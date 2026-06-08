@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum AssetType {
+  IMAGE
+  CV
+  DOCUMENT
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AdminUser {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String
+  passwordHash  String
+  role          Role           @default(ADMIN)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Profile {
+  id                 String       @id @default(cuid())
+  name               String
+  title              String
+  tagline            String
+  bio                String
+  philosophy         String
+  location           String
+  email              String
+  availabilityStatus String
+  profileImageUrl    String?
+  currentlyExploring String[]
+  timeline           Json?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  socialLinks        SocialLink[]
+}
+
+model SocialLink {
+  id        String  @id @default(cuid())
+  label     String
+  url       String
+  icon      String?
+  order     Int     @default(0)
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, label])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  icon        String?
+  proficiency Int      @default(80)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name, category])
+}
+
+model Project {
+  id          String             @id @default(cuid())
+  title       String
+  slug        String             @unique
+  description String
+  techStack   String[]
+  githubUrl   String?
+  liveUrl     String?
+  coverImage  String?
+  category    String
+  status      ProjectStatus      @default(DRAFT)
+  featured    Boolean            @default(false)
+  outcome     String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  media       ProjectMedia[]
+  caseStudy   CaseStudySection[]
+}
+
+model ProjectMedia {
+  id        String    @id @default(cuid())
+  url       String
+  alt       String
+  type      AssetType @default(IMAGE)
+  order     Int       @default(0)
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model CaseStudySection {
+  id        String  @id @default(cuid())
+  heading   String
+  body      String
+  order     Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model BlogPost {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  excerpt     String
+  content     String
+  coverImage  String?
+  status      BlogStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  tags        BlogTag[]
+}
+
+model BlogTag {
+  id    String     @id @default(cuid())
+  name  String
+  slug  String     @unique
+  posts BlogPost[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model CvAsset {
+  id        String   @id @default(cuid())
+  title     String
+  fileUrl   String
+  publicId  String?
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model GithubSnapshot {
+  id               String   @id @default(cuid())
+  username         String
+  repositoryCount  Int      @default(0)
+  commitCount      Int      @default(0)
+  languages        Json
+  recentRepos      Json
+  recentActivity   Json
+  contributionData Json?
+  syncedAt         DateTime @default(now())
+}
+
+model SyncSuggestion {
+  id        String           @id @default(cuid())
+  source    String
+  title     String
+  payload   Json
+  status    SuggestionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  path      String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
