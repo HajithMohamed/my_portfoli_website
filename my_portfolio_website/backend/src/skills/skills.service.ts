@@ -7,7 +7,9 @@ export class SkillsService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.skill.findMany({ orderBy: [{ category: 'asc' }, { order: 'asc' }, { name: 'asc' }] });
+    return this.prisma.skill.findMany({
+      orderBy: [{ category: 'asc' }, { order: 'asc' }, { name: 'asc' }],
+    });
   }
 
   create(dto: SkillDto) {

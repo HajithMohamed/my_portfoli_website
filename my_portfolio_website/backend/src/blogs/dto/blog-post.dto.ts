@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BlogStatus } from '@prisma/client';
-import { IsArray, IsEnum, IsOptional, IsString, IsUrl, Matches, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class BlogPostDto {
   @ApiProperty()

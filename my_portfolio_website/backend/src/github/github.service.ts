@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ProjectStatus, SuggestionStatus } from '@prisma/client';
+import { Prisma, ProjectStatus, SuggestionStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type GithubRepo = {
@@ -32,7 +32,9 @@ export class GithubService {
   ) {}
 
   latestSummary() {
-    return this.prisma.githubSnapshot.findFirst({ orderBy: { syncedAt: 'desc' } });
+    return this.prisma.githubSnapshot.findFirst({
+      orderBy: { syncedAt: 'desc' },
+    });
   }
 
   async sync() {
@@ -54,14 +56,19 @@ export class GithubService {
       }),
     );
 
-    const languages = languagePairs.flat().reduce<Record<string, number>>((acc, [language, bytes]) => {
-      acc[language] = (acc[language] ?? 0) + bytes;
-      return acc;
-    }, {});
+    const languages = languagePairs
+      .flat()
+      .reduce<Record<string, number>>((acc, [language, bytes]) => {
+        acc[language] = (acc[language] ?? 0) + bytes;
+        return acc;
+      }, {});
 
     const commitCount = events
       .filter((event) => event.type === 'PushEvent')
-      .reduce((count, event) => count + (event.payload?.commits?.length ?? 0), 0);
+      .reduce(
+        (count, event) => count + (event.payload?.commits?.length ?? 0),
+        0,
+      );
 
     const recentRepos = sourceRepos.slice(0, 8).map((repo) => ({
       name: repo.name,
@@ -95,11 +102,15 @@ export class GithubService {
   }
 
   suggestions() {
-    return this.prisma.syncSuggestion.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.syncSuggestion.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async approveSuggestion(id: string) {
-    const suggestion = await this.prisma.syncSuggestion.findUnique({ where: { id } });
+    const suggestion = await this.prisma.syncSuggestion.findUnique({
+      where: { id },
+    });
     if (!suggestion) {
       throw new NotFoundException('Suggestion not found');
     }
@@ -114,18 +125,26 @@ export class GithubService {
       category?: string;
     };
 
-    if (suggestion.source === 'github:new-repo' && payload.slug && payload.title) {
+    if (
+      suggestion.source === 'github:new-repo' &&
+      payload.slug &&
+      payload.title
+    ) {
       await this.prisma.project.upsert({
         where: { slug: payload.slug },
         update: {
           githubUrl: payload.githubUrl,
           liveUrl: payload.liveUrl,
-          description: payload.description ?? 'GitHub-synced project awaiting admin refinement.',
+          description:
+            payload.description ??
+            'GitHub-synced project awaiting admin refinement.',
         },
         create: {
           title: payload.title,
           slug: payload.slug,
-          description: payload.description ?? 'GitHub-synced project awaiting admin refinement.',
+          description:
+            payload.description ??
+            'GitHub-synced project awaiting admin refinement.',
           techStack: payload.techStack ?? [],
           githubUrl: payload.githubUrl,
           liveUrl: payload.liveUrl,
@@ -142,7 +161,9 @@ export class GithubService {
   }
 
   async rejectSuggestion(id: string) {
-    const suggestion = await this.prisma.syncSuggestion.findUnique({ where: { id } });
+    const suggestion = await this.prisma.syncSuggestion.findUnique({
+      where: { id },
+    });
     if (!suggestion) {
       throw new NotFoundException('Suggestion not found');
     }
@@ -152,15 +173,30 @@ export class GithubService {
     });
   }
 
-  private async createSuggestions(previousJson: unknown, recentRepos: Array<Record<string, unknown>>) {
+  private async createSuggestions(
+    previousJson: unknown,
+    recentRepos: Array<{
+      name: string;
+      description?: string | null;
+      url: string;
+      language?: string | null;
+      homepage?: string | null;
+    }>,
+  ) {
     const previousRepos = Array.isArray(previousJson) ? previousJson : [];
     const previousNames = new Set(
       previousRepos
-        .map((repo) => (typeof repo === 'object' && repo !== null ? (repo as { name?: string }).name : undefined))
+        .map((repo) =>
+          typeof repo === 'object' && repo !== null
+            ? (repo as { name?: string }).name
+            : undefined,
+        )
         .filter(Boolean),
     );
 
-    const newRepos = recentRepos.filter((repo) => typeof repo.name === 'string' && !previousNames.has(repo.name));
+    const newRepos = recentRepos.filter(
+      (repo) => typeof repo.name === 'string' && !previousNames.has(repo.name),
+    );
     if (!newRepos.length) {
       return;
     }
@@ -174,10 +210,10 @@ export class GithubService {
           slug: this.slugify(String(repo.name)),
           description: repo.description,
           githubUrl: repo.url,
-          liveUrl: repo.homepage,
+          liveUrl: repo.homepage ?? null,
           techStack: repo.language ? [repo.language] : [],
           category: 'GitHub',
-        },
+        } satisfies Prisma.InputJsonObject,
       })),
     });
   }
@@ -193,7 +229,9 @@ export class GithubService {
     });
 
     if (!response.ok) {
-      throw new Error(`GitHub API request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `GitHub API request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     return (await response.json()) as T;

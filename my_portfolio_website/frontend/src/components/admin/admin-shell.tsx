@@ -1,37 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useSyncExternalStore } from "react";
 import { LogOut, Shield } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 
 const nav = [
   ["Dashboard", "/admin/dashboard"],
+  ["Profile", "/admin/profile"],
   ["Projects", "/admin/projects"],
   ["Blog", "/admin/blog"],
   ["Skills", "/admin/skills"],
   ["Resume", "/admin/resume"],
+  ["Messages", "/admin/messages"],
 ];
 
 export function useAdminToken() {
-  const [token, setToken] = useState<string | null>(null);
-  useEffect(() => {
-    setToken(localStorage.getItem("hz_access_token"));
-  }, []);
-  return token;
+  return useSyncExternalStore(subscribeToAuth, getTokenSnapshot, () => null);
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    setToken(localStorage.getItem("hz_access_token"));
-  }, []);
+  const token = useAdminToken();
 
   function logout() {
     localStorage.removeItem("hz_access_token");
     localStorage.removeItem("hz_refresh_token");
-    setToken(null);
+    notifyAuthChanged();
   }
 
   if (!token) {
@@ -89,4 +83,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
+}
+
+export function notifyAuthChanged() {
+  window.dispatchEvent(new Event("hz-auth-change"));
+}
+
+function getTokenSnapshot() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return localStorage.getItem("hz_access_token");
+}
+
+function subscribeToAuth(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("hz-auth-change", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("hz-auth-change", callback);
+  };
 }

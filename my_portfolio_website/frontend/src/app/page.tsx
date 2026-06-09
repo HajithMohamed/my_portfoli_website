@@ -4,7 +4,6 @@ import {
   BookOpenText,
   Boxes,
   CalendarClock,
-  Code2,
   DatabaseZap,
   Download,
   Github,

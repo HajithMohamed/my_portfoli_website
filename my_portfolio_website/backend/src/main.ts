@@ -31,7 +31,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('HZ Labs Portfolio API')
-    .setDescription('CMS, portfolio, GitHub intelligence, resume, and message APIs for HZ Labs.')
+    .setDescription(
+      'CMS, portfolio, GitHub intelligence, resume, and message APIs for HZ Labs.',
+    )
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();
@@ -40,4 +42,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 4000);
 }
-bootstrap();
+void bootstrap();

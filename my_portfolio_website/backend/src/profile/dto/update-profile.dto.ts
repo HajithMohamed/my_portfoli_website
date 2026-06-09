@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEmail, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SocialLinkDto {
@@ -8,7 +15,7 @@ export class SocialLinkDto {
   label!: string;
 
   @ApiPropertyOptional()
-  @IsUrl({ require_protocol: true })
+  @IsString()
   url!: string;
 
   @ApiPropertyOptional()

@@ -32,12 +32,25 @@ async function main() {
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
       location: 'Sri Lanka',
       email: 'hello@hzlabs.dev',
-      availabilityStatus: 'Available for internships and software engineering opportunities',
-      currentlyExploring: ['NestJS Architecture', 'System Design', 'Docker', 'Data Science', 'AI Integration'],
+      availabilityStatus:
+        'Available for internships and software engineering opportunities',
+      currentlyExploring: [
+        'NestJS Architecture',
+        'System Design',
+        'Docker',
+        'Data Science',
+        'AI Integration',
+      ],
       timeline: [
         { label: 'Education', value: 'Computer Science undergraduate' },
-        { label: 'Major Projects', value: 'Commerce, booking, authentication, and admin systems' },
-        { label: 'Focus', value: 'Modern full-stack platforms and product engineering' },
+        {
+          label: 'Major Projects',
+          value: 'Commerce, booking, authentication, and admin systems',
+        },
+        {
+          label: 'Focus',
+          value: 'Modern full-stack platforms and product engineering',
+        },
       ],
     },
     create: {
@@ -50,21 +63,52 @@ async function main() {
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
       location: 'Sri Lanka',
       email: 'hello@hzlabs.dev',
-      availabilityStatus: 'Available for internships and software engineering opportunities',
-      currentlyExploring: ['NestJS Architecture', 'System Design', 'Docker', 'Data Science', 'AI Integration'],
+      availabilityStatus:
+        'Available for internships and software engineering opportunities',
+      currentlyExploring: [
+        'NestJS Architecture',
+        'System Design',
+        'Docker',
+        'Data Science',
+        'AI Integration',
+      ],
       timeline: [
         { label: 'Education', value: 'Computer Science undergraduate' },
-        { label: 'Major Projects', value: 'Commerce, booking, authentication, and admin systems' },
-        { label: 'Focus', value: 'Modern full-stack platforms and product engineering' },
+        {
+          label: 'Major Projects',
+          value: 'Commerce, booking, authentication, and admin systems',
+        },
+        {
+          label: 'Focus',
+          value: 'Modern full-stack platforms and product engineering',
+        },
       ],
     },
   });
 
   await prisma.socialLink.createMany({
     data: [
-      { profileId: profile.id, label: 'GitHub', url: 'https://github.com/HajithMohamed', icon: 'github', order: 1 },
-      { profileId: profile.id, label: 'LinkedIn', url: 'https://www.linkedin.com/', icon: 'linkedin', order: 2 },
-      { profileId: profile.id, label: 'Email', url: 'mailto:hello@hzlabs.dev', icon: 'mail', order: 3 },
+      {
+        profileId: profile.id,
+        label: 'GitHub',
+        url: 'https://github.com/HajithMohamed',
+        icon: 'github',
+        order: 1,
+      },
+      {
+        profileId: profile.id,
+        label: 'LinkedIn',
+        url: 'https://www.linkedin.com/',
+        icon: 'linkedin',
+        order: 2,
+      },
+      {
+        profileId: profile.id,
+        label: 'Email',
+        url: 'mailto:hello@hzlabs.dev',
+        icon: 'mail',
+        order: 3,
+      },
     ],
     skipDuplicates: true,
   });
@@ -104,20 +148,38 @@ async function main() {
     create: {
       title: 'Commerce Platform',
       slug: 'commerce-platform',
-      description: 'A full-stack e-commerce foundation with catalog management, checkout-ready architecture, authentication, and admin workflows.',
+      description:
+        'A full-stack e-commerce foundation with catalog management, checkout-ready architecture, authentication, and admin workflows.',
       techStack: ['Next.js', 'NestJS', 'PostgreSQL', 'JWT', 'Cloudinary'],
       githubUrl: 'https://github.com/HajithMohamed',
       liveUrl: 'https://hzlabs.dev',
       category: 'Commerce Platforms',
       status: 'ACTIVE',
       featured: true,
-      outcome: 'Created a scalable storefront and operational dashboard pattern for product-led businesses.',
+      outcome:
+        'Created a scalable storefront and operational dashboard pattern for product-led businesses.',
       caseStudy: {
         create: [
-          { heading: 'Problem', body: 'Small businesses need a flexible commerce stack that can grow without rebuilding core workflows.', order: 1 },
-          { heading: 'Solution', body: 'Designed a modular frontend, API, database model, and admin layer that separates content, product data, and operations.', order: 2 },
-          { heading: 'Architecture', body: 'Next.js -> NestJS API -> PostgreSQL -> JWT Authentication -> Cloudinary', order: 3 },
-          { heading: 'Outcome', body: 'A reusable commerce foundation for inventory, content, and customer journeys.', order: 4 },
+          {
+            heading: 'Problem',
+            body: 'Small businesses need a flexible commerce stack that can grow without rebuilding core workflows.',
+            order: 1,
+          },
+          {
+            heading: 'Solution',
+            body: 'Designed a modular frontend, API, database model, and admin layer that separates content, product data, and operations.',
+            order: 2,
+          },
+          {
+            heading: 'Architecture',
+            body: 'Next.js -> NestJS API -> PostgreSQL -> JWT Authentication -> Cloudinary',
+            order: 3,
+          },
+          {
+            heading: 'Outcome',
+            body: 'A reusable commerce foundation for inventory, content, and customer journeys.',
+            order: 4,
+          },
         ],
       },
     },
@@ -129,15 +191,22 @@ async function main() {
     create: {
       title: 'Building Operational Web Platforms',
       slug: 'building-operational-web-platforms',
-      excerpt: 'How HZ Labs approaches maintainable full-stack systems for real business workflows.',
+      excerpt:
+        'How HZ Labs approaches maintainable full-stack systems for real business workflows.',
       content:
         '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. HZ Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
       status: 'PUBLISHED',
       publishedAt: new Date(),
       tags: {
         connectOrCreate: [
-          { where: { slug: 'engineering' }, create: { name: 'Engineering', slug: 'engineering' } },
-          { where: { slug: 'systems' }, create: { name: 'Systems', slug: 'systems' } },
+          {
+            where: { slug: 'engineering' },
+            create: { name: 'Engineering', slug: 'engineering' },
+          },
+          {
+            where: { slug: 'systems' },
+            create: { name: 'Systems', slug: 'systems' },
+          },
         ],
       },
     },

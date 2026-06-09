@@ -16,7 +16,9 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.adminUser.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.adminUser.findUnique({
+      where: { email: dto.email },
+    });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -66,7 +68,9 @@ export class AuthService {
       return { ok: true };
     }
 
-    const storedTokens = await this.prisma.refreshToken.findMany({ where: { revokedAt: null } });
+    const storedTokens = await this.prisma.refreshToken.findMany({
+      where: { revokedAt: null },
+    });
     for (const stored of storedTokens) {
       if (await argon2.verify(stored.tokenHash, refreshToken)) {
         await this.prisma.refreshToken.update({
@@ -82,18 +86,29 @@ export class AuthService {
   async me(user: AuthUser) {
     return this.prisma.adminUser.findUnique({
       where: { id: user.sub },
-      select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
     });
   }
 
   private async issueTokens(user: AuthUser) {
+    const accessExpiresIn =
+      this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m';
     const accessToken = await this.jwtService.signAsync(user, {
       secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
+      expiresIn: accessExpiresIn as never,
     });
 
     const refreshToken = randomBytes(64).toString('hex');
-    const days = Number(this.configService.get<string>('JWT_REFRESH_EXPIRES_DAYS') ?? 7);
+    const days = Number(
+      this.configService.get<string>('JWT_REFRESH_EXPIRES_DAYS') ?? 7,
+    );
     await this.prisma.refreshToken.create({
       data: {
         tokenHash: await argon2.hash(refreshToken),

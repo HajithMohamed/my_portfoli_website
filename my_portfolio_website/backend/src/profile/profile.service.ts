@@ -54,16 +54,36 @@ export class ProfileService {
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
       location: 'Sri Lanka',
       email: 'hello@hzlabs.dev',
-      availabilityStatus: 'Available for internships and software engineering opportunities',
-      currentlyExploring: ['NestJS Architecture', 'System Design', 'Docker', 'Data Science', 'AI Integration'],
+      availabilityStatus:
+        'Available for internships and software engineering opportunities',
+      currentlyExploring: [
+        'NestJS Architecture',
+        'System Design',
+        'Docker',
+        'Data Science',
+        'AI Integration',
+      ],
       timeline: [
         { label: 'Education', value: 'Computer Science undergraduate' },
-        { label: 'Projects', value: 'Commerce, booking, authentication, and admin platforms' },
+        {
+          label: 'Projects',
+          value: 'Commerce, booking, authentication, and admin platforms',
+        },
       ],
       socialLinks: {
         create: [
-          { label: 'GitHub', url: 'https://github.com/HajithMohamed', icon: 'github', order: 1 },
-          { label: 'LinkedIn', url: 'https://www.linkedin.com/', icon: 'linkedin', order: 2 },
+          {
+            label: 'GitHub',
+            url: 'https://github.com/HajithMohamed',
+            icon: 'github',
+            order: 1,
+          },
+          {
+            label: 'LinkedIn',
+            url: 'https://www.linkedin.com/',
+            icon: 'linkedin',
+            order: 2,
+          },
         ],
       },
     };

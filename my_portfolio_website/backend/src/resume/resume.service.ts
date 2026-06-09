@@ -18,7 +18,9 @@ export class ResumeService {
   }
 
   async create(dto: CreateResumeDto) {
-    const latest = await this.prisma.cvAsset.findFirst({ orderBy: { version: 'desc' } });
+    const latest = await this.prisma.cvAsset.findFirst({
+      orderBy: { version: 'desc' },
+    });
     if (dto.isActive ?? true) {
       await this.prisma.cvAsset.updateMany({ data: { isActive: false } });
     }
@@ -37,7 +39,10 @@ export class ResumeService {
       throw new NotFoundException('CV not found');
     }
     await this.prisma.cvAsset.updateMany({ data: { isActive: false } });
-    return this.prisma.cvAsset.update({ where: { id }, data: { isActive: true } });
+    return this.prisma.cvAsset.update({
+      where: { id },
+      data: { isActive: true },
+    });
   }
 
   async remove(id: string) {

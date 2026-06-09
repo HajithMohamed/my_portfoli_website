@@ -16,11 +16,17 @@ export class BlogsService {
   }
 
   adminPosts() {
-    return this.prisma.blogPost.findMany({ include: { tags: true }, orderBy: { updatedAt: 'desc' } });
+    return this.prisma.blogPost.findMany({
+      include: { tags: true },
+      orderBy: { updatedAt: 'desc' },
+    });
   }
 
   async findBySlug(slug: string, includeDrafts = false) {
-    const post = await this.prisma.blogPost.findUnique({ where: { slug }, include: { tags: true } });
+    const post = await this.prisma.blogPost.findUnique({
+      where: { slug },
+      include: { tags: true },
+    });
     if (!post || (!includeDrafts && post.status !== BlogStatus.PUBLISHED)) {
       throw new NotFoundException('Blog post not found');
     }
@@ -31,7 +37,11 @@ export class BlogsService {
     const status = dto.status ?? BlogStatus.DRAFT;
     return this.prisma.blogPost.create({
       data: {
-        ...this.blogFields(dto),
+        title: dto.title,
+        slug: dto.slug,
+        excerpt: dto.excerpt,
+        content: dto.content,
+        coverImage: dto.coverImage,
         status,
         publishedAt: status === BlogStatus.PUBLISHED ? new Date() : undefined,
         tags: this.tags(dto.tags),
@@ -46,7 +56,9 @@ export class BlogsService {
       where: { id },
       data: {
         ...this.blogFields(dto),
-        ...(dto.status === BlogStatus.PUBLISHED ? { publishedAt: new Date() } : {}),
+        ...(dto.status === BlogStatus.PUBLISHED
+          ? { publishedAt: new Date() }
+          : {}),
         ...(dto.tags ? { tags: { set: [], ...this.tags(dto.tags) } } : {}),
       },
       include: { tags: true },

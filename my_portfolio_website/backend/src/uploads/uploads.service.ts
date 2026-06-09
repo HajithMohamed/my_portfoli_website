@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'node:stream';
@@ -48,7 +52,11 @@ export class UploadsService {
     };
   }
 
-  private streamUpload(buffer: Buffer, folder: string, resourceType: 'image' | 'raw') {
+  private streamUpload(
+    buffer: Buffer,
+    folder: string,
+    resourceType: 'image' | 'raw',
+  ) {
     return new Promise<UploadApiResponse>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
@@ -58,7 +66,11 @@ export class UploadsService {
         },
         (error, result) => {
           if (error || !result) {
-            reject(error ?? new Error('Cloudinary upload failed'));
+            reject(
+              error instanceof Error
+                ? error
+                : new Error(error?.message ?? 'Cloudinary upload failed'),
+            );
             return;
           }
           resolve(result);

@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { notifyAuthChanged } from "@/components/admin/admin-shell";
 import { absoluteApiUrl } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -40,6 +41,7 @@ export function LoginForm() {
     const data = (await response.json()) as { accessToken: string; refreshToken: string };
     localStorage.setItem("hz_access_token", data.accessToken);
     localStorage.setItem("hz_refresh_token", data.refreshToken);
+    notifyAuthChanged();
     router.push("/admin/dashboard");
   }
 

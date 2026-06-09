@@ -16,7 +16,10 @@ export class ProjectsService {
   }
 
   adminProjects() {
-    return this.prisma.project.findMany({ include: this.includes(), orderBy: { updatedAt: 'desc' } });
+    return this.prisma.project.findMany({
+      include: this.includes(),
+      orderBy: { updatedAt: 'desc' },
+    });
   }
 
   async findBySlug(slug: string, includeDrafts = false) {
@@ -25,7 +28,10 @@ export class ProjectsService {
       include: this.includes(),
     });
 
-    if (!project || (!includeDrafts && project.status !== ProjectStatus.ACTIVE)) {
+    if (
+      !project ||
+      (!includeDrafts && project.status !== ProjectStatus.ACTIVE)
+    ) {
       throw new NotFoundException('Project not found');
     }
 
@@ -35,7 +41,17 @@ export class ProjectsService {
   create(dto: ProjectDto) {
     return this.prisma.project.create({
       data: {
-        ...this.projectFields(dto),
+        title: dto.title,
+        slug: dto.slug,
+        description: dto.description,
+        techStack: dto.techStack,
+        githubUrl: dto.githubUrl,
+        liveUrl: dto.liveUrl,
+        coverImage: dto.coverImage,
+        category: dto.category,
+        status: dto.status,
+        featured: dto.featured,
+        outcome: dto.outcome,
         media: dto.media?.length
           ? { create: dto.media.map((item, order) => ({ ...item, order })) }
           : undefined,
@@ -65,7 +81,10 @@ export class ProjectsService {
           ? {
               caseStudy: {
                 deleteMany: {},
-                create: dto.caseStudy.map((item, order) => ({ ...item, order })),
+                create: dto.caseStudy.map((item, order) => ({
+                  ...item,
+                  order,
+                })),
               },
             }
           : {}),

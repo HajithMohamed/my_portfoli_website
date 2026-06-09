@@ -9,7 +9,14 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Post('analytics')
-  track(@Body() body: { type: string; path?: string; metadata?: Record<string, unknown> }) {
+  track(
+    @Body()
+    body: {
+      type: string;
+      path?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ) {
     return this.analyticsService.track(body.type, body.path, body.metadata);
   }
 
