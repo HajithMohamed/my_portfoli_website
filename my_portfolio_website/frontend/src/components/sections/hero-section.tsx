@@ -76,7 +76,7 @@ export function HeroSection({
               <div className="grid grid-cols-3 gap-3">
                 {[
                   ["Repos", github.repositoryCount],
-                  ["Commits", github.commitCount],
+                  ["Contributions", github.contributionData?.totalContributions ?? github.commitCount],
                   ["Projects", projects.length],
                 ].map(([label, value]) => (
                   <div className="rounded-md border border-white/10 bg-[#0F172A]/50 p-4" key={label as string}>
