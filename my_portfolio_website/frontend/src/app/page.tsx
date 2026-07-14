@@ -121,7 +121,13 @@ export default async function Home() {
             <p className="mt-5 leading-8 text-slate-300">{profile.philosophy}</p>
 
             <div className="mt-8">
-              <DeveloperDNAClient />
+              <DeveloperDNAClient
+                skills={skills}
+                projects={projects}
+                github={github}
+                certificates={certificates}
+                name={profile.name}
+              />
             </div>
 
             <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.02] p-4">
