@@ -6,9 +6,10 @@ export class CreateResumeDto {
   @IsString()
   title!: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsUrl({ require_protocol: true })
-  fileUrl!: string;
+  fileUrl?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

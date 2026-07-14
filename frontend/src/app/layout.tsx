@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { CursorSpotlight } from "@/components/effects/cursor-spotlight";
+import { AdminAccess } from "@/components/admin/admin-access";
+import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -46,7 +50,13 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-[#050816] text-slate-50">
-        <Providers>{children}</Providers>
+        <SmoothScrollProvider>
+          <CursorSpotlight>
+            <Providers>{children}</Providers>
+          </CursorSpotlight>
+        </SmoothScrollProvider>
+        <AdminAccess />
+        <AnalyticsTracker />
       </body>
     </html>
   );

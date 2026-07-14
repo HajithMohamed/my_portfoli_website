@@ -1,4 +1,14 @@
-import type { BlogPost, CvAsset, GithubSummary, Profile, Project, Skill } from "./types";
+import type {
+  BlogPost,
+  Certificate,
+  CvAsset,
+  GithubSummary,
+  MediaAsset,
+  Profile,
+  Project,
+  Skill,
+  Testimonial,
+} from "./types";
 
 export const fallbackProfile: Profile = {
   name: "Mohamed Hajith",
@@ -119,6 +129,12 @@ export const fallbackBlogs: BlogPost[] = [
 ];
 
 export const fallbackResume: CvAsset | null = null;
+
+// No fabricated social proof: real testimonials/certificates come from the CMS,
+// and their sections stay hidden until the admin adds genuine entries.
+export const fallbackTestimonials: Testimonial[] = [];
+export const fallbackCertificates: Certificate[] = [];
+export const fallbackGallery: MediaAsset[] = [];
 
 export const fallbackGithub: GithubSummary = {
   username: "HajithMohamed",

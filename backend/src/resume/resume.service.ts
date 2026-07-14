@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateResumeDto } from './resume.dto';
 
@@ -18,6 +18,9 @@ export class ResumeService {
   }
 
   async create(dto: CreateResumeDto) {
+    if (!dto.fileUrl) {
+      throw new BadRequestException('fileUrl is required');
+    }
     const latest = await this.prisma.cvAsset.findFirst({
       orderBy: { version: 'desc' },
     });
@@ -26,7 +29,9 @@ export class ResumeService {
     }
     return this.prisma.cvAsset.create({
       data: {
-        ...dto,
+        title: dto.title,
+        fileUrl: dto.fileUrl,
+        publicId: dto.publicId,
         isActive: dto.isActive ?? true,
         version: (latest?.version ?? 0) + 1,
       },

@@ -74,6 +74,16 @@ export type CvAsset = {
   isActive: boolean;
 };
 
+export type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
+
+export type ContributionData = {
+  calendar?: { totalContributions: number; weeks: { days: ContributionDay[] }[] } | null;
+  totalStars?: number;
+  totalForks?: number;
+  totalContributions?: number;
+  technologies?: string[];
+};
+
 export type GithubSummary = {
   username: string;
   repositoryCount: number;
@@ -85,9 +95,47 @@ export type GithubSummary = {
     url: string;
     language?: string | null;
     updatedAt?: string;
+    stars?: number;
+    forks?: number;
+    topics?: string[];
   }>;
   recentActivity: Array<{ type: string; repo?: string; createdAt: string }>;
+  contributionData?: ContributionData | null;
   syncedAt?: string;
+};
+
+export type Testimonial = {
+  id: string;
+  author: string;
+  role?: string | null;
+  company?: string | null;
+  quote: string;
+  avatarUrl?: string | null;
+  project?: string | null;
+  rating?: number;
+  featured?: boolean;
+  order?: number;
+};
+
+export type Certificate = {
+  id: string;
+  title: string;
+  issuer: string;
+  type: "certification" | "achievement" | string;
+  issueDate?: string | null;
+  credentialUrl?: string | null;
+  imageUrl?: string | null;
+  order?: number;
+};
+
+export type MediaAsset = {
+  id: string;
+  url: string;
+  publicId?: string | null;
+  alt: string;
+  category: "profile" | "gallery" | "about" | string;
+  featured?: boolean;
+  order?: number;
 };
 
 export type HomeData = {
@@ -97,4 +145,7 @@ export type HomeData = {
   blogs: BlogPost[];
   resume: CvAsset | null;
   github: GithubSummary;
+  testimonials: Testimonial[];
+  certificates: Certificate[];
+  gallery: MediaAsset[];
 };

@@ -1,46 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode, useSyncExternalStore } from "react";
-import { LogOut, Shield } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import { ExternalLink, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { adminFetch } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const nav = [
-  ["Dashboard", "/admin/dashboard"],
-  ["Profile", "/admin/profile"],
-  ["Projects", "/admin/projects"],
-  ["Blog", "/admin/blog"],
-  ["Skills", "/admin/skills"],
-  ["Resume", "/admin/resume"],
-  ["Messages", "/admin/messages"],
-];
-
-export function useAdminToken() {
-  return useSyncExternalStore(subscribeToAuth, getTokenSnapshot, () => null);
-}
+  ["Dashboard", "/_internal/dashboard"],
+  ["Analytics", "/_internal/analytics"],
+  ["Profile", "/_internal/profile"],
+  ["Projects", "/_internal/projects"],
+  ["Blog", "/_internal/blog"],
+  ["Skills", "/_internal/skills"],
+  ["Photos", "/_internal/media"],
+  ["Testimonials", "/_internal/testimonials"],
+  ["Credentials", "/_internal/credentials"],
+  ["Resume", "/_internal/resume"],
+  ["Messages", "/_internal/messages"],
+] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const token = useAdminToken();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  function logout() {
-    localStorage.removeItem("hz_access_token");
-    localStorage.removeItem("hz_refresh_token");
-    notifyAuthChanged();
-  }
-
-  if (!token) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#050816] px-4 text-slate-50">
-        <div className="max-w-md rounded-lg border border-white/10 bg-slate-950/80 p-8 text-center">
-          <Shield className="mx-auto h-8 w-8 text-blue-300" />
-          <h1 className="mt-4 font-display text-2xl font-semibold">Admin session required</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-400">Sign in with the env-seeded admin account to manage HZ Labs content.</p>
-          <ButtonLink className="mt-6" href="/admin/login">
-            Login
-          </ButtonLink>
-        </div>
-      </main>
-    );
+  async function logout() {
+    try {
+      await adminFetch("/auth/logout", { method: "POST" });
+    } catch {
+      // Even if the network call fails, drop the user back to the public site.
+    }
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -49,13 +42,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <Link className="font-display text-xl font-semibold" href="/">
           HZ Labs
         </Link>
+        <p className="mt-1 text-[11px] uppercase tracking-widest text-slate-500">Control Center</p>
         <nav className="mt-10 grid gap-2">
           {nav.map(([label, href]) => (
-            <Link className="rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white" href={href} key={href}>
+            <Link
+              className={cn(
+                "rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
+                pathname === href && "bg-white/10 text-white",
+              )}
+              href={href}
+              key={href}
+            >
               {label}
             </Link>
           ))}
         </nav>
+        <Link
+          className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-white"
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <ExternalLink className="h-4 w-4" />
+          View public site
+        </Link>
         <Button className="absolute bottom-5 left-5 right-5" onClick={logout} variant="secondary">
           <LogOut className="h-4 w-4" />
           Logout
@@ -83,24 +93,4 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
-}
-
-export function notifyAuthChanged() {
-  window.dispatchEvent(new Event("hz-auth-change"));
-}
-
-function getTokenSnapshot() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  return localStorage.getItem("hz_access_token");
-}
-
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener("hz-auth-change", callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener("hz-auth-change", callback);
-  };
 }
