@@ -104,6 +104,40 @@ export type GithubSummary = {
   syncedAt?: string;
 };
 
+export type Testimonial = {
+  id: string;
+  author: string;
+  role?: string | null;
+  company?: string | null;
+  quote: string;
+  avatarUrl?: string | null;
+  project?: string | null;
+  rating?: number;
+  featured?: boolean;
+  order?: number;
+};
+
+export type Certificate = {
+  id: string;
+  title: string;
+  issuer: string;
+  type: "certification" | "achievement" | string;
+  issueDate?: string | null;
+  credentialUrl?: string | null;
+  imageUrl?: string | null;
+  order?: number;
+};
+
+export type MediaAsset = {
+  id: string;
+  url: string;
+  publicId?: string | null;
+  alt: string;
+  category: "profile" | "gallery" | "about" | string;
+  featured?: boolean;
+  order?: number;
+};
+
 export type HomeData = {
   profile: Profile;
   skills: Skill[];
@@ -111,4 +145,7 @@ export type HomeData = {
   blogs: BlogPost[];
   resume: CvAsset | null;
   github: GithubSummary;
+  testimonials: Testimonial[];
+  certificates: Certificate[];
+  gallery: MediaAsset[];
 };

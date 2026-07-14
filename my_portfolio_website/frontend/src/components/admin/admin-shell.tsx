@@ -15,6 +15,9 @@ const nav = [
   ["Projects", "/_internal/projects"],
   ["Blog", "/_internal/blog"],
   ["Skills", "/_internal/skills"],
+  ["Photos", "/_internal/media"],
+  ["Testimonials", "/_internal/testimonials"],
+  ["Credentials", "/_internal/credentials"],
   ["Resume", "/_internal/resume"],
   ["Messages", "/_internal/messages"],
 ] as const;

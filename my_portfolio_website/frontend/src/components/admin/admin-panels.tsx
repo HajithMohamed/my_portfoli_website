@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Check, Plus, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -180,6 +180,30 @@ export function DashboardPanel() {
 
 export function ProfilePanel() {
   const { data: profile, error, loading, load } = useAdminResource<Profile | null>("/profile", null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+
+  async function uploadPhoto(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setPhotoBusy(true);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const res = await fetch(bffUrl("/admin/uploads?folder=hz-labs/profile"), {
+        method: "POST",
+        credentials: "include",
+        body: form,
+      });
+      const uploaded = (await res.json()) as { url: string };
+      await adminFetch("/admin/profile", {
+        method: "PATCH",
+        body: JSON.stringify({ profileImageUrl: uploaded.url }),
+      });
+      await load();
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -210,6 +234,20 @@ export function ProfilePanel() {
     <>
       <SectionHeader title="Profile Management" description="Edit HZ Labs positioning, contact details, philosophy, social links, and currently exploring list." />
       <Card>
+        <div className="mb-5 flex items-center gap-4">
+          {profile?.profileImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img alt="Profile" className="h-16 w-16 rounded-xl object-cover" src={profile.profileImageUrl} />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/5 text-xs text-slate-500">
+              No photo
+            </div>
+          )}
+          <label className="cursor-pointer text-sm text-blue-300 transition-colors hover:text-blue-200">
+            {photoBusy ? "Uploading…" : "Upload / change profile photo"}
+            <input accept="image/*" className="hidden" onChange={uploadPhoto} type="file" />
+          </label>
+        </div>
         {profile ? (
           <form className="grid gap-4" onSubmit={submit}>
             <Input defaultValue={profile.name} name="name" placeholder="Name" />
@@ -456,40 +494,68 @@ export function BlogPanel() {
 export function ResumePanel() {
   const { data: resumes, error, load } = useAdminResource<CvAsset[]>("/admin/resume", []);
   const [uploading, setUploading] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const file = form.get("file");
-    let fileUrl = String(form.get("fileUrl") ?? "");
+    let fileUrl = String(form.get("fileUrl") ?? "").trim();
     let publicId: string | undefined;
 
-    if (file instanceof File && file.size > 0) {
-      setUploading(true);
-      const uploadForm = new FormData();
-      uploadForm.set("file", file);
-      const response = await fetch(bffUrl("/admin/uploads?folder=hz-labs/cv"), {
-        method: "POST",
-        credentials: "include",
-        body: uploadForm,
-      });
-      const uploaded = (await response.json()) as { url: string; publicId: string };
-      fileUrl = uploaded.url;
-      publicId = uploaded.publicId;
-      setUploading(false);
+    if (!fileUrl && !(file instanceof File && file.size > 0)) {
+      setMsg("Please provide either a file or a URL.");
+      return;
     }
 
-    await adminFetch("/admin/resume", {
-      method: "POST",
-      body: JSON.stringify({
+    setMsg(null);
+    if (file instanceof File && file.size > 0) {
+      setUploading(true);
+      try {
+        const uploadForm = new FormData();
+        uploadForm.set("file", file);
+        const response = await fetch(bffUrl("/admin/uploads?folder=hz-labs/cv"), {
+          method: "POST",
+          credentials: "include",
+          body: uploadForm,
+        });
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+        const uploaded = (await response.json()) as { url: string; publicId: string };
+        fileUrl = uploaded.url;
+        publicId = uploaded.publicId;
+      } catch (err) {
+        setMsg(err instanceof Error ? err.message : "Upload failed");
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    try {
+      const payload: Record<string, unknown> = {
         title: form.get("title"),
-        fileUrl,
-        publicId,
         isActive: true,
-      }),
-    });
-    event.currentTarget.reset();
-    await load();
+      };
+      if (fileUrl) {
+        payload.fileUrl = fileUrl;
+      }
+      if (publicId) {
+        payload.publicId = publicId;
+      }
+
+      await adminFetch("/admin/resume", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      formElement.reset();
+      await load();
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Save failed");
+    }
   }
 
   async function setActive(id: string) {
@@ -516,7 +582,7 @@ export function ResumePanel() {
               {uploading ? "Uploading" : "Save CV"}
             </Button>
           </form>
-          {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+          {msg || error ? <p className="mt-4 text-sm text-red-300">{msg || error}</p> : null}
         </Card>
         <Card>
           <div className="grid gap-3">

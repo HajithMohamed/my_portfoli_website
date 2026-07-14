@@ -1,13 +1,27 @@
 import { absoluteApiUrl } from "./utils";
 import {
   fallbackBlogs,
+  fallbackCertificates,
+  fallbackGallery,
   fallbackGithub,
   fallbackProfile,
   fallbackProjects,
   fallbackResume,
   fallbackSkills,
+  fallbackTestimonials,
 } from "./fallback-data";
-import type { BlogPost, CvAsset, GithubSummary, HomeData, Profile, Project, Skill } from "./types";
+import type {
+  BlogPost,
+  Certificate,
+  CvAsset,
+  GithubSummary,
+  HomeData,
+  MediaAsset,
+  Profile,
+  Project,
+  Skill,
+  Testimonial,
+} from "./types";
 
 async function fetchJson<T>(path: string, fallback: T, init?: RequestInit): Promise<T> {
   try {
@@ -29,16 +43,20 @@ async function fetchJson<T>(path: string, fallback: T, init?: RequestInit): Prom
 }
 
 export async function getHomeData(): Promise<HomeData> {
-  const [profile, skills, projects, blogs, resume, github] = await Promise.all([
-    fetchJson<Profile>("/profile", fallbackProfile),
-    fetchJson<Skill[]>("/skills", fallbackSkills),
-    fetchJson<Project[]>("/projects", fallbackProjects),
-    fetchJson<BlogPost[]>("/blogs", fallbackBlogs),
-    fetchJson<CvAsset | null>("/resume/latest", fallbackResume),
-    fetchJson<GithubSummary>("/github/summary", fallbackGithub),
-  ]);
+  const [profile, skills, projects, blogs, resume, github, testimonials, certificates, gallery] =
+    await Promise.all([
+      fetchJson<Profile>("/profile", fallbackProfile),
+      fetchJson<Skill[]>("/skills", fallbackSkills),
+      fetchJson<Project[]>("/projects", fallbackProjects),
+      fetchJson<BlogPost[]>("/blogs", fallbackBlogs),
+      fetchJson<CvAsset | null>("/resume/latest", fallbackResume),
+      fetchJson<GithubSummary>("/github/summary", fallbackGithub),
+      fetchJson<Testimonial[]>("/testimonials", fallbackTestimonials),
+      fetchJson<Certificate[]>("/certificates", fallbackCertificates),
+      fetchJson<MediaAsset[]>("/media?category=gallery", fallbackGallery),
+    ]);
 
-  return { profile, skills, projects, blogs, resume, github };
+  return { profile, skills, projects, blogs, resume, github, testimonials, certificates, gallery };
 }
 
 export async function getProject(slug: string) {

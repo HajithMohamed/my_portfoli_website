@@ -4,142 +4,127 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { RevealAnimation } from "@/components/ui/reveal-animation";
+import type { Testimonial } from "@/lib/types";
 
-const testimonials = [
-  {
-    name: "Alex M.",
-    role: "Startup Founder",
-    company: "TechCo",
-    quote: "Delivered a production-ready booking system with clean architecture and excellent documentation. The attention to detail was impressive.",
-    project: "Booking System",
-    initials: "AM",
-    color: "from-blue-500 to-blue-700",
-  },
-  {
-    name: "Sarah K.",
-    role: "Product Manager",
-    company: "DigitalWorks",
-    quote: "The e-commerce backend was modular, well-documented, and shipped ahead of schedule. A developer who understands product context.",
-    project: "Commerce Platform",
-    initials: "SK",
-    color: "from-violet-500 to-violet-700",
-  },
-  {
-    name: "James R.",
-    role: "CTO",
-    company: "BuildFast",
-    quote: "The authentication infrastructure was rock solid — JWT rotation, RBAC, everything secured properly. Exactly what we needed.",
-    project: "Auth Infrastructure",
-    initials: "JR",
-    color: "from-emerald-500 to-emerald-700",
-  },
-  {
-    name: "Priya L.",
-    role: "Engineering Lead",
-    company: "FlowSys",
-    quote: "Excellent communication throughout, clean code, and proper test coverage. A developer who understands engineering at scale.",
-    project: "Admin Dashboard",
-    initials: "PL",
-    color: "from-amber-500 to-amber-700",
-  },
+const GRADIENTS = [
+  "from-blue-500 to-blue-700",
+  "from-violet-500 to-violet-700",
+  "from-emerald-500 to-emerald-700",
+  "from-amber-500 to-amber-700",
+  "from-rose-500 to-rose-700",
+  "from-cyan-500 to-cyan-700",
 ];
 
-function TestimonialCard({
-  testimonial,
-  onClick,
-}: {
-  testimonial: (typeof testimonials)[0];
-  onClick: () => void;
-}) {
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((part) => part.charAt(0))
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function gradientFor(name: string): string {
+  const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return GRADIENTS[hash % GRADIENTS.length];
+}
+
+function Avatar({ item, size }: { item: Testimonial; size: "sm" | "lg" }) {
+  const dims = size === "lg" ? "h-14 w-14 text-lg" : "h-9 w-9 text-xs";
+  if (item.avatarUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img alt={item.author} className={`${dims} shrink-0 rounded-full object-cover`} src={item.avatarUrl} />;
+  }
   return (
-    <motion.div
-      className="flex-shrink-0 w-[320px] cursor-pointer"
-      whileHover={{ y: -4 }}
-      onClick={onClick}
+    <div
+      className={`${dims} flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${gradientFor(item.author)} font-bold text-white`}
     >
-      <div className="h-full rounded-xl border border-white/10 bg-slate-950/80 backdrop-blur-sm p-5 hover:border-white/20 transition-all duration-300">
-        <div className="flex items-start gap-3 mb-3">
-          <div
-            className={`h-9 w-9 rounded-full bg-gradient-to-br ${testimonial.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
-          >
-            {testimonial.initials}
-          </div>
+      {initialsOf(item.author)}
+    </div>
+  );
+}
+
+function meta(item: Testimonial): string {
+  return [item.role, item.company].filter(Boolean).join(" · ");
+}
+
+function TestimonialCard({ item, onClick }: { item: Testimonial; onClick: () => void }) {
+  return (
+    <motion.div className="w-[320px] flex-shrink-0 cursor-pointer" onClick={onClick} whileHover={{ y: -4 }}>
+      <div className="h-full rounded-xl border border-white/10 bg-slate-950/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/20">
+        <div className="mb-3 flex items-start gap-3">
+          <Avatar item={item} size="sm" />
           <div>
-            <p className="text-sm font-semibold text-white">{testimonial.name}</p>
-            <p className="text-xs text-slate-500">
-              {testimonial.role} · {testimonial.company}
-            </p>
+            <p className="text-sm font-semibold text-white">{item.author}</p>
+            {meta(item) ? <p className="text-xs text-slate-500">{meta(item)}</p> : null}
           </div>
         </div>
-        <p className="text-sm text-slate-300 leading-6 italic">"{testimonial.quote}"</p>
-        <div className="mt-3 text-xs text-blue-400">
-          Project: {testimonial.project}
-        </div>
+        <p className="text-sm italic leading-6 text-slate-300">&ldquo;{item.quote}&rdquo;</p>
+        {item.project ? <div className="mt-3 text-xs text-blue-400">Project: {item.project}</div> : null}
       </div>
     </motion.div>
   );
 }
 
-export function Testimonials() {
-  const [selected, setSelected] = useState<(typeof testimonials)[0] | null>(null);
+export function Testimonials({ items }: { items: Testimonial[] }) {
+  const [selected, setSelected] = useState<Testimonial | null>(null);
+
+  // No genuine testimonials yet → hide the section entirely (never fabricate proof).
+  if (!items || items.length === 0) {
+    return null;
+  }
+
+  // Duplicate for a seamless marquee only when there are enough to scroll.
+  const track = items.length >= 3 ? [...items, ...items] : items;
 
   return (
-    <section className="py-24 overflow-hidden border-y border-white/10 bg-white/[0.015]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-12">
+    <section className="overflow-hidden border-y border-white/10 bg-white/[0.015] py-24">
+      <div className="mx-auto mb-12 max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealAnimation>
           <Badge>Testimonials</Badge>
-          <h2 className="mt-4 font-display text-3xl font-semibold text-white sm:text-4xl">
-            What collaborators say
-          </h2>
+          <h2 className="mt-4 font-display text-3xl font-semibold text-white sm:text-4xl">What collaborators say</h2>
         </RevealAnimation>
       </div>
 
-      {/* Infinite marquee */}
       <div
-        className="testimonial-track flex gap-5 px-4"
-        style={{ width: "max-content" }}
+        className={`flex gap-5 px-4 ${items.length >= 3 ? "testimonial-track" : "mx-auto max-w-7xl flex-wrap justify-center"}`}
+        style={items.length >= 3 ? { width: "max-content" } : undefined}
       >
-        {[...testimonials, ...testimonials].map((t, i) => (
-          <TestimonialCard key={i} testimonial={t} onClick={() => setSelected(t)} />
+        {track.map((item, i) => (
+          <TestimonialCard item={item} key={`${item.id}-${i}`} onClick={() => setSelected(item)} />
         ))}
       </div>
 
-      {/* Detail modal */}
       <AnimatePresence>
         {selected && (
           <motion.div
-            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
             onClick={() => setSelected(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="w-full max-w-lg rounded-2xl border border-white/15 bg-slate-900 p-8 shadow-2xl"
               exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(event) => event.stopPropagation()}
               transition={{ type: "spring", duration: 0.5 }}
-              className="rounded-2xl border border-white/15 bg-slate-900 p-8 max-w-lg w-full shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-4 mb-5">
-                <div
-                  className={`h-14 w-14 rounded-full bg-gradient-to-br ${selected.color} flex items-center justify-center text-white text-lg font-bold`}
-                >
-                  {selected.initials}
-                </div>
+              <div className="mb-5 flex items-center gap-4">
+                <Avatar item={selected} size="lg" />
                 <div>
-                  <p className="text-lg font-semibold text-white">{selected.name}</p>
-                  <p className="text-sm text-slate-400">
-                    {selected.role} · {selected.company}
-                  </p>
+                  <p className="text-lg font-semibold text-white">{selected.author}</p>
+                  {meta(selected) ? <p className="text-sm text-slate-400">{meta(selected)}</p> : null}
                 </div>
               </div>
-              <p className="text-slate-200 leading-7 italic text-base">"{selected.quote}"</p>
-              <div className="mt-4 text-sm text-blue-400">Project: {selected.project}</div>
+              <p className="text-base italic leading-7 text-slate-200">&ldquo;{selected.quote}&rdquo;</p>
+              {selected.project ? <div className="mt-4 text-sm text-blue-400">Project: {selected.project}</div> : null}
               <button
+                className="mt-6 text-xs text-slate-500 transition-colors hover:text-slate-300"
                 onClick={() => setSelected(null)}
-                className="mt-6 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                type="button"
               >
                 Close ×
               </button>
@@ -153,12 +138,8 @@ export function Testimonials() {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .testimonial-track {
-          animation: testimonial-marquee 30s linear infinite;
-        }
-        .testimonial-track:hover {
-          animation-play-state: paused;
-        }
+        .testimonial-track { animation: testimonial-marquee 30s linear infinite; }
+        .testimonial-track:hover { animation-play-state: paused; }
       `}</style>
     </section>
   );

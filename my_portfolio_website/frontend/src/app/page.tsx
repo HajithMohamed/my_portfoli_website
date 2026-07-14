@@ -18,6 +18,7 @@ import { ProjectShowcase } from "@/components/sections/project-showcase";
 import { ServicesSection } from "@/components/sections/services-section";
 import { GithubDashboard } from "@/components/sections/github-dashboard";
 import { Testimonials } from "@/components/sections/testimonials";
+import { CertificatesSection } from "@/components/sections/certificates-section";
 import { CommandCenterFooter } from "@/components/sections/command-center-footer";
 import { ContactForm } from "@/components/sections/contact-form";
 import { SkillsGalaxyClient } from "@/components/sections/skills-galaxy-client";
@@ -30,14 +31,32 @@ import { formatDate } from "@/lib/utils";
 
 
 export default async function Home() {
-  const { profile, skills, projects, blogs, resume, github } = await getHomeData();
+  const { profile, skills, projects, blogs, resume, github, testimonials, certificates, gallery } =
+    await getHomeData();
 
   const timeline = Array.isArray(profile.timeline)
     ? (profile.timeline as Array<{ label: string; value: string }>)
     : [];
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: profile.name,
+    jobTitle: profile.title,
+    description: profile.bio,
+    email: `mailto:${profile.email}`,
+    address: { "@type": "PostalAddress", addressLocality: profile.location },
+    image: profile.profileImageUrl ?? undefined,
+    sameAs: profile.socialLinks?.map((link) => link.url).filter(Boolean),
+    knowsAbout: skills.map((skill) => skill.name),
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#050816] text-slate-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
       <LoadingScreen />
       {/* Floating navigation */}
       <FloatingNav />
@@ -87,6 +106,14 @@ export default async function Home() {
           className="mx-auto grid max-w-7xl gap-10 px-4 py-24 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8"
         >
           <RevealAnimation variant="slide-up">
+            {profile.profileImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                alt={profile.name}
+                className="mb-6 h-24 w-24 rounded-2xl border border-white/10 object-cover shadow-lg shadow-black/30"
+                src={profile.profileImageUrl}
+              />
+            ) : null}
             <Badge>Engineering Philosophy</Badge>
             <h2 className="mt-4 font-display text-3xl font-semibold text-white sm:text-4xl">
               Scalable systems with useful interfaces
@@ -128,8 +155,30 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* ── Photo gallery ── */}
+        {gallery.length > 0 ? (
+          <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {gallery.map((photo) => (
+                <RevealAnimation key={photo.id} variant="fade">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={photo.alt || "Gallery photo"}
+                    className="aspect-square w-full rounded-xl border border-white/10 object-cover transition-transform duration-300 hover:scale-[1.02]"
+                    loading="lazy"
+                    src={photo.url}
+                  />
+                </RevealAnimation>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* ── Certifications & Achievements ── */}
+        <CertificatesSection items={certificates} />
+
         {/* ── Testimonials ── */}
-        <Testimonials />
+        <Testimonials items={testimonials} />
 
         {/* ── Blog ── */}
         <section id="blog" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
