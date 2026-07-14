@@ -42,3 +42,28 @@ html {
 .text-balance {
   text-wrap: balance;
 }
+
+/* Animations and Effects */
+@keyframes aurora {
+  0% { background-position: 50% 50%, 50% 50%; }
+  50% { background-position: 100% 50%, 0% 50%; }
+  100% { background-position: 50% 50%, 50% 50%; }
+}
+
+.animate-aurora {
+  animation: aurora 60s linear infinite;
+}
+
+.cursor-spotlight {
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255,255,255,0.06),
+    transparent 40%
+  );
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

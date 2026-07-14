@@ -2,13 +2,13 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Check, Plus, RefreshCw, Trash2, UploadCloud } from "lucide-react";
-import { AdminShell, useAdminToken } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
-import { adminFetch } from "@/lib/api";
+import { AnalyticsOverview } from "@/components/admin/admin-analytics";
+import { adminFetch, bffUrl } from "@/lib/api";
 import type { BlogPost, CvAsset, GithubSummary, Profile, Project, Skill } from "@/lib/types";
-import { absoluteApiUrl, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 type Suggestion = {
   id: string;
@@ -36,17 +36,15 @@ function splitList(value: FormDataEntryValue | null) {
 }
 
 function useAdminResource<T>(path: string, fallback: T) {
-  const token = useAdminToken();
   const [data, setData] = useState<T>(fallback);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function load() {
-    if (!token) return;
     setLoading(true);
     setError(null);
     try {
-      setData(await adminFetch<T>(path, token));
+      setData(await adminFetch<T>(path));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -58,9 +56,9 @@ function useAdminResource<T>(path: string, fallback: T) {
     const timeoutId = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, path]);
+  }, [path]);
 
-  return { token, data, setData, error, loading, load };
+  return { data, setData, error, loading, load };
 }
 
 function SectionHeader({ title, description }: { title: string; description: string }) {
@@ -73,7 +71,6 @@ function SectionHeader({ title, description }: { title: string; description: str
 }
 
 export function DashboardPanel() {
-  const token = useAdminToken();
   const [projects, setProjects] = useState<Project[]>([]);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -83,14 +80,13 @@ export function DashboardPanel() {
   const [status, setStatus] = useState<string | null>(null);
 
   async function load() {
-    if (!token) return;
     const [projectData, blogData, skillData, messageData, githubData, suggestionData] = await Promise.all([
-      adminFetch<Project[]>("/admin/projects", token),
-      adminFetch<BlogPost[]>("/admin/blogs", token),
-      adminFetch<Skill[]>("/admin/skills", token),
-      adminFetch<Message[]>("/admin/messages", token),
-      adminFetch<GithubSummary | null>("/github/summary", token),
-      adminFetch<Suggestion[]>("/admin/suggestions", token),
+      adminFetch<Project[]>("/admin/projects"),
+      adminFetch<BlogPost[]>("/admin/blogs"),
+      adminFetch<Skill[]>("/admin/skills"),
+      adminFetch<Message[]>("/admin/messages"),
+      adminFetch<GithubSummary | null>("/github/summary"),
+      adminFetch<Suggestion[]>("/admin/suggestions"),
     ]);
     setProjects(projectData);
     setBlogs(blogData);
@@ -104,25 +100,25 @@ export function DashboardPanel() {
     const timeoutId = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   async function syncGithub() {
-    if (!token) return;
     setStatus("Syncing GitHub");
-    await adminFetch("/admin/github/sync", token, { method: "POST", body: "{}" });
+    await adminFetch("/admin/github/sync", { method: "POST", body: "{}" });
     await load();
     setStatus("GitHub sync complete");
   }
 
   async function handleSuggestion(id: string, action: "approve" | "reject") {
-    if (!token) return;
-    await adminFetch(`/admin/suggestions/${id}/${action}`, token, { method: "POST", body: "{}" });
+    await adminFetch(`/admin/suggestions/${id}/${action}`, { method: "POST", body: "{}" });
     await load();
   }
 
   return (
-    <AdminShell>
-      <SectionHeader title="Portfolio Operating System" description="Content, GitHub intelligence, messages, and release readiness at a glance." />
+    <>
+      <SectionHeader title="Portfolio Operating System" description="Traffic, content, GitHub intelligence, and messages at a glance." />
+      <AnalyticsOverview />
+      <h2 className="mb-4 mt-10 text-lg font-semibold text-white">Content</h2>
       <div className="grid gap-4 md:grid-cols-4">
         {[
           ["Projects", projects.length],
@@ -178,18 +174,17 @@ export function DashboardPanel() {
           </div>
         </Card>
       </div>
-    </AdminShell>
+    </>
   );
 }
 
 export function ProfilePanel() {
-  const { token, data: profile, error, loading, load } = useAdminResource<Profile | null>("/profile", null);
+  const { data: profile, error, loading, load } = useAdminResource<Profile | null>("/profile", null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
     const form = new FormData(event.currentTarget);
-    await adminFetch<Profile>("/admin/profile", token, {
+    await adminFetch<Profile>("/admin/profile", {
       method: "PATCH",
       body: JSON.stringify({
         name: form.get("name"),
@@ -212,7 +207,7 @@ export function ProfilePanel() {
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="Profile Management" description="Edit HZ Labs positioning, contact details, philosophy, social links, and currently exploring list." />
       <Card>
         {profile ? (
@@ -235,18 +230,17 @@ export function ProfilePanel() {
         )}
         {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
       </Card>
-    </AdminShell>
+    </>
   );
 }
 
 export function SkillsPanel() {
-  const { token, data: skills, error, load } = useAdminResource<Skill[]>("/admin/skills", []);
+  const { data: skills, error, load } = useAdminResource<Skill[]>("/admin/skills", []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
     const form = new FormData(event.currentTarget);
-    await adminFetch("/admin/skills", token, {
+    await adminFetch("/admin/skills", {
       method: "POST",
       body: JSON.stringify({
         name: form.get("name"),
@@ -260,13 +254,12 @@ export function SkillsPanel() {
   }
 
   async function remove(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/skills/${id}`, token, { method: "DELETE" });
+    await adminFetch(`/admin/skills/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="Skills Management" description="Add, reorder, feature, and remove technology skills shown on the public portfolio." />
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <Card>
@@ -301,23 +294,22 @@ export function SkillsPanel() {
           </div>
         </Card>
       </div>
-    </AdminShell>
+    </>
   );
 }
 
 export function ProjectsPanel() {
-  const { token, data: projects, error, load } = useAdminResource<Project[]>("/admin/projects", []);
+  const { data: projects, error, load } = useAdminResource<Project[]>("/admin/projects", []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
     const form = new FormData(event.currentTarget);
     const title = String(form.get("title") ?? "");
     const caseStudy = ["Problem", "Solution", "Architecture", "Outcome"].map((heading) => ({
       heading,
       body: String(form.get(heading.toLowerCase()) ?? ""),
     }));
-    await adminFetch("/admin/projects", token, {
+    await adminFetch("/admin/projects", {
       method: "POST",
       body: JSON.stringify({
         title,
@@ -337,13 +329,12 @@ export function ProjectsPanel() {
   }
 
   async function remove(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/projects/${id}`, token, { method: "DELETE" });
+    await adminFetch(`/admin/projects/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="Projects Management" description="Create CMS-backed projects with tech stacks, links, feature flags, and case-study sections." />
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <Card>
@@ -390,19 +381,18 @@ export function ProjectsPanel() {
           </div>
         </Card>
       </div>
-    </AdminShell>
+    </>
   );
 }
 
 export function BlogPanel() {
-  const { token, data: posts, error, load } = useAdminResource<BlogPost[]>("/admin/blogs", []);
+  const { data: posts, error, load } = useAdminResource<BlogPost[]>("/admin/blogs", []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
     const form = new FormData(event.currentTarget);
     const title = String(form.get("title") ?? "");
-    await adminFetch("/admin/blogs", token, {
+    await adminFetch("/admin/blogs", {
       method: "POST",
       body: JSON.stringify({
         title,
@@ -418,13 +408,12 @@ export function BlogPanel() {
   }
 
   async function remove(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/blogs/${id}`, token, { method: "DELETE" });
+    await adminFetch(`/admin/blogs/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="Blog Management" description="Create markdown posts with SEO-friendly slugs, tags, draft and publish states." />
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <Card>
@@ -460,17 +449,16 @@ export function BlogPanel() {
           </div>
         </Card>
       </div>
-    </AdminShell>
+    </>
   );
 }
 
 export function ResumePanel() {
-  const { token, data: resumes, error, load } = useAdminResource<CvAsset[]>("/admin/resume", []);
+  const { data: resumes, error, load } = useAdminResource<CvAsset[]>("/admin/resume", []);
   const [uploading, setUploading] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
     const form = new FormData(event.currentTarget);
     const file = form.get("file");
     let fileUrl = String(form.get("fileUrl") ?? "");
@@ -480,9 +468,9 @@ export function ResumePanel() {
       setUploading(true);
       const uploadForm = new FormData();
       uploadForm.set("file", file);
-      const response = await fetch(absoluteApiUrl("/admin/uploads?folder=hz-labs/cv"), {
+      const response = await fetch(bffUrl("/admin/uploads?folder=hz-labs/cv"), {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
         body: uploadForm,
       });
       const uploaded = (await response.json()) as { url: string; publicId: string };
@@ -491,7 +479,7 @@ export function ResumePanel() {
       setUploading(false);
     }
 
-    await adminFetch("/admin/resume", token, {
+    await adminFetch("/admin/resume", {
       method: "POST",
       body: JSON.stringify({
         title: form.get("title"),
@@ -505,19 +493,17 @@ export function ResumePanel() {
   }
 
   async function setActive(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/resume/${id}/active`, token, { method: "PATCH", body: "{}" });
+    await adminFetch(`/admin/resume/${id}/active`, { method: "PATCH", body: "{}" });
     await load();
   }
 
   async function remove(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/resume/${id}`, token, { method: "DELETE" });
+    await adminFetch(`/admin/resume/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="CV Management" description="Upload or register CV files. The homepage Download CV button points to the active latest CV." />
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <Card>
@@ -551,27 +537,25 @@ export function ResumePanel() {
           </div>
         </Card>
       </div>
-    </AdminShell>
+    </>
   );
 }
 
 export function MessagesPanel() {
-  const { token, data: messages, error, load } = useAdminResource<Message[]>("/admin/messages", []);
+  const { data: messages, error, load } = useAdminResource<Message[]>("/admin/messages", []);
 
   async function markRead(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/messages/${id}/read`, token, { method: "PATCH", body: "{}" });
+    await adminFetch(`/admin/messages/${id}/read`, { method: "PATCH", body: "{}" });
     await load();
   }
 
   async function remove(id: string) {
-    if (!token) return;
-    await adminFetch(`/admin/messages/${id}`, token, { method: "DELETE" });
+    await adminFetch(`/admin/messages/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
-    <AdminShell>
+    <>
       <SectionHeader title="Message Management" description="Review contact form submissions and mark outreach as handled." />
       <Card>
         {error ? <p className="mb-4 text-sm text-red-300">{error}</p> : null}
@@ -601,6 +585,6 @@ export function MessagesPanel() {
           )}
         </div>
       </Card>
-    </AdminShell>
+    </>
   );
 }

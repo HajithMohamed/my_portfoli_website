@@ -74,6 +74,16 @@ export type CvAsset = {
   isActive: boolean;
 };
 
+export type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
+
+export type ContributionData = {
+  calendar?: { totalContributions: number; weeks: { days: ContributionDay[] }[] } | null;
+  totalStars?: number;
+  totalForks?: number;
+  totalContributions?: number;
+  technologies?: string[];
+};
+
 export type GithubSummary = {
   username: string;
   repositoryCount: number;
@@ -85,8 +95,12 @@ export type GithubSummary = {
     url: string;
     language?: string | null;
     updatedAt?: string;
+    stars?: number;
+    forks?: number;
+    topics?: string[];
   }>;
   recentActivity: Array<{ type: string; repo?: string; createdAt: string }>;
+  contributionData?: ContributionData | null;
   syncedAt?: string;
 };
 

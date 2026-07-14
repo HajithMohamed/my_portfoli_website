@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { absoluteApiUrl } from "@/lib/utils";
+import { track } from "@/lib/analytics";
 
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -25,6 +26,9 @@ export function ContactForm() {
         body: JSON.stringify(payload),
       });
       setStatus(response.ok ? "sent" : "error");
+      if (response.ok) {
+        track("contact_submit");
+      }
     } catch {
       setStatus("error");
     }

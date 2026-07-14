@@ -49,17 +49,29 @@ export async function getBlogPost(slug: string) {
   return fetchJson<BlogPost | null>(`/blogs/${slug}`, fallbackBlogs.find((post) => post.slug === slug) ?? null);
 }
 
-export async function adminFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(absoluteApiUrl(path), {
+/** Same-origin base for admin calls; proxied to the API so the session cookie is first-party. */
+export const BFF_BASE = "/bff";
+
+export function bffUrl(path: string): string {
+  return `${BFF_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/**
+ * Authenticated admin request. Auth rides on the HTTP-only session cookie
+ * (credentials: "include") — there is no access token to pass around anymore.
+ */
+export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(bffUrl(path), {
+    credentials: "include",
     ...init,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
   });
   if (!response.ok) {
     throw new Error(await response.text());
   }
-  return (await response.json()) as T;
+  const text = await response.text();
+  return text ? (JSON.parse(text) as T) : (undefined as T);
 }

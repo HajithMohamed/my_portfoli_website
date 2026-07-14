@@ -32,6 +32,7 @@ html {
   background: rgba(59, 130, 246, 0.35);
 }
 
+/* ─── Grid Background ─── */
 .engineering-grid {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
@@ -41,4 +42,83 @@ html {
 
 .text-balance {
   text-wrap: balance;
+}
+
+/* ─── Aurora Animation ─── */
+@keyframes aurora {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+  50% {
+    background-position: 100% 50%, 0% 50%;
+  }
+  100% {
+    background-position: 50% 50%, 50% 50%;
+  }
+}
+
+.animate-aurora {
+  animation: aurora 60s linear infinite;
+}
+
+/* ─── Testimonial Marquee ─── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ─── Cursor Spotlight ─── */
+.cursor-spotlight {
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(59, 130, 246, 0.05),
+    transparent 40%
+  );
+}
+
+/* ─── Glass Morphism ─── */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Glow Effects ─── */
+.glow-blue {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.08);
+}
+
+.glow-violet {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.08);
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050816;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

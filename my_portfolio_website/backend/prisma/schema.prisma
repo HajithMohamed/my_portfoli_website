@@ -203,10 +203,120 @@ model SyncSuggestion {
   updatedAt DateTime         @updatedAt
 }
 
+/// One visitor session (30-minute sliding window, keyed by a client-generated
+/// sessionKey). Enriched server-side with device/OS/browser (user agent),
+/// country/region/city (IP geolocation), and traffic source (referrer/UTM).
+model VisitorSession {
+  id             String           @id @default(cuid())
+  sessionKey     String           @unique
+  visitorId      String
+  startedAt      DateTime         @default(now())
+  lastSeenAt     DateTime         @default(now())
+  entryPath      String?
+  exitPath       String?
+  referrer       String?
+  source         String           @default("Direct")
+  device         String           @default("desktop")
+  os             String?
+  browser        String?
+  country        String?
+  countryCode    String?
+  region         String?
+  city           String?
+  isReturning    Boolean          @default(false)
+  pageViewCount  Int              @default(0)
+  maxScrollDepth Int              @default(0)
+  pageViews      PageView[]
+  events         AnalyticsEvent[]
+
+  @@index([startedAt])
+  @@index([lastSeenAt])
+  @@index([visitorId])
+}
+
+model PageView {
+  id          String         @id @default(cuid())
+  path        String
+  duration    Int            @default(0)
+  scrollDepth Int            @default(0)
+  createdAt   DateTime       @default(now())
+  sessionId   String
+  session     VisitorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([path])
+  @@index([createdAt])
+  @@index([sessionId])
+}
+
 model AnalyticsEvent {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   type      String
   path      String?
   metadata  Json?
+  createdAt DateTime        @default(now())
+  sessionId String?
+  session   VisitorSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+/// Security audit trail for the hidden admin surface: logins (success/failure),
+/// logout, and privileged actions, with the originating IP and user agent.
+model AdminActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  success   Boolean  @default(true)
+  ip        String?
+  userAgent String?
+  meta      Json?
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+/// Uploaded personal photos / imagery (Cloudinary). category: profile | gallery | about.
+model MediaAsset {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String?
+  alt       String   @default("")
+  category  String   @default("gallery")
+  featured  Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  author    String
+  role      String?
+  company   String?
+  quote     String
+  avatarUrl String?
+  project   String?
+  rating    Int      @default(5)
+  featured  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([order])
+}
+
+/// Certifications and achievements. type: certification | achievement.
+model Certificate {
+  id            String    @id @default(cuid())
+  title         String
+  issuer        String
+  type          String    @default("certification")
+  issueDate     DateTime?
+  credentialUrl String?
+  imageUrl      String?
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  @@index([type])
 }
