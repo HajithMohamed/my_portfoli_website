@@ -76,11 +76,7 @@ export function HeroSection({
               <div className="grid grid-cols-3 gap-3">
                 {[
                   ["Repos", github.repositoryCount],
-<<<<<<< HEAD:frontend/src/components/sections/hero-section.tsx
                   ["Contributions", github.contributionData?.totalContributions ?? github.commitCount],
-=======
-                  ["Commits", github.commitCount],
->>>>>>> 484122ca180bf7a724e76f74b44a833b09c83f7e:my_portfolio_website/frontend/src/components/sections/hero-section.tsx
                   ["Projects", projects.length],
                 ].map(([label, value]) => (
                   <div className="rounded-md border border-white/10 bg-[#0F172A]/50 p-4" key={label as string}>
