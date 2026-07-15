@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
   // a stray lockfile elsewhere in the tree.
   turbopack: {
     root: path.join(__dirname, ".."),
+
+  // node_modules lives two levels up (shared monorepo root); pin the Turbopack
+  // workspace root there so it can resolve `next` and won't mis-infer from a
+  // stray nested lockfile.
+  turbopack: {
+    root: path.join(__dirname, "..", ".."),
+
   },
   async rewrites() {
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];
