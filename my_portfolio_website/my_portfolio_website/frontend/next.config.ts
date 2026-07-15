@@ -9,11 +9,11 @@ const backendOrigin = (
 ).replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
-  // node_modules lives two levels up (shared monorepo root); pin the Turbopack
-  // workspace root there so it can resolve `next` and won't mis-infer from a
-  // stray nested lockfile.
+  // This is an npm workspace: deps hoist to the monorepo root one level up.
+  // Pin Turbopack's root there so it resolves `next` and doesn't mis-infer from
+  // a stray lockfile elsewhere in the tree.
   turbopack: {
-    root: path.join(__dirname, "..", ".."),
+    root: path.join(__dirname, ".."),
   },
   async rewrites() {
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];
