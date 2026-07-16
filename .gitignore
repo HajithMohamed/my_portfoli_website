@@ -28,6 +28,5 @@ Thumbs.db
 # Prisma
 backend/prisma/dev.db
 
-# Netlify/Railway
+# Netlify
 .netlify/
-.railway/

@@ -1,0 +1,54 @@
+# Render — NestJS backend API (Blueprint).
+# The app is an npm workspace nested under my_portfolio_website/, so `rootDir`
+# points there and the build/start commands drive the `backend` workspace with
+# plain `npm` (the repo-root scripts use `npm.cmd`, which is Windows-only).
+#
+# PostgreSQL is Supabase (external) — there is deliberately no `databases:` block.
+# Set DATABASE_URL to the Supabase IPv4 "Session pooler" connection string.
+#
+# Values marked `sync: false` must be filled in the Render dashboard (secrets).
+services:
+  - type: web
+    name: hz-labs-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: my_portfolio_website
+    autoDeploy: true
+    healthCheckPath: /health
+    buildCommand: npm ci && npm run prisma:generate --workspace backend && npm run build --workspace backend
+    startCommand: npm run prisma:deploy --workspace backend && npm run start:prod --workspace backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      # Supabase Postgres — IPv4 Session pooler URL (not the direct connection).
+      - key: DATABASE_URL
+        sync: false
+      # Public URL of the Netlify frontend (used for CORS + cookie origin).
+      - key: FRONTEND_URL
+        sync: false
+      - key: NETLIFY_URL
+        sync: false
+      # Hidden-admin credentials (single administrator).
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: Mohamed Hajith
+      - key: ADMIN_SESSION_TTL_MINUTES
+        value: "120"
+      # Session-JWT signing secret — Render generates a strong random value once.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      # Integrations.
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

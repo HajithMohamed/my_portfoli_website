@@ -1,15 +1,22 @@
+# Netlify — public frontend (Next.js App Router).
+# The app is an npm workspace nested under my_portfolio_website/, so the build
+# base is the workspace root (where package-lock.json lives) and we build the
+# `frontend` workspace from there. `publish` is resolved relative to `base`.
+#
+# Leave the site's "Base directory" EMPTY in the Netlify UI so this file (read
+# from the repo root) is the single source of truth.
+#
+# Set these in Site settings → Environment variables:
+#   NEXT_PUBLIC_API_URL   = https://<your-render-service>.onrender.com
+#   NEXT_PUBLIC_SITE_URL  = https://<your-netlify-site>.netlify.app
+
 [build]
-  base = "frontend"
-  command = "npm run build"
-  publish = ".next"
+  base = "my_portfolio_website"
+  command = "npm run build --workspace frontend"
+  publish = "frontend/.next"
 
 [build.environment]
   NODE_VERSION = "22"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/api/:splat"
-  status = 200

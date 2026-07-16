@@ -6,7 +6,7 @@ HZ Labs is a separated monorepo with a public portfolio frontend and a backend C
 
 - Frontend: Next.js App Router, TypeScript, Tailwind CSS, shadcn-style primitives, React Query, React Hook Form, Zod, Framer Motion-ready.
 - Backend: NestJS, Prisma, PostgreSQL, JWT access tokens, refresh-token rotation, Swagger, Cloudinary, GitHub API.
-- Hosting: Netlify for `frontend/`, Railway for `backend/` and PostgreSQL.
+- Hosting: Netlify for `frontend/`, Render for `backend/`, Supabase for PostgreSQL.
 
 ## Data Flow
 
