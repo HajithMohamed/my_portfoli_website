@@ -40,6 +40,26 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+
+  try {
+    await app.listen(port);
+    console.log(`🚀 HZ Labs API running on http://localhost:${port}`);
+    console.log(`📄 Swagger docs at http://localhost:${port}/docs`);
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      'code' in error &&
+      (error as NodeJS.ErrnoException).code === 'EADDRINUSE'
+    ) {
+      console.error(
+        `\n❌ Port ${port} is already in use.\n` +
+          `   → Another instance may already be running.\n` +
+          `   → Fix: kill the process on port ${port}, or set a different PORT in .env\n`,
+      );
+      process.exit(1);
+    }
+    throw error;
+  }
 }
 void bootstrap();

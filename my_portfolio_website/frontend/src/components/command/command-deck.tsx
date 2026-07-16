@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { motion, Variants } from "framer-motion";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
+import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
 
 const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
   ssr: false,
@@ -22,8 +24,10 @@ function useBootLog() {
       return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
     };
     return [
-      `[${stamp(2000)}] hero.deck mounted · 6 nodes`,
-      `[${stamp(1000)}] visitor.session_id=${sessionId ?? "…"}`,
+      `[${stamp(2000)}] init.core_systems`,
+      `[${stamp(1500)}] decrypting.dossier`,
+      `[${stamp(1000)}] visitor.id=${sessionId ?? "…"}`,
+      `[${stamp(500)}] connection.secure=true`,
       `[${stamp(0)}] welcome, operator.`,
     ];
   }, [sessionId]);
@@ -39,7 +43,7 @@ function useBootLog() {
         }
         return v + 1;
       });
-    }, 450);
+    }, 350);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
@@ -63,13 +67,16 @@ function BootStatusRow({
         ? "text-signal-amber"
         : "text-cyan";
   return (
-    <div className="flex items-center justify-between border-b border-cyan/10 py-2 last:border-0">
-      <span className="text-muted-foreground">
-        <span className="text-cyan/60">▸ </span>
+    <div className="flex items-center justify-between border-b border-cyan/10 py-2.5 last:border-0 hover:bg-cyan/5 transition-colors px-2 -mx-2 rounded-sm">
+      <span className="text-muted-foreground flex items-center gap-2">
+        <span className="text-cyan/40">▸</span>
         {label}
       </span>
-      <span className={`flex items-center gap-2 ${toneClass}`}>
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse-dot" />
+      <span className={`flex items-center gap-2 font-semibold tracking-wider ${toneClass}`}>
+        <span className="relative flex h-2 w-2 items-center justify-center">
+          <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-50 ${tone === 'green' ? 'bg-signal-green' : tone === 'amber' ? 'bg-signal-amber' : 'bg-cyan'}`}></span>
+          <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${tone === 'green' ? 'bg-signal-green' : tone === 'amber' ? 'bg-signal-amber' : 'bg-cyan'}`}></span>
+        </span>
         {value}
       </span>
     </div>
@@ -97,123 +104,178 @@ export function CommandDeck({
 
   const focus = profile.currentlyExploring?.slice(0, 2).join(" · ") || "Full-stack systems";
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+  };
+
   return (
-    <section className="relative overflow-hidden border-b border-cyan/15">
-      {/* 3D backdrop — desktop only; on small screens it fights the content */}
-      <div className="pointer-events-none absolute inset-0 hidden opacity-60 lg:block" aria-hidden>
+    <section className="relative min-h-[90vh] flex items-center border-b border-cyan/15 overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-grid opacity-30" />
+      <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none" />
+      <div className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none" style={{ animationDelay: '-10s' }} />
+
+      {/* 3D backdrop — desktop only */}
+      <div className="pointer-events-none absolute inset-0 hidden opacity-[0.35] lg:block" aria-hidden>
         <WorkspaceScene />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-[1400px] gap-10 px-4 py-16 md:py-20 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-        {/* Left — identity */}
-        <div>
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em]">
-            <span className="flex items-center gap-2 text-signal-green">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-signal-green animate-pulse-dot" />
-              {profile.availabilityStatus}
-            </span>
-            <span className="hidden text-muted-foreground sm:inline">· sector 01</span>
-          </div>
+      <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 pt-32 pb-16 md:pt-40 lg:pt-32">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 items-center"
+        >
+          {/* Left — identity */}
+          <div>
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] w-full min-w-0">
+              <span className="flex max-w-full min-w-0 items-center gap-2 text-signal-green bg-signal-green/10 border border-signal-green/20 px-3 py-1 rounded-sm" title={profile.availabilityStatus}>
+                <span className="shrink-0 inline-block h-1.5 w-1.5 rounded-full bg-signal-green animate-pulse-dot" />
+                <span className="truncate min-w-0">{profile.availabilityStatus}</span>
+              </span>
+              <span className="hidden text-muted-foreground sm:inline-block border border-cyan/10 px-3 py-1 rounded-sm shrink-0">sys.sector_01</span>
+            </motion.div>
 
-          <h1 className="mt-6 font-display text-6xl font-bold tracking-tight text-foreground text-glow sm:text-7xl md:text-8xl">
-            HZ LABS
-          </h1>
+            <motion.h1 
+              variants={itemVariants}
+              className="mt-8 font-display text-7xl font-bold tracking-tight text-gradient sm:text-8xl md:text-9xl relative"
+            >
+              HZ LABS
+            </motion.h1>
 
-          <div className="mt-3">
-            <div className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
-              {profile.name}
-            </div>
-            <div className="mt-1 font-mono text-sm uppercase tracking-[0.2em] text-cyan">
-              Software Engineer · Full Stack Developer · Founder of HZ Labs
-            </div>
-          </div>
+            <motion.div variants={itemVariants} className="mt-6 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
+              <div className="font-display text-3xl font-semibold text-foreground">
+                {profile.name}
+              </div>
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-cyan flex items-center gap-2">
+                <span className="text-cyan/40">/</span> {profile.title}
+              </div>
+            </motion.div>
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            {profile.bio}
-          </p>
+            <motion.p variants={itemVariants} className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg border-l-2 border-cyan/30 pl-4 py-1">
+              {profile.bio}
+            </motion.p>
 
-          <div className="mt-8 flex flex-wrap gap-3 font-mono text-xs uppercase tracking-[0.2em]">
-            {resume?.fileUrl ? (
+            <motion.div variants={itemVariants} className="mt-10 flex flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
+              {resume?.fileUrl ? (
+                <a
+                  href={resume.fileUrl}
+                  data-track="resume_download"
+                  className="group relative flex items-center gap-3 border border-cyan/50 bg-cyan/10 px-6 py-4 text-cyan transition-all hover:bg-cyan/20 hover:text-glow hover:border-cyan"
+                >
+                  <FileText size={16} className="opacity-70 group-hover:opacity-100" />
+                  <span>download cv</span>
+                  <span className="absolute inset-0 rounded-[1px] bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100 animate-pulse" />
+                </a>
+              ) : null}
               <a
-                href={resume.fileUrl}
-                data-track="resume_download"
-                className="border border-cyan/50 bg-cyan/10 px-5 py-3 text-cyan transition-all hover:bg-cyan/20 hover:text-glow"
+                href="#projects"
+                className="group flex items-center gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2"
               >
-                {"> download cv"}
+                <Terminal size={16} className="opacity-70" />
+                <span>view systems</span>
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
-            ) : null}
-            <a
-              href="#projects"
-              className="border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan"
-            >
-              {"> view systems"} <span aria-hidden>→</span>
-            </a>
-            <a
-              href={githubLink}
-              target="_blank"
-              rel="noreferrer"
-              data-track="github_click"
-              className="border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan"
-            >
-              {"> github"}
-            </a>
-            <a
-              href="#comms"
-              className="border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan"
-            >
-              {"> open comms"}
-            </a>
+              <a
+                href={githubLink}
+                target="_blank"
+                rel="noreferrer"
+                data-track="github_click"
+                className="group flex items-center gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2"
+              >
+                <Github size={16} className="opacity-70 group-hover:text-glow" />
+                <span>github</span>
+              </a>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="mt-12 grid max-w-2xl grid-cols-2 md:grid-cols-3 gap-6 font-mono border-t border-cyan/15 pt-8">
+              <div className="relative group">
+                <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">response</div>
+                <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <span className="text-signal-green">⚡</span> &lt; 24h
+                </div>
+              </div>
+              <div className="relative group">
+                <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">focus</div>
+                <div className="text-sm font-semibold text-foreground text-balance leading-snug">{focus}</div>
+              </div>
+              <div className="relative group col-span-2 md:col-span-1">
+                <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">modes</div>
+                <div className="text-sm font-semibold text-foreground flex flex-col gap-1">
+                  <span>Internship</span>
+                  <span className="text-cyan/70">Full-time</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
-          <div className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-cyan/15 pt-5 font-mono">
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">response</div>
-              <div className="mt-1 text-sm font-semibold text-foreground">&lt; 24h</div>
-            </div>
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">focus</div>
-              <div className="mt-1 text-sm font-semibold text-foreground">{focus}</div>
-            </div>
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">modes</div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
-                Internship · Full-time
+          {/* Right — boot status + log tail */}
+          <motion.div variants={itemVariants} className="flex flex-col justify-center gap-8 lg:pl-10 relative z-10">
+            {/* Status Panel */}
+            <div className="hud-panel-glass p-6">
+              <div className="mb-4 flex items-center gap-3 border-b border-cyan/20 pb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70">
+                <span className="h-[1px] w-4 bg-cyan/50" />
+                System Diagnostics
+              </div>
+              <div className="font-mono text-[11px]">
+                <BootStatusRow label="sys.core" value="online" tone="green" />
+                <BootStatusRow
+                  label="github.api"
+                  value={githubFresh ? "connected" : "cached"}
+                  tone={githubFresh ? "green" : "amber"}
+                />
+                <BootStatusRow label="mailbox" value="accepting" tone="green" />
+                <BootStatusRow label="deploy.pipeline" value="idle" tone="amber" />
+                <BootStatusRow label="threat.level" value="low" tone="cyan" />
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Right — boot status + log tail */}
-        <div className="flex flex-col justify-center gap-6">
-          <div className="font-mono text-xs">
-            <BootStatusRow label="sys.core" value="online" tone="green" />
-            <BootStatusRow
-              label="github.api"
-              value={githubFresh ? "connected" : "cached"}
-              tone={githubFresh ? "green" : "amber"}
-            />
-            <BootStatusRow label="mailbox" value="accepting" tone="green" />
-            <BootStatusRow label="deploy.pipeline" value="idle" tone="amber" />
-            <BootStatusRow label="threat.level" value="low" tone="cyan" />
-            <BootStatusRow label="version" value="v4.0.0" tone="green" />
-          </div>
-
-          <div className="hud-panel corner-brackets p-4">
-            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.25em]">
-              <span className="text-cyan">◉ log tail</span>
-              <span className="text-signal-green">streaming</span>
+            {/* Boot Log Panel */}
+            <div className="hud-panel corner-brackets p-5">
+              <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.25em] border-b border-cyan/15 pb-3">
+                <span className="text-cyan flex items-center gap-2">
+                  <Terminal size={14} />
+                  boot_log
+                </span>
+                <span className="text-signal-green bg-signal-green/10 px-2 py-0.5 rounded-sm flex items-center gap-1">
+                  <span className="inline-block h-1 w-1 rounded-full bg-signal-green animate-pulse-dot" />
+                  streaming
+                </span>
+              </div>
+              <div className="mt-4 min-h-[90px] space-y-1.5 font-mono text-[11px] text-muted-foreground">
+                {log.map((line, i) => (
+                  <div key={i} className="animate-ticker flex items-start gap-2">
+                    <span className="text-cyan/40 shrink-0">❯</span>
+                    <span className={i === log.length - 1 ? "text-foreground" : ""}>{line}</span>
+                  </div>
+                ))}
+                {log.length > 0 && (
+                  <span className="ml-5 inline-block h-[14px] w-2 translate-y-0.5 bg-cyan animate-typing-cursor" />
+                )}
+              </div>
             </div>
-            <div className="mt-3 min-h-[72px] space-y-1 font-mono text-[11px] text-muted-foreground">
-              {log.map((line, i) => (
-                <div key={i} className="animate-ticker">
-                  {line}
-                </div>
-              ))}
-              <span className="ml-0.5 inline-block h-3 w-1.5 translate-y-0.5 bg-cyan animate-flicker" />
-            </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
+      
+      {/* Decorative gradient border bottom */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan/50 to-transparent opacity-60" />
     </section>
   );
 }

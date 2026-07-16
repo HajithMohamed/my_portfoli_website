@@ -1,5 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 /**
  * HUD panel — the core container of the JARVIS console design.
@@ -23,12 +26,18 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className={cn("hud-panel corner-brackets", className)}>
-      <header className="flex items-center justify-between gap-3 border-b border-cyan/15 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em]">
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={cn("hud-panel-glow corner-brackets group transition-all duration-500 hover:border-cyan/40", className)}
+    >
+      <header className="flex items-center justify-between gap-3 border-b border-cyan/15 bg-black/20 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] backdrop-blur-md">
         <div className="flex min-w-0 items-baseline gap-2">
-          <span className="shrink-0 text-cyan">◉ {label}</span>
+          <span className="shrink-0 text-cyan text-glow group-hover:text-cyan">◉ {label}</span>
           {subtitle ? (
-            <span className="truncate text-muted-foreground">— {subtitle}</span>
+            <span className="truncate text-muted-foreground transition-colors group-hover:text-cyan/70">— {subtitle}</span>
           ) : null}
         </div>
         {live ? (
@@ -40,7 +49,7 @@ export function Panel({
           actions
         )}
       </header>
-      <div className={bodyClassName ?? "p-4"}>{children}</div>
-    </section>
+      <div className={cn("relative z-10", bodyClassName ?? "p-5")}>{children}</div>
+    </motion.section>
   );
 }

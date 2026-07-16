@@ -13,6 +13,18 @@ import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
 import { getHomeData } from "@/lib/api";
 
+function SectionDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-center w-full py-12">
+      <div className="flex items-center gap-4 w-full max-w-sm mx-auto opacity-50">
+        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-cyan" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-cyan">{label}</span>
+        <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan" />
+      </div>
+    </div>
+  );
+}
+
 export default async function Home() {
   const { profile, skills, projects, blogs, resume, github, testimonials, certificates } =
     await getHomeData();
@@ -42,32 +54,48 @@ export default async function Home() {
 
       <TopBar location={profile.location} />
 
-      <main className="relative z-10 pt-14">
+      <main className="relative z-10">
         <CommandDeck profile={profile} github={github} resume={resume} />
 
-        <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-12">
-          <div className="grid gap-4 md:grid-cols-3">
+        <div className="mx-auto max-w-[1400px] space-y-16 px-4 py-20">
+          
+          {/* Status Row */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
             <SystemStatus profile={profile} />
             <GithubTelemetry github={github} />
             <NowDeploying project={inFlight} />
           </div>
 
-          <div id="projects" className="scroll-mt-20">
+          <SectionDivider label="sys.portfolio" />
+
+          {/* Projects */}
+          <div id="projects" className="scroll-mt-24">
             <ProjectsShowcase projects={projects} />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <SectionDivider label="sys.infrastructure" />
+
+          {/* Architecture & Skills */}
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-stretch">
             <ArchitectureMap />
             <SkillsConstellation skills={skills} />
           </div>
 
-          <SignalLog posts={blogs} />
+          <SectionDivider label="sys.intelligence" />
 
-          <IntelDossier testimonials={testimonials} certificates={certificates} />
+          {/* Blog & Intel */}
+          <div className="space-y-6">
+            <SignalLog posts={blogs} />
+            <IntelDossier testimonials={testimonials} certificates={certificates} />
+          </div>
 
-          <div id="comms" className="scroll-mt-20">
+          <SectionDivider label="sys.communication" />
+
+          {/* Contact */}
+          <div id="comms" className="scroll-mt-24">
             <Comms profile={profile} />
           </div>
+          
         </div>
       </main>
 
