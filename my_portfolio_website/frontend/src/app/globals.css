@@ -1,0 +1,241 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────
+   HZ LABS — JARVIS Console Design System
+   Ported from the command-center design reference.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  --radius: 0.25rem;
+
+  /* Base */
+  --background: #05070d;
+  --foreground: #d6ecff;
+
+  /* JARVIS surfaces */
+  --surface: #0a1628;
+  --surface-2: #0f2038;
+  --hud: rgba(10, 22, 40, 0.75);
+  --grid: rgba(92, 208, 255, 0.06);
+
+  /* Accents */
+  --cyan: #5cd0ff;
+  --cyan-dim: #3a8fb8;
+  --signal-green: #34d399;
+  --signal-amber: #fbbf24;
+  --signal-red: #f87171;
+
+  /* Semantic mappings */
+  --card: #0a1628;
+  --card-foreground: #d6ecff;
+  --popover: #0a1628;
+  --popover-foreground: #d6ecff;
+  --primary: #5cd0ff;
+  --primary-foreground: #05070d;
+  --secondary: #0f2038;
+  --secondary-foreground: #d6ecff;
+  --muted: #0f2038;
+  --muted-foreground: #6b8caf;
+  --accent: #0f2038;
+  --accent-foreground: #5cd0ff;
+  --destructive: #f87171;
+  --destructive-foreground: #05070d;
+  --border: #1e3a5f;
+  --input: #1e3a5f;
+  --ring: #5cd0ff;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* JARVIS semantic tokens */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-hud: var(--hud);
+  --color-cyan: var(--cyan);
+  --color-cyan-dim: var(--cyan-dim);
+  --color-signal-green: var(--signal-green);
+  --color-signal-amber: var(--signal-amber);
+  --color-signal-red: var(--signal-red);
+  --color-grid: var(--grid);
+
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--cyan) 40%, transparent);
+    color: white;
+  }
+}
+
+/* Global backdrop: dot grid + scanlines */
+@utility bg-grid {
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@utility bg-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(92, 208, 255, 0.025) 3px,
+    transparent 4px
+  );
+}
+
+@utility text-glow {
+  text-shadow: 0 0 20px color-mix(in oklab, var(--cyan) 60%, transparent);
+}
+
+@utility hud-panel {
+  background: linear-gradient(180deg, rgba(15, 32, 56, 0.6), rgba(10, 22, 40, 0.4));
+  border: 1px solid color-mix(in oklab, var(--cyan) 22%, transparent);
+  backdrop-filter: blur(6px);
+  position: relative;
+}
+
+@utility hud-panel-solid {
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--cyan) 25%, transparent);
+  position: relative;
+}
+
+@utility corner-brackets {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-color: var(--cyan);
+    pointer-events: none;
+  }
+  &::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  &::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px transparent; }
+}
+
+@keyframes ticker {
+  0% { transform: translateY(-6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@utility animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@utility animate-ticker {
+  animation: ticker 0.35s ease-out;
+}
+
+@utility animate-flicker {
+  animation: flicker 4s ease-in-out infinite;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--cyan) 30%, transparent);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--cyan) 50%, transparent);
+}
+
+/* ─── Legacy utilities (admin + transitional; pruned during cleanup) ─── */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
