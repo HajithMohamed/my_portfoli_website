@@ -2,7 +2,7 @@
   "name": "hz-labs-portfolio-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "Premium portfolio CMS, GitHub intelligence platform, and digital product studio website for HZ Labs.",
+  "description": "Premium portfolio CMS, GitHub intelligence platform, and digital product studio website for Hz Labs.",
   "workspaces": [
     "frontend",
     "backend"

@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/utils";
 
 export const metadata = {
   title: "Signal Log",
-  description: "Engineering notes and product thinking from HZ Labs.",
+  description: "Engineering notes and product thinking from Hz Labs.",
 };
 
 export default async function BlogPage() {

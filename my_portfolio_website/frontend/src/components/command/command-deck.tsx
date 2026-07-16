@@ -153,7 +153,7 @@ export function CommandDeck({
               variants={itemVariants}
               className="mt-8 font-display text-7xl font-bold tracking-tight text-gradient sm:text-8xl md:text-9xl relative"
             >
-              HZ LABS
+              Hz LABS
             </motion.h1>
 
             <motion.div variants={itemVariants} className="mt-6 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">

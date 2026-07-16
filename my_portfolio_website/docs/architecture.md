@@ -1,6 +1,6 @@
-# HZ Labs Architecture
+# Hz Labs Architecture
 
-HZ Labs is a separated monorepo with a public portfolio frontend and a backend CMS/API.
+Hz Labs is a separated monorepo with a public portfolio frontend and a backend CMS/API.
 
 ## Runtime
 

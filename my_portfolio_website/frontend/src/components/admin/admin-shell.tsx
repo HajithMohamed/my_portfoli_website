@@ -40,7 +40,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[#050816] text-slate-50">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-white/10 bg-slate-950/85 p-5 lg:block">
         <Link className="font-display text-xl font-semibold" href="/">
-          HZ Labs
+          Hz Labs
         </Link>
         <p className="mt-1 text-[11px] uppercase tracking-widest text-slate-500">Control Center</p>
         <nav className="mt-10 grid gap-2">
@@ -75,7 +75,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050816]/85 px-4 py-4 backdrop-blur-xl lg:hidden">
           <div className="flex items-center justify-between">
             <Link className="font-display font-semibold" href="/">
-              HZ Labs
+              Hz Labs
             </Link>
             <Button onClick={logout} size="sm" variant="secondary">
               Logout

@@ -378,7 +378,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       : null;
     const overview = readme
       ? firstParagraph(readme)
-      : (payload.description ?? `${payload.title} is a project from the HZ Labs GitHub.`);
+      : (payload.description ?? `${payload.title} is a project from the Hz Labs GitHub.`);
     const stack = payload.techStack?.length
       ? payload.techStack.join(', ')
       : 'a modern full-stack toolchain';

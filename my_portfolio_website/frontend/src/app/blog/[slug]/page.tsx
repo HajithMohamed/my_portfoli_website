@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps) {
   const post = await getBlogPost(slug);
   return {
     title: post?.title ?? "Signal Log",
-    description: post?.excerpt ?? "HZ Labs engineering article.",
+    description: post?.excerpt ?? "Hz Labs engineering article.",
   };
 }
 

@@ -56,7 +56,7 @@ export function ArchitectureMap() {
           preserveAspectRatio="none"
           className="h-[360px] w-full"
           role="img"
-          aria-label="Interactive architecture diagram of the HZ Labs platform"
+          aria-label="Interactive architecture diagram of the Hz Labs platform"
         >
           <defs>
             <pattern id="arch-grid" width="4" height="4" patternUnits="userSpaceOnUse">

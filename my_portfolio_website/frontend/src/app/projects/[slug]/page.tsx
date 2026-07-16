@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: PageProps) {
   const project = await getProject(slug);
   return {
     title: project ? `${project.title} — Dossier` : "Dossier not found",
-    description: project?.description ?? "HZ Labs project dossier.",
+    description: project?.description ?? "Hz Labs project dossier.",
   };
 }
 

@@ -51,7 +51,7 @@ function Laptop() {
           anchorY="middle"
           maxWidth={2}
         >
-          {"> HZ LABS ~ $"}
+          {"> Hz LABS ~ $"}
         </Text>
       </group>
     </group>

@@ -25,23 +25,23 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hzlabs.dev"),
   title: {
-    default: "HZ Labs — Software Engineer · Command Center",
-    template: "%s | HZ Labs",
+    default: "Hz Labs — Software Engineer · Command Center",
+    template: "%s | Hz Labs",
   },
   description:
-    "HZ Labs is the operations console of Mohamed Hajith — full-stack software engineer. Live systems, projects, and architecture in one command-center portfolio.",
+    "Hz Labs is the operations console of Mohamed Hajith — full-stack software engineer. Live systems, projects, and architecture in one command-center portfolio.",
   authors: [{ name: "Mohamed Hajith" }],
   openGraph: {
-    title: "HZ Labs — Software Engineer · Command Center",
+    title: "Hz Labs — Software Engineer · Command Center",
     description:
       "The operations console of Mohamed Hajith — full-stack software engineer. Live systems, projects, and architecture.",
     url: "/",
-    siteName: "HZ Labs",
+    siteName: "Hz Labs",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "HZ Labs — Software Engineer · Command Center",
+    title: "Hz Labs — Software Engineer · Command Center",
     description:
       "The operations console of Mohamed Hajith — full-stack software engineer.",
   },

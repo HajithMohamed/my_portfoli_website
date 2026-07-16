@@ -193,9 +193,9 @@ async function main() {
       title: 'Building Operational Web Platforms',
       slug: 'building-operational-web-platforms',
       excerpt:
-        'How HZ Labs approaches maintainable full-stack systems for real business workflows.',
+        'How Hz Labs approaches maintainable full-stack systems for real business workflows.',
       content:
-        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. HZ Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
+        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. Hz Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
       status: 'PUBLISHED',
       publishedAt: new Date(),
       tags: {

@@ -1,4 +1,4 @@
-# HZ Labs Portfolio Platform
+# Hz Labs Portfolio Platform
 
 Premium portfolio CMS, GitHub intelligence platform, and digital product studio website for Mohamed Hajith.
 

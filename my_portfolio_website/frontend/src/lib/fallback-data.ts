@@ -119,7 +119,7 @@ export const fallbackBlogs: BlogPost[] = [
     id: "building-operational-web-platforms",
     title: "Building Operational Web Platforms",
     slug: "building-operational-web-platforms",
-    excerpt: "How HZ Labs approaches maintainable full-stack systems for real business workflows.",
+    excerpt: "How Hz Labs approaches maintainable full-stack systems for real business workflows.",
     content:
       "# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier.",
     status: "PUBLISHED",

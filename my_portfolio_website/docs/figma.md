@@ -1,6 +1,6 @@
 # Figma Design System Plan
 
-Figma write tools are not currently exposed in this session. When connected, create a fresh HZ Labs file in this order:
+Figma write tools are not currently exposed in this session. When connected, create a fresh Hz Labs file in this order:
 
 1. Foundations: color variables, spacing, radii, text styles, and effect styles.
 2. Components: button, badge, card, input, textarea, navigation, dashboard shell, form field, data row, modal.

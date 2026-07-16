@@ -232,7 +232,7 @@ export function ProfilePanel() {
 
   return (
     <>
-      <SectionHeader title="Profile Management" description="Edit HZ Labs positioning, contact details, philosophy, social links, and currently exploring list." />
+      <SectionHeader title="Profile Management" description="Edit Hz Labs positioning, contact details, philosophy, social links, and currently exploring list." />
       <Card>
         <div className="mb-5 flex items-center gap-4">
           {profile?.profileImageUrl ? (

@@ -6,7 +6,7 @@ import { getHomeData } from "@/lib/api";
 export const metadata = {
   title: "Operator",
   description:
-    "Mohamed Hajith — full-stack software engineer and founder of HZ Labs. Engineering philosophy, mission log, services, and resume.",
+    "Mohamed Hajith — full-stack software engineer and founder of Hz Labs. Engineering philosophy, mission log, services, and resume.",
 };
 
 /** Services actually offered — the operator's real engagement catalog. */
@@ -54,7 +54,7 @@ export default async function AboutPage() {
                 {profile.name}
               </h1>
               <p className="mt-1 font-mono text-sm text-muted-foreground">
-                Software Engineer · Full Stack Developer · Founder of HZ Labs
+                Software Engineer · Full Stack Developer · Founder of Hz Labs
               </p>
             </div>
           </header>
@@ -69,7 +69,7 @@ export default async function AboutPage() {
             <div className="space-y-3 text-base leading-relaxed text-foreground/90">
               <p>{profile.bio}</p>
               <p>
-                BICT (Hons) undergraduate at the University of Ruhuna and founder of HZ Labs —
+                BICT (Hons) undergraduate at the University of Ruhuna and founder of Hz Labs —
                 building real-world business systems on the MERN stack, Next.js, and NestJS, with
                 a growing focus on scalable software, AI, and machine learning.
               </p>
