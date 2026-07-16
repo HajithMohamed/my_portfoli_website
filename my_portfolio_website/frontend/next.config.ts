@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, ".."),
   },
+  images: {
+    remotePatterns: [
+      // GitHub-generated repo social cards used as project cover images.
+      { protocol: "https", hostname: "opengraph.githubassets.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      // Admin CMS uploads.
+      { protocol: "https", hostname: "res.cloudinary.com" },
+    ],
+  },
   async rewrites() {
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];
   },

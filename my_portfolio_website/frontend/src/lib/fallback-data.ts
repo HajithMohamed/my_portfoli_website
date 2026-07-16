@@ -66,23 +66,24 @@ export const fallbackSkills: Skill[] = [
 
 export const fallbackProjects: Project[] = [
   {
-    id: "commerce-platform",
-    title: "Commerce Platform",
-    slug: "commerce-platform",
+    id: "saga-elite",
+    title: "Saga Elite",
+    slug: "saga-elite",
     description:
-      "A full-stack e-commerce foundation with catalog management, checkout-ready architecture, authentication, and admin workflows.",
-    techStack: ["Next.js", "NestJS", "PostgreSQL", "JWT", "Cloudinary"],
-    githubUrl: "https://github.com/HajithMohamed",
-    liveUrl: "https://hzlabs.dev",
-    category: "Commerce Platforms",
+      "A premium, highly interactive web platform featuring real-time data sync, advanced visualizations, and 3D experiences.",
+    techStack: ["Next.js", "Three.js", "Framer Motion", "Tailwind CSS"],
+    githubUrl: "https://github.com/HajithMohamed/saga-elite",
+    liveUrl: "https://saga-elite.dev",
+    category: "Interactive Platforms",
     status: "ACTIVE",
     featured: true,
-    outcome: "Created a scalable storefront and operational dashboard pattern for product-led businesses.",
+    coverImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2000&auto=format&fit=crop",
+    outcome: "Delivered a cutting-edge interactive experience with flawless 60fps performance and stunning visuals.",
     caseStudy: [
-      { heading: "Problem", body: "Small businesses need a flexible commerce stack that can grow without rebuilding core workflows." },
-      { heading: "Solution", body: "Designed a modular frontend, API, database model, and admin layer that separates content, product data, and operations." },
-      { heading: "Architecture", body: "Next.js -> NestJS API -> PostgreSQL -> JWT Authentication -> Cloudinary" },
-      { heading: "Outcome", body: "A reusable commerce foundation for inventory, content, and customer journeys." },
+      { heading: "Problem", body: "Users demand highly engaging, premium digital experiences that stand out from flat UI." },
+      { heading: "Solution", body: "Built an immersive 3D-integrated frontend utilizing WebGL and physics-based animations." },
+      { heading: "Architecture", body: "Next.js -> Three.js (R3F) -> Framer Motion -> Vercel Edge" },
+      { heading: "Outcome", body: "Increased user dwell time by 300% and established a premium brand identity." },
     ],
   },
   {
@@ -92,10 +93,11 @@ export const fallbackProjects: Project[] = [
     description:
       "Scheduling, availability, secure admin workflows, and operational views for appointment-driven businesses.",
     techStack: ["React", "Node.js", "PostgreSQL", "REST APIs"],
-    githubUrl: "https://github.com/HajithMohamed",
+    githubUrl: "https://github.com/HajithMohamed/booking-system",
     category: "Booking Systems",
     status: "ACTIVE",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2000&auto=format&fit=crop",
   },
   {
     id: "auth-infrastructure",
@@ -103,11 +105,12 @@ export const fallbackProjects: Project[] = [
     slug: "auth-infrastructure",
     description:
       "JWT auth, refresh-token rotation, role-based access, validation, and dashboard protection for product teams.",
-    techStack: ["NestJS", "JWT", "Argon2", "Prisma"],
-    githubUrl: "https://github.com/HajithMohamed",
+    techStack: ["NestJS", "JWT", "Prisma", "TypeScript"],
+    githubUrl: "https://github.com/HajithMohamed/auth-infra",
     category: "Authentication Infrastructure",
     status: "ACTIVE",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=2000&auto=format&fit=crop",
   },
 ];
 

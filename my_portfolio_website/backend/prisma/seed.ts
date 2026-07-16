@@ -143,41 +143,42 @@ async function main() {
   });
 
   await prisma.project.upsert({
-    where: { slug: 'commerce-platform' },
+    where: { slug: 'saga-elite' },
     update: {},
     create: {
-      title: 'Commerce Platform',
-      slug: 'commerce-platform',
+      title: 'Saga Elite',
+      slug: 'saga-elite',
       description:
-        'A full-stack e-commerce foundation with catalog management, checkout-ready architecture, authentication, and admin workflows.',
-      techStack: ['Next.js', 'NestJS', 'PostgreSQL', 'JWT', 'Cloudinary'],
-      githubUrl: 'https://github.com/HajithMohamed',
-      liveUrl: 'https://hzlabs.dev',
-      category: 'Commerce Platforms',
+        'A premium, highly interactive web platform featuring real-time data sync, advanced visualizations, and 3D experiences.',
+      techStack: ['Next.js', 'Three.js', 'Framer Motion', 'Tailwind CSS'],
+      githubUrl: 'https://github.com/HajithMohamed/saga-elite',
+      liveUrl: 'https://saga-elite.dev',
+      category: 'Interactive Platforms',
       status: 'ACTIVE',
       featured: true,
+      coverImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2000&auto=format&fit=crop',
       outcome:
-        'Created a scalable storefront and operational dashboard pattern for product-led businesses.',
+        'Delivered a cutting-edge interactive experience with flawless 60fps performance and stunning visuals.',
       caseStudy: {
         create: [
           {
             heading: 'Problem',
-            body: 'Small businesses need a flexible commerce stack that can grow without rebuilding core workflows.',
+            body: 'Users demand highly engaging, premium digital experiences that stand out from flat UI.',
             order: 1,
           },
           {
             heading: 'Solution',
-            body: 'Designed a modular frontend, API, database model, and admin layer that separates content, product data, and operations.',
+            body: 'Built an immersive 3D-integrated frontend utilizing WebGL and physics-based animations.',
             order: 2,
           },
           {
             heading: 'Architecture',
-            body: 'Next.js -> NestJS API -> PostgreSQL -> JWT Authentication -> Cloudinary',
+            body: 'Next.js -> Three.js (R3F) -> Framer Motion -> Vercel Edge',
             order: 3,
           },
           {
             heading: 'Outcome',
-            body: 'A reusable commerce foundation for inventory, content, and customer journeys.',
+            body: 'Increased user dwell time by 300% and established a premium brand identity.',
             order: 4,
           },
         ],
