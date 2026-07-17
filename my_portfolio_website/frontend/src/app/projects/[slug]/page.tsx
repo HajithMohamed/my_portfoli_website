@@ -44,7 +44,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     <div className="relative min-h-screen">
       <TopBar location={profile.location} />
       <main className="relative z-10 pt-14">
-        <div className="mx-auto max-w-[1200px] space-y-6 px-4 py-12">
+        <div className="container-responsive section-gap space-y-6 max-w-[1200px]">
           <Link href="/projects" className="font-mono text-xs text-cyan hover:underline">
             ← back to reactor.grid
           </Link>
@@ -54,7 +54,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <span className="text-cyan">DOSSIER / {projectCodename(project)}</span>
               <span className={`border px-2 py-0.5 ${HUD_STATUS_STYLE[status]}`}>{status}</span>
             </div>
-            <h1 className="mt-4 font-display text-5xl font-bold text-foreground text-glow md:text-6xl">
+            <h1 className="mt-4 font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-glow">
               {project.title}
             </h1>
             <div className="mt-2 font-mono text-sm text-muted-foreground">
@@ -84,14 +84,14 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3 font-mono text-xs uppercase tracking-[0.2em]">
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 font-mono text-xs uppercase tracking-[0.2em]">
               {project.githubUrl ? (
                 <a
                   href={project.githubUrl}
                   target="_blank"
                   rel="noreferrer"
                   data-track="github_click"
-                  className="border border-cyan/50 bg-cyan/10 px-5 py-2.5 text-cyan transition-all hover:bg-cyan/20"
+                  className="flex items-center justify-center border border-cyan/50 bg-cyan/10 px-5 py-3 text-cyan transition-all hover:bg-cyan/20 touch-target-lg w-full sm:w-auto"
                 >
                   {"> source code"}
                 </a>
@@ -101,7 +101,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="border border-cyan/30 bg-surface/60 px-5 py-2.5 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan"
+                  className="flex items-center justify-center border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan touch-target-lg w-full sm:w-auto"
                 >
                   {"> live system →"}
                 </a>

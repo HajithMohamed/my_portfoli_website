@@ -49,7 +49,7 @@ export function Panel({
           actions
         )}
       </header>
-      <div className={cn("relative z-10", bodyClassName ?? "p-5")}>{children}</div>
+      <div className={cn("relative z-10", bodyClassName ?? "p-4 md:p-5 lg:p-6")}>{children}</div>
     </motion.section>
   );
 }

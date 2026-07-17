@@ -7,7 +7,7 @@ import type { Group } from "three";
 import { Color } from "three";
 
 /** Floating tech nodes — the operator's actual day-to-day stack. */
-const NODES = [
+const NODES_DESKTOP = [
   { label: "React", pos: [2.4, 1.2, 0.5] as const },
   { label: "NestJS", pos: [-2.6, 0.8, -0.4] as const },
   { label: "Postgres", pos: [2.2, -1.1, -0.6] as const },
@@ -16,6 +16,22 @@ const NODES = [
   { label: "GitHub", pos: [0.1, -1.9, 0.5] as const },
 ];
 
+const NODES_TABLET = [
+  { label: "React", pos: [2.0, 1.0, 0.4] as const },
+  { label: "NestJS", pos: [-2.0, 0.6, -0.3] as const },
+  { label: "Postgres", pos: [1.8, -0.9, -0.5] as const },
+  { label: "Next.js", pos: [-1.8, -1.0, 0.2] as const },
+  { label: "GitHub", pos: [0.1, -1.5, 0.4] as const },
+];
+
+const NODES_MOBILE = [
+  { label: "React", pos: [1.4, 0.9, 0.3] as const },
+  { label: "NestJS", pos: [-1.4, 0.5, -0.2] as const },
+  { label: "Next.js", pos: [1.2, -0.8, -0.3] as const },
+  { label: "GitHub", pos: [-1.2, -0.9, 0.2] as const },
+];
+
+/* ── Device: Laptop (desktop) ── */
 function Laptop() {
   const ref = useRef<Group>(null);
   useFrame((state) => {
@@ -58,6 +74,171 @@ function Laptop() {
   );
 }
 
+/* ── Device: Tablet (tablet viewports) ── */
+function Tablet() {
+  const ref = useRef<Group>(null);
+  useFrame((state) => {
+    if (!ref.current) return;
+    const t = state.clock.getElapsedTime();
+    ref.current.rotation.y = Math.sin(t * 0.2) * 0.25;
+    ref.current.rotation.x = Math.sin(t * 0.3) * 0.08;
+    ref.current.rotation.z = Math.sin(t * 0.15) * 0.03;
+    ref.current.position.y = Math.sin(t * 0.4) * 0.1;
+  });
+
+  return (
+    <group ref={ref}>
+      {/* Tablet body — flat slab */}
+      <mesh castShadow>
+        <boxGeometry args={[1.8, 2.4, 0.08]} />
+        <meshStandardMaterial color="#0a1628" metalness={0.85} roughness={0.3} />
+      </mesh>
+      {/* Bezel edge glow */}
+      <mesh position={[0, 0, 0.001]}>
+        <boxGeometry args={[1.82, 2.42, 0.075]} />
+        <meshStandardMaterial
+          color="#1a3050"
+          metalness={0.9}
+          roughness={0.4}
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
+      {/* Screen */}
+      <mesh position={[0, 0, 0.045]}>
+        <planeGeometry args={[1.6, 2.15]} />
+        <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.3)} />
+      </mesh>
+      {/* Screen content */}
+      <Text
+        position={[0, 0.6, 0.05]}
+        fontSize={0.1}
+        color="#d6ecff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={1.4}
+      >
+        {"Hz LABS"}
+      </Text>
+      <Text
+        position={[0, 0.3, 0.05]}
+        fontSize={0.06}
+        color="#5cd0ff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={1.4}
+      >
+        {"> mission_control"}
+      </Text>
+      {/* Simulated UI lines on screen */}
+      {[-0.1, -0.3, -0.5, -0.7].map((y, i) => (
+        <mesh key={i} position={[-0.2 + i * 0.05, y, 0.048]}>
+          <planeGeometry args={[0.9 - i * 0.1, 0.025]} />
+          <meshBasicMaterial
+            color={new Color("#5cd0ff").multiplyScalar(0.15 + i * 0.05)}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
+      ))}
+      {/* Home indicator */}
+      <mesh position={[0, -1.1, 0.045]}>
+        <planeGeometry args={[0.35, 0.03]} />
+        <meshBasicMaterial
+          color={new Color("#5cd0ff").multiplyScalar(0.5)}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/* ── Device: Phone (mobile viewports) ── */
+function Phone() {
+  const ref = useRef<Group>(null);
+  useFrame((state) => {
+    if (!ref.current) return;
+    const t = state.clock.getElapsedTime();
+    ref.current.rotation.y = Math.sin(t * 0.2) * 0.3;
+    ref.current.rotation.x = Math.sin(t * 0.25) * 0.1;
+    ref.current.rotation.z = Math.sin(t * 0.18) * 0.05;
+    ref.current.position.y = Math.sin(t * 0.35) * 0.12;
+  });
+
+  return (
+    <group ref={ref} scale={1.3}>
+      {/* Phone body */}
+      <mesh castShadow>
+        <boxGeometry args={[0.9, 1.9, 0.06]} />
+        <meshStandardMaterial color="#0a1628" metalness={0.85} roughness={0.3} />
+      </mesh>
+      {/* Edge frame */}
+      <mesh position={[0, 0, 0.001]}>
+        <boxGeometry args={[0.92, 1.92, 0.055]} />
+        <meshStandardMaterial
+          color="#1a3050"
+          metalness={0.9}
+          roughness={0.35}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      {/* Screen */}
+      <mesh position={[0, 0, 0.035]}>
+        <planeGeometry args={[0.78, 1.7]} />
+        <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.28)} />
+      </mesh>
+      {/* Notch / Dynamic Island */}
+      <mesh position={[0, 0.78, 0.04]}>
+        <planeGeometry args={[0.28, 0.06]} />
+        <meshBasicMaterial color="#030711" />
+      </mesh>
+      {/* Screen content */}
+      <Text
+        position={[0, 0.45, 0.04]}
+        fontSize={0.07}
+        color="#d6ecff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={0.7}
+      >
+        {"Hz LABS"}
+      </Text>
+      <Text
+        position={[0, 0.25, 0.04]}
+        fontSize={0.04}
+        color="#5cd0ff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={0.7}
+      >
+        {"> sys.online"}
+      </Text>
+      {/* Simulated UI elements */}
+      {[-0.0, -0.15, -0.3, -0.45, -0.6].map((y, i) => (
+        <mesh key={i} position={[0, y, 0.038]}>
+          <planeGeometry args={[0.55 - i * 0.04, 0.02]} />
+          <meshBasicMaterial
+            color={new Color("#5cd0ff").multiplyScalar(0.12 + i * 0.04)}
+            transparent
+            opacity={0.5}
+          />
+        </mesh>
+      ))}
+      {/* Home indicator */}
+      <mesh position={[0, -0.78, 0.037]}>
+        <planeGeometry args={[0.2, 0.02]} />
+        <meshBasicMaterial
+          color={new Color("#5cd0ff").multiplyScalar(0.4)}
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 function Node({ label, pos }: { label: string; pos: readonly [number, number, number] }) {
   return (
     <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.6}>
@@ -86,14 +267,14 @@ function Node({ label, pos }: { label: string; pos: readonly [number, number, nu
   );
 }
 
-function Connections() {
+function Connections({ nodes }: { nodes: readonly { label: string; pos: readonly [number, number, number] }[] }) {
   const points = useMemo(
     () =>
-      NODES.map((n) => [
+      nodes.map((n) => [
         [0, 0.3, 0] as [number, number, number],
         n.pos as unknown as [number, number, number],
       ]),
-    [],
+    [nodes],
   );
   return (
     <>
@@ -104,17 +285,17 @@ function Connections() {
   );
 }
 
-function Particles() {
+function Particles({ count = 60 }: { count?: number }) {
   const ref = useRef<Group>(null);
   const items = useMemo(
     () =>
-      Array.from({ length: 60 }, () => ({
+      Array.from({ length: count }, () => ({
         x: (Math.random() - 0.5) * 10,
         y: (Math.random() - 0.5) * 6,
         z: (Math.random() - 0.5) * 6 - 2,
         s: 0.01 + Math.random() * 0.02,
       })),
-    [],
+    [count],
   );
   useFrame((state) => {
     if (!ref.current) return;
@@ -132,23 +313,48 @@ function Particles() {
   );
 }
 
-export default function WorkspaceScene() {
+export type DeviceType = "laptop" | "tablet" | "phone";
+
+interface WorkspaceSceneProps {
+  device?: DeviceType;
+  particleCount?: number;
+}
+
+export default function WorkspaceScene({ device = "laptop", particleCount = 60 }: WorkspaceSceneProps) {
+  const nodes =
+    device === "phone"
+      ? NODES_MOBILE
+      : device === "tablet"
+        ? NODES_TABLET
+        : NODES_DESKTOP;
+
+  const cameraPos: [number, number, number] =
+    device === "phone"
+      ? [0, 0.3, 5.5]
+      : device === "tablet"
+        ? [0, 0.4, 5.4]
+        : [0, 0.6, 5.2];
+
   return (
     <Canvas
-      dpr={[1, 1.5]}
-      camera={{ position: [0, 0.6, 5.2], fov: 42 }}
-      gl={{ antialias: true, alpha: true }}
+      dpr={[1, device === "laptop" ? 1.5 : 1]}
+      camera={{ position: cameraPos, fov: device === "phone" ? 38 : 42 }}
+      gl={{ antialias: device === "laptop", alpha: true }}
       style={{ background: "transparent" }}
     >
       <ambientLight intensity={0.35} />
       <directionalLight position={[5, 5, 5]} intensity={0.6} color="#5cd0ff" />
       <pointLight position={[-4, -2, 3]} intensity={0.8} color="#3a8fb8" />
-      <Laptop />
-      <Connections />
-      {NODES.map((n) => (
+
+      {device === "laptop" && <Laptop />}
+      {device === "tablet" && <Tablet />}
+      {device === "phone" && <Phone />}
+
+      <Connections nodes={nodes} />
+      {nodes.map((n) => (
         <Node key={n.label} label={n.label} pos={n.pos} />
       ))}
-      <Particles />
+      <Particles count={particleCount} />
     </Canvas>
   );
 }

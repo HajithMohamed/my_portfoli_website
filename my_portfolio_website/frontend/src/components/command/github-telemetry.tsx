@@ -80,7 +80,7 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
               <span className="text-cyan/70">contribution matrix</span>
               <span className="text-[9px] text-muted-foreground">{heatmap.length} days</span>
             </div>
-            <div className="grid grid-flow-col grid-rows-7 gap-[3px] rounded-md border border-cyan/10 bg-black/20 p-2">
+            <div className="grid grid-flow-col grid-rows-7 gap-[3px] rounded-md border border-cyan/10 bg-black/20 p-2 overflow-x-auto touch-pan-x hide-scrollbar">
               {heatmap.map((v, i) => (
                 <div
                   key={i}

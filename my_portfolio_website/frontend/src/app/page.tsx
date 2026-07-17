@@ -57,7 +57,7 @@ export default async function Home() {
       <main className="relative z-10">
         <CommandDeck profile={profile} github={github} resume={resume} />
 
-        <div className="mx-auto max-w-[1400px] space-y-16 px-4 py-20">
+        <div className="container-responsive section-gap space-y-12 md:space-y-16 lg:space-y-24">
           
           {/* Status Row */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">

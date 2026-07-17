@@ -29,7 +29,7 @@ export function SignalLog({ posts }: { posts: BlogPost[] }) {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-cyan/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             
-            <div className="relative z-10 flex shrink-0 items-center gap-3 w-40">
+            <div className="relative z-10 flex shrink-0 items-center gap-3 w-full md:w-40">
               <FileText size={14} className="text-cyan/50 transition-colors group-hover:text-cyan" />
               <span className="text-cyan/60 transition-colors group-hover:text-cyan/90">
                 {post.publishedAt ? formatDate(post.publishedAt) : "unreleased"}

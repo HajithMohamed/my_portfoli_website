@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { motion, Variants } from "framer-motion";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
 import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
   ssr: false,
@@ -94,6 +95,12 @@ export function CommandDeck({
 }) {
   const log = useBootLog();
 
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  
+  const device = isDesktop ? "laptop" : isTablet ? "tablet" : "phone";
+  const particleCount = isDesktop ? 60 : isTablet ? 30 : 15;
+
   const githubLink =
     profile.socialLinks?.find((l) => l.url.includes("github.com"))?.url ??
     `https://github.com/${github.username}`;
@@ -124,12 +131,12 @@ export function CommandDeck({
     <section className="relative min-h-[90vh] flex items-center border-b border-cyan/15 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-grid opacity-30" />
-      <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none" />
-      <div className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none" style={{ animationDelay: '-10s' }} />
+      <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none md:w-[40vw] md:h-[40vw]" />
+      <div className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]" style={{ animationDelay: '-10s' }} />
 
-      {/* 3D backdrop — desktop only */}
-      <div className="pointer-events-none absolute inset-0 hidden opacity-[0.35] lg:block" aria-hidden>
-        <WorkspaceScene />
+      {/* 3D backdrop — responsive */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.25] md:opacity-[0.3] lg:opacity-[0.35]" aria-hidden>
+        <WorkspaceScene device={device} particleCount={particleCount} />
       </div>
 
       <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 pt-32 pb-16 md:pt-40 lg:pt-32">
@@ -151,7 +158,7 @@ export function CommandDeck({
 
             <motion.h1 
               variants={itemVariants}
-              className="mt-8 font-display text-7xl font-bold tracking-tight text-gradient sm:text-8xl md:text-9xl relative"
+              className="mt-8 font-display font-bold tracking-tight text-gradient text-hero relative"
             >
               Hz LABS
             </motion.h1>
@@ -169,12 +176,12 @@ export function CommandDeck({
               {profile.bio}
             </motion.p>
 
-            <motion.div variants={itemVariants} className="mt-10 flex flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
+            <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
               {resume?.fileUrl ? (
                 <a
                   href={resume.fileUrl}
                   data-track="resume_download"
-                  className="group relative flex items-center gap-3 border border-cyan/50 bg-cyan/10 px-6 py-4 text-cyan transition-all hover:bg-cyan/20 hover:text-glow hover:border-cyan"
+                  className="group relative flex items-center justify-center sm:justify-start gap-3 border border-cyan/50 bg-cyan/10 px-6 py-4 text-cyan transition-all hover:bg-cyan/20 hover:text-glow hover:border-cyan touch-target-lg w-full sm:w-auto"
                 >
                   <FileText size={16} className="opacity-70 group-hover:opacity-100" />
                   <span>download cv</span>
@@ -183,7 +190,7 @@ export function CommandDeck({
               ) : null}
               <a
                 href="#projects"
-                className="group flex items-center gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2"
+                className="group flex items-center justify-center sm:justify-start gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2 touch-target-lg w-full sm:w-auto"
               >
                 <Terminal size={16} className="opacity-70" />
                 <span>view systems</span>
@@ -194,7 +201,7 @@ export function CommandDeck({
                 target="_blank"
                 rel="noreferrer"
                 data-track="github_click"
-                className="group flex items-center gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2"
+                className="group flex items-center justify-center sm:justify-start gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2 touch-target-lg w-full sm:w-auto"
               >
                 <Github size={16} className="opacity-70 group-hover:text-glow" />
                 <span>github</span>

@@ -74,7 +74,7 @@ export function NowDeploying({ project }: { project: Project | null }) {
             <Terminal size={14} className="text-cyan/30" />
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-1 break-words whitespace-pre-wrap">
             {LOG_LINES.slice(0, Math.min(step + 1, LOG_LINES.length)).map((line, i) => {
               const isLast = i === Math.min(step, LOG_LINES.length - 1);
               return (

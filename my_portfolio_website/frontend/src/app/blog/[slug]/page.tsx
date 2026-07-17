@@ -32,7 +32,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     <div className="relative min-h-screen">
       <TopBar location={profile.location} />
       <main className="relative z-10 pt-14">
-        <article className="mx-auto max-w-[860px] px-4 py-12">
+        <article className="container-responsive section-gap max-w-[860px]">
           <Link href="/blog" className="font-mono text-xs text-cyan hover:underline">
             ← back to signal.log
           </Link>
@@ -53,7 +53,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 ))}
               </div>
             </div>
-            <h1 className="mt-4 font-display text-4xl font-bold text-foreground text-glow md:text-5xl">
+            <h1 className="mt-4 font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-glow">
               {post.title}
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{post.excerpt}</p>

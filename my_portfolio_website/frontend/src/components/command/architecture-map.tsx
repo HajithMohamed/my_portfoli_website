@@ -47,14 +47,14 @@ export function ArchitectureMap() {
 
   return (
     <Panel label="architecture.map" subtitle="production stack" live className="h-full">
-      <div className="relative w-full overflow-hidden rounded-md border border-cyan/10 bg-[#02050a]">
+      <div className="relative w-full overflow-x-auto touch-pan-x hide-scrollbar rounded-md border border-cyan/10 bg-[#02050a]">
         {/* Glow behind the svg */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan/5 via-transparent to-transparent pointer-events-none" />
         
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="h-[360px] w-full"
+          className="min-w-[600px] w-full h-[250px] md:h-[320px] lg:h-[360px]"
           role="img"
           aria-label="Interactive architecture diagram of the Hz Labs platform"
         >
@@ -146,6 +146,7 @@ export function ArchitectureMap() {
                 key={n.id}
                 onMouseEnter={() => setHover(n.id)}
                 onMouseLeave={() => setHover(null)}
+                onTouchStart={() => setHover(n.id)}
                 style={{ cursor: "crosshair" }}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={mounted ? { opacity: 1, scale: 1 } : {}}
@@ -209,7 +210,7 @@ export function ArchitectureMap() {
       <div className="mt-4 font-mono text-[11px] text-muted-foreground flex items-start gap-2">
         <span className="text-cyan text-lg leading-none shrink-0">⎈</span>
         <p>
-          <span className="text-cyan/90 font-medium">Hover</span> a node to trace its connections. 
+          <span className="text-cyan/90 font-medium">Tap/Hover</span> a node to trace its connections. 
           This is the live architecture behind this site — Next.js frontend, first-party BFF proxy, 
           NestJS API, Prisma on Postgres.
         </p>

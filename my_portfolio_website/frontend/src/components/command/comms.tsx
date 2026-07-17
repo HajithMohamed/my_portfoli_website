@@ -26,7 +26,7 @@ function TerminalField({
   required?: boolean;
 }) {
   return (
-    <div className="group relative mt-4 flex items-center gap-3 border-b border-cyan/15 pb-2 transition-colors focus-within:border-cyan">
+    <div className="group relative mt-4 flex min-h-[44px] items-center gap-3 border-b border-cyan/15 pb-2 transition-colors focus-within:border-cyan">
       <span className="text-cyan/40 transition-colors group-focus-within:text-cyan">▸</span>
       <label htmlFor={`comms-${name}`} className="w-16 shrink-0 text-[10px] uppercase tracking-[0.25em] text-cyan/80 transition-colors group-focus-within:text-cyan group-focus-within:text-glow">
         {label}
@@ -209,7 +209,7 @@ export function Comms({ profile }: { profile: Profile }) {
                 onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
                 rows={5}
                 required
-                className="w-full resize-none rounded-md border border-cyan/20 bg-black/40 p-3 text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-cyan focus:bg-black/60 focus:ring-1 focus:ring-cyan/30"
+                className="w-full resize-none rounded-md border border-cyan/20 bg-black/40 p-3 text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-cyan focus:bg-black/60 focus:ring-1 focus:ring-cyan/30 scroll-mb-24"
                 placeholder="Enter briefing details..."
               />
             </div>
@@ -219,7 +219,7 @@ export function Comms({ profile }: { profile: Profile }) {
             <button
               type="submit"
               disabled={state === "sending" || state === "sent"}
-              className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-md border border-cyan/50 bg-cyan/10 px-4 py-3 text-[11px] uppercase tracking-[0.25em] text-cyan transition-all hover:bg-cyan/20 hover:text-cyan-glow hover:shadow-[0_0_20px_rgba(92,208,255,0.15)] disabled:opacity-60 disabled:hover:bg-cyan/10 disabled:hover:shadow-none"
+              className="group relative flex w-full touch-target-lg items-center justify-center gap-3 overflow-hidden rounded-md border border-cyan/50 bg-cyan/10 px-4 py-3 text-[11px] uppercase tracking-[0.25em] text-cyan transition-all hover:bg-cyan/20 hover:text-cyan-glow hover:shadow-[0_0_20px_rgba(92,208,255,0.15)] disabled:opacity-60 disabled:hover:bg-cyan/10 disabled:hover:shadow-none"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-cyan/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
               

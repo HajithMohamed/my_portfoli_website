@@ -28,7 +28,7 @@ export function CommandFooter({ profile }: { profile: Profile }) {
       {/* Subtle scanline background */}
       <div className="absolute inset-0 bg-scanlines opacity-50 pointer-events-none" />
 
-      <div className="relative mx-auto max-w-[1400px] px-4 py-12 md:py-16 font-mono text-xs">
+      <div className="relative container-responsive section-gap font-mono text-xs">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-cyan">
@@ -83,33 +83,33 @@ export function CommandFooter({ profile }: { profile: Profile }) {
           </div>
           
           {/* Social Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {github && (
-              <a href={github.url} target="_blank" rel="noreferrer" className="text-muted-foreground transition-colors hover:text-cyan hover:text-glow" aria-label="GitHub">
-                <Github size={16} />
+              <a href={github.url} target="_blank" rel="noreferrer" className="flex items-center justify-center text-muted-foreground transition-colors hover:text-cyan hover:text-glow touch-target" aria-label="GitHub">
+                <Github size={18} />
               </a>
             )}
             {linkedin && (
-              <a href={linkedin.url} target="_blank" rel="noreferrer" className="text-muted-foreground transition-colors hover:text-cyan hover:text-glow" aria-label="LinkedIn">
-                <Linkedin size={16} />
+              <a href={linkedin.url} target="_blank" rel="noreferrer" className="flex items-center justify-center text-muted-foreground transition-colors hover:text-cyan hover:text-glow touch-target" aria-label="LinkedIn">
+                <Linkedin size={18} />
               </a>
             )}
-            <a href={`mailto:${profile.email}`} className="text-muted-foreground transition-colors hover:text-cyan hover:text-glow" aria-label="Email">
-              <Mail size={16} />
+            <a href={`mailto:${profile.email}`} className="flex items-center justify-center text-muted-foreground transition-colors hover:text-cyan hover:text-glow touch-target" aria-label="Email">
+              <Mail size={18} />
             </a>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-4 md:mt-0">
             <div className="text-[9px] uppercase tracking-[0.4em] text-cyan/50">
               — end of transmission —
             </div>
             
             <button 
               onClick={scrollToTop}
-              className="group flex h-8 w-8 items-center justify-center rounded-md border border-cyan/20 bg-surface-2/50 transition-all hover:border-cyan/50 hover:bg-surface-2 hover:text-cyan hover:shadow-[0_0_15px_rgba(92,208,255,0.15)]"
+              className="group flex touch-target items-center justify-center rounded-md border border-cyan/20 bg-surface-2/50 transition-all hover:border-cyan/50 hover:bg-surface-2 hover:text-cyan hover:shadow-[0_0_15px_rgba(92,208,255,0.15)]"
               aria-label="Scroll to top"
             >
-              <ArrowUp size={14} className="opacity-70 transition-transform group-hover:-translate-y-0.5 group-hover:opacity-100" />
+              <ArrowUp size={16} className="opacity-70 transition-transform group-hover:-translate-y-0.5 group-hover:opacity-100" />
             </button>
           </div>
         </div>

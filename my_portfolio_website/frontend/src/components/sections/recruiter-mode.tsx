@@ -38,7 +38,7 @@ export function RecruiterMode({ profile, skills, projects, github, resume }: Rec
       {/* Toggle button - floats in corner */}
       <button
         onClick={toggle}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 border border-cyan/50 bg-surface/90 px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-cyan shadow-lg shadow-cyan/20 backdrop-blur-md transition-all duration-300 hover:bg-cyan/10 hover:shadow-cyan/40"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center touch-target gap-2 border border-cyan/50 bg-surface/90 px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-cyan shadow-lg shadow-cyan/20 backdrop-blur-md transition-all duration-300 hover:bg-cyan/10 hover:shadow-cyan/40"
         title="Toggle Recruiter Mode"
       >
         <Briefcase className="h-4 w-4" />
@@ -54,7 +54,7 @@ export function RecruiterMode({ profile, skills, projects, github, resume }: Rec
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 right-0 z-40 w-full max-w-lg overflow-y-auto bg-slate-950/95 backdrop-blur-xl border-l border-white/10 shadow-2xl shadow-black/50"
+            className="fixed inset-y-0 right-0 z-40 w-full sm:max-w-lg overflow-y-auto bg-slate-950/95 backdrop-blur-xl border-l border-white/10 shadow-2xl shadow-black/50"
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex items-center justify-between">

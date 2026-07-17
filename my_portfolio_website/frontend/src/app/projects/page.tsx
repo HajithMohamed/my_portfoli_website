@@ -38,14 +38,14 @@ export default async function ProjectsPage() {
     <div className="relative min-h-screen">
       <TopBar location={profile.location} />
       <main className="relative z-10 pt-14">
-        <div className="mx-auto max-w-[1400px] px-4 py-12">
-          <header className="mb-8 flex items-end justify-between">
+        <div className="container-responsive section-gap">
+          <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-cyan flex items-center gap-2">
                 <span className="h-[1px] w-4 bg-cyan/50" />
                 /systems
               </div>
-              <h1 className="mt-4 font-display text-4xl font-bold text-foreground md:text-5xl group flex items-center gap-3">
+              <h1 className="mt-4 font-display text-display font-bold text-foreground group flex items-center gap-3">
                 All systems
                 <span className="inline-block h-2 w-2 rounded-full bg-cyan/80 animate-pulse-dot" />
               </h1>

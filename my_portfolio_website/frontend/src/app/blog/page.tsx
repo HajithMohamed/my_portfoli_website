@@ -17,7 +17,7 @@ export default async function BlogPage() {
     <div className="relative min-h-screen">
       <TopBar location={profile.location} />
       <main className="relative z-10 pt-14">
-        <div className="mx-auto max-w-[1000px] px-4 py-12">
+        <div className="container-responsive section-gap max-w-[1000px]">
           <header className="mb-6">
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-cyan">
               /signal.log
