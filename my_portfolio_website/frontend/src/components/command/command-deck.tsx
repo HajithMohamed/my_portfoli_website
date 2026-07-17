@@ -134,8 +134,13 @@ export function CommandDeck({
       <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none md:w-[40vw] md:h-[40vw]" />
       <div className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]" style={{ animationDelay: '-10s' }} />
 
-      {/* 3D backdrop — responsive */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.25] md:opacity-[0.3] lg:opacity-[0.35]" aria-hidden>
+      {/* 3D backdrop — responsive. On phones the copy runs the full width, so the scene is
+          confined to a band above it instead of spanning the section: a tall, narrow canvas
+          also makes the device fill most of the width, which a wider band avoids. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[42vh] opacity-[0.25] md:inset-0 md:h-auto md:opacity-[0.3] lg:opacity-[0.35]"
+        aria-hidden
+      >
         <WorkspaceScene
           device={device}
           particleCount={particleCount}
