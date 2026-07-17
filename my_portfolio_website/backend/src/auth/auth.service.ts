@@ -3,7 +3,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
-import type { CookieOptions } from 'express';
+import type { CookieOptions, Request } from 'express';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthUser } from '../common/types/authenticated-request';
@@ -65,12 +65,19 @@ export class AuthService {
   }
 
   /** Cookie attributes shared by login (set) and logout (clear). */
-  cookieOptions(): CookieOptions {
-    const isProd = process.env.NODE_ENV === 'production';
+  cookieOptions(req: Request): CookieOptions {
+    // The admin UI reaches this API through its own origin's /bff proxy, so the session
+    // cookie is always first-party and Lax is both sufficient and the safer default —
+    // None would expose it to cross-site requests for no benefit.
+    //
+    // Secure keys off the request scheme rather than NODE_ENV: NODE_ENV can't be set to
+    // `production` on the API host because the build runs `npm ci`, which would then omit
+    // @nestjs/cli (a devDependency) and break `nest build`. Tying it to NODE_ENV meant
+    // the deployed cookie silently lost its Secure flag.
     return {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: isHttpsRequest(req),
+      sameSite: 'lax',
       path: '/',
       maxAge: this.sessionTtlSeconds() * 1000,
     };
@@ -185,4 +192,16 @@ export class AuthService {
       // Never let an audit-log write failure block authentication.
     }
   }
+}
+
+/**
+ * The API sits behind a TLS-terminating proxy in production, so the socket itself is
+ * plain HTTP and only the forwarded header reports the scheme the browser actually used.
+ */
+function isHttpsRequest(req: Request): boolean {
+  const forwarded = req.headers['x-forwarded-proto'];
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim() === 'https';
+  }
+  return req.protocol === 'https';
 }

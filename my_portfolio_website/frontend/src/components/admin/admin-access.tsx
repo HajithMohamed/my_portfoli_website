@@ -9,6 +9,26 @@ import { adminFetch } from "@/lib/api";
 import { excludeSelfFromAnalytics } from "@/lib/analytics";
 
 /**
+ * adminFetch rejects with the raw response body. The API already distinguishes bad
+ * credentials from an IP lockout from a rate limit, so surface its reason rather than
+ * collapsing every failure — including network errors — into one opaque string.
+ */
+function loginErrorMessage(error: unknown): string {
+  const raw = error instanceof Error ? error.message.trim() : "";
+  if (!raw) {
+    return "Authentication failed.";
+  }
+  try {
+    const body = JSON.parse(raw) as { message?: string | string[] };
+    const message = Array.isArray(body.message) ? body.message.join(", ") : body.message;
+    return message || "Authentication failed.";
+  } catch {
+    // Not a JSON body (e.g. a network failure) — show it as-is.
+    return raw;
+  }
+}
+
+/**
  * Invisible on the public site. Pressing Ctrl+Shift+A anywhere opens a discreet
  * authentication modal; a successful login sets the HTTP-only session cookie and
  * routes to the hidden control center. There is no visible link to any of this.
@@ -53,8 +73,8 @@ export function AdminAccess() {
       setOpen(false);
       router.push("/_internal/dashboard");
       router.refresh();
-    } catch {
-      setError("Authentication failed.");
+    } catch (err) {
+      setError(loginErrorMessage(err));
     } finally {
       setLoading(false);
     }

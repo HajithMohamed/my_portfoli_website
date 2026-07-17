@@ -136,7 +136,11 @@ export function CommandDeck({
 
       {/* 3D backdrop — responsive */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.25] md:opacity-[0.3] lg:opacity-[0.35]" aria-hidden>
-        <WorkspaceScene device={device} particleCount={particleCount} />
+        <WorkspaceScene
+          device={device}
+          particleCount={particleCount}
+          portraitUrl={profile.profileImageUrl ?? undefined}
+        />
       </div>
 
       <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 pt-32 pb-16 md:pt-40 lg:pt-32">
@@ -179,7 +183,8 @@ export function CommandDeck({
             <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
               {resume?.fileUrl ? (
                 <a
-                  href={resume.fileUrl}
+                  href="/api/cv"
+                  download
                   data-track="resume_download"
                   className="group relative flex items-center justify-center sm:justify-start gap-3 border border-cyan/50 bg-cyan/10 px-6 py-4 text-cyan transition-all hover:bg-cyan/20 hover:text-glow hover:border-cyan touch-target-lg w-full sm:w-auto"
                 >

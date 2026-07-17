@@ -1,10 +1,55 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Line, Text } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { Float, Line, Text, useTexture } from "@react-three/drei";
+import { Suspense, useMemo, useRef } from "react";
 import type { Group } from "three";
 import { Color } from "three";
+
+/** Portrait aspect the screen geometry below is built around (w:h = 4:5). */
+const PORTRAIT_W = 400;
+const PORTRAIT_H = 500;
+
+/**
+ * Crop the CMS portrait to a fixed 4:5 around the face. Cloudinary does the cropping,
+ * so the meshes can assume one aspect no matter what was uploaded. Non-Cloudinary URLs
+ * pass through and simply get stretched to the same frame.
+ */
+function portraitSrc(url: string): string {
+  return url.includes("/image/upload/")
+    ? url.replace(
+        "/image/upload/",
+        `/image/upload/c_fill,g_face,w_${PORTRAIT_W},h_${PORTRAIT_H},q_auto/`,
+      )
+    : url;
+}
+
+/** The operator's photo, framed on a device screen. */
+function OperatorPortrait({
+  url,
+  width,
+  position,
+}: {
+  url: string;
+  width: number;
+  position: readonly [number, number, number];
+}) {
+  const texture = useTexture(portraitSrc(url));
+  const height = width * (PORTRAIT_H / PORTRAIT_W);
+
+  return (
+    <group position={position as unknown as [number, number, number]}>
+      <mesh position={[0, 0, -0.002]}>
+        <planeGeometry args={[width + 0.05, height + 0.05]} />
+        <meshBasicMaterial color="#5cd0ff" transparent opacity={0.45} />
+      </mesh>
+      <mesh>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
 
 /** Floating tech nodes — the operator's actual day-to-day stack. */
 const NODES_DESKTOP = [
@@ -32,7 +77,7 @@ const NODES_MOBILE = [
 ];
 
 /* ── Device: Laptop (desktop) ── */
-function Laptop() {
+function Laptop({ portraitUrl }: { portraitUrl?: string }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -59,13 +104,14 @@ function Laptop() {
           <planeGeometry args={[2.25, 1.35]} />
           <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.35)} />
         </mesh>
+        {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.72} position={[-0.62, 0, 0.05]} /> : null}
         <Text
-          position={[0, 0, 0.05]}
+          position={portraitUrl ? [0.45, 0, 0.05] : [0, 0, 0.05]}
           fontSize={0.11}
           color="#d6ecff"
           anchorX="center"
           anchorY="middle"
-          maxWidth={2}
+          maxWidth={portraitUrl ? 1.1 : 2}
         >
           {"> Hz LABS ~ $"}
         </Text>
@@ -75,7 +121,7 @@ function Laptop() {
 }
 
 /* ── Device: Tablet (tablet viewports) ── */
-function Tablet() {
+function Tablet({ portraitUrl }: { portraitUrl?: string }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -110,8 +156,9 @@ function Tablet() {
         <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.3)} />
       </mesh>
       {/* Screen content */}
+      {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.8} position={[0, 0.5, 0.05]} /> : null}
       <Text
-        position={[0, 0.6, 0.05]}
+        position={[0, portraitUrl ? -0.15 : 0.6, 0.05]}
         fontSize={0.1}
         color="#d6ecff"
         anchorX="center"
@@ -121,7 +168,7 @@ function Tablet() {
         {"Hz LABS"}
       </Text>
       <Text
-        position={[0, 0.3, 0.05]}
+        position={[0, portraitUrl ? -0.35 : 0.3, 0.05]}
         fontSize={0.06}
         color="#5cd0ff"
         anchorX="center"
@@ -131,7 +178,7 @@ function Tablet() {
         {"> mission_control"}
       </Text>
       {/* Simulated UI lines on screen */}
-      {[-0.1, -0.3, -0.5, -0.7].map((y, i) => (
+      {(portraitUrl ? [-0.55, -0.7, -0.85] : [-0.1, -0.3, -0.5, -0.7]).map((y, i) => (
         <mesh key={i} position={[-0.2 + i * 0.05, y, 0.048]}>
           <planeGeometry args={[0.9 - i * 0.1, 0.025]} />
           <meshBasicMaterial
@@ -155,7 +202,7 @@ function Tablet() {
 }
 
 /* ── Device: Phone (mobile viewports) ── */
-function Phone() {
+function Phone({ portraitUrl }: { portraitUrl?: string }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -195,8 +242,9 @@ function Phone() {
         <meshBasicMaterial color="#030711" />
       </mesh>
       {/* Screen content */}
+      {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.46} position={[0, 0.36, 0.04]} /> : null}
       <Text
-        position={[0, 0.45, 0.04]}
+        position={[0, portraitUrl ? -0.12 : 0.45, 0.04]}
         fontSize={0.07}
         color="#d6ecff"
         anchorX="center"
@@ -206,7 +254,7 @@ function Phone() {
         {"Hz LABS"}
       </Text>
       <Text
-        position={[0, 0.25, 0.04]}
+        position={[0, portraitUrl ? -0.27 : 0.25, 0.04]}
         fontSize={0.04}
         color="#5cd0ff"
         anchorX="center"
@@ -216,7 +264,7 @@ function Phone() {
         {"> sys.online"}
       </Text>
       {/* Simulated UI elements */}
-      {[-0.0, -0.15, -0.3, -0.45, -0.6].map((y, i) => (
+      {(portraitUrl ? [-0.42, -0.54, -0.66] : [-0.0, -0.15, -0.3, -0.45, -0.6]).map((y, i) => (
         <mesh key={i} position={[0, y, 0.038]}>
           <planeGeometry args={[0.55 - i * 0.04, 0.02]} />
           <meshBasicMaterial
@@ -318,9 +366,15 @@ export type DeviceType = "laptop" | "tablet" | "phone";
 interface WorkspaceSceneProps {
   device?: DeviceType;
   particleCount?: number;
+  /** Operator portrait shown on the device screen. */
+  portraitUrl?: string;
 }
 
-export default function WorkspaceScene({ device = "laptop", particleCount = 60 }: WorkspaceSceneProps) {
+export default function WorkspaceScene({
+  device = "laptop",
+  particleCount = 60,
+  portraitUrl,
+}: WorkspaceSceneProps) {
   const nodes =
     device === "phone"
       ? NODES_MOBILE
@@ -346,9 +400,12 @@ export default function WorkspaceScene({ device = "laptop", particleCount = 60 }
       <directionalLight position={[5, 5, 5]} intensity={0.6} color="#5cd0ff" />
       <pointLight position={[-4, -2, 3]} intensity={0.8} color="#3a8fb8" />
 
-      {device === "laptop" && <Laptop />}
-      {device === "tablet" && <Tablet />}
-      {device === "phone" && <Phone />}
+      {/* The portrait texture loads async; the device renders without it until then. */}
+      <Suspense fallback={null}>
+        {device === "laptop" && <Laptop portraitUrl={portraitUrl} />}
+        {device === "tablet" && <Tablet portraitUrl={portraitUrl} />}
+        {device === "phone" && <Phone portraitUrl={portraitUrl} />}
+      </Suspense>
 
       <Connections nodes={nodes} />
       {nodes.map((n) => (
