@@ -31,7 +31,7 @@ export function Panel({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={cn("hud-panel-glow corner-brackets group transition-all duration-500 hover:border-cyan/40", className)}
+      className={cn("hud-panel-glow corner-brackets group transition-all duration-500 hover:border-cyan/40 min-w-0 w-full", className)}
     >
       <header className="flex items-center justify-between gap-3 border-b border-cyan/15 bg-black/20 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] backdrop-blur-md">
         <div className="flex min-w-0 items-baseline gap-2">

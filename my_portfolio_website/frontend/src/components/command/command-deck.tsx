@@ -147,7 +147,7 @@ export function CommandDeck({
           className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 items-center"
         >
           {/* Left — identity */}
-          <div>
+          <div className="min-w-0 w-full">
             <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] w-full min-w-0">
               <span className="flex max-w-full min-w-0 items-center gap-2 text-signal-green bg-signal-green/10 border border-signal-green/20 px-3 py-1 rounded-sm" title={profile.availabilityStatus}>
                 <span className="shrink-0 inline-block h-1.5 w-1.5 rounded-full bg-signal-green animate-pulse-dot" />
@@ -233,7 +233,7 @@ export function CommandDeck({
           </div>
 
           {/* Right — boot status + log tail */}
-          <motion.div variants={itemVariants} className="flex flex-col justify-center gap-8 lg:pl-10 relative z-10">
+          <motion.div variants={itemVariants} className="flex flex-col justify-center gap-8 lg:pl-10 relative z-10 min-w-0 w-full">
             {/* Status Panel */}
             <div className="hud-panel-glass p-6">
               <div className="mb-4 flex items-center gap-3 border-b border-cyan/20 pb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70">
