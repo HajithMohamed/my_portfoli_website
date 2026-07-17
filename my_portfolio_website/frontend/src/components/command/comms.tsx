@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Panel } from "@/components/hud/panel";
-import { absoluteApiUrl } from "@/lib/utils";
+import { bffUrl } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import type { Profile } from "@/lib/types";
 import { Send, CheckCircle2, AlertCircle, Mail, MapPin, Github, Link as LinkIcon, ExternalLink } from "lucide-react";
@@ -56,7 +56,7 @@ export function Comms({ profile }: { profile: Profile }) {
     e.preventDefault();
     setState("sending");
     try {
-      const response = await fetch(absoluteApiUrl("/messages"), {
+      const response = await fetch(bffUrl("/messages"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

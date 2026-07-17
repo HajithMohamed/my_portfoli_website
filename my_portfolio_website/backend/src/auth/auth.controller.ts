@@ -31,7 +31,7 @@ export class AuthController {
   ) {
     const context = { ip: clientIp(req), userAgent: req.headers['user-agent'] };
     const { token, user } = await this.authService.login(dto, context);
-    res.cookie(this.authService.cookieName, token, this.authService.cookieOptions());
+    res.cookie(this.authService.cookieName, token, this.authService.cookieOptions(req));
     return { user };
   }
 
@@ -42,7 +42,7 @@ export class AuthController {
       ip: clientIp(req),
       userAgent: req.headers['user-agent'],
     });
-    res.clearCookie(this.authService.cookieName, this.authService.cookieOptions());
+    res.clearCookie(this.authService.cookieName, this.authService.cookieOptions(req));
     return { ok: true };
   }
 

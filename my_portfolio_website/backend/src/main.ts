@@ -17,9 +17,15 @@ async function bootstrap() {
     }),
   );
 
+  // The site's own browser calls go through its /bff proxy, so they are same-origin and
+  // never reach this list. It still names the production frontend explicitly rather than
+  // trusting FRONTEND_URL/NETLIFY_URL alone, so that a direct cross-origin call keeps
+  // working when those vars are unset on the host — which is the case today.
   const allowedOrigins = [
     process.env.FRONTEND_URL,
     process.env.NETLIFY_URL,
+    'https://hzlabs.studio',
+    'https://www.hzlabs.studio',
     'http://localhost:3000',
     'http://localhost:3001',
   ].filter(Boolean) as string[];

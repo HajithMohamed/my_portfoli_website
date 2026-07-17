@@ -167,7 +167,8 @@ export default async function AboutPage() {
               <div className="flex flex-col justify-center gap-3 font-mono text-xs uppercase tracking-[0.2em]">
                 {resume?.fileUrl ? (
                   <a
-                    href={resume.fileUrl}
+                    href="/api/cv"
+                    download
                     data-track="resume_download"
                     className="border border-cyan/50 bg-cyan/10 px-5 py-3 text-center text-cyan transition-all hover:bg-cyan/20"
                   >
