@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "opengraph.githubassets.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
       // Admin CMS uploads.
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],

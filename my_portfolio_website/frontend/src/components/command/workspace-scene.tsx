@@ -113,7 +113,7 @@ function Laptop({ portraitUrl }: { portraitUrl?: string }) {
           anchorY="middle"
           maxWidth={portraitUrl ? 1.1 : 2}
         >
-          {"> Hz LABS ~ $"}
+          {"> HERTZ LABS ~ $"}
         </Text>
       </group>
     </group>
@@ -165,7 +165,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
         anchorY="middle"
         maxWidth={1.4}
       >
-        {"Hz LABS"}
+        {"HERTZ LABS"}
       </Text>
       <Text
         position={[0, portraitUrl ? -0.35 : 0.3, 0.05]}
@@ -251,7 +251,7 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
         anchorY="middle"
         maxWidth={0.7}
       >
-        {"Hz LABS"}
+        {"HERTZ LABS"}
       </Text>
       <Text
         position={[0, portraitUrl ? -0.27 : 0.25, 0.04]}

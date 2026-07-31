@@ -12,6 +12,7 @@ import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
 import { getHomeData } from "@/lib/api";
+import type { GithubSummary, Project } from "@/lib/types";
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -25,12 +26,41 @@ function SectionDivider({ label }: { label: string }) {
   );
 }
 
+function titleFromRepoName(name: string) {
+  return name.replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function projectFromCurrentRepo(github: GithubSummary): Project | null {
+  const repo = github.currentRepo ?? github.contributionData?.currentRepo ?? null;
+  if (!repo) {
+    return null;
+  }
+
+  return {
+    id: repo.fullName,
+    title: titleFromRepoName(repo.name),
+    slug: repo.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    description: repo.description ?? "Current GitHub repository synced from the live portfolio integration.",
+    techStack: repo.languages?.length ? repo.languages : [repo.language ?? "MERN Stack"].filter(Boolean),
+    githubUrl: repo.url,
+    liveUrl: repo.homepage,
+    category: "GitHub Focus",
+    status: repo.isArchived ? "ARCHIVED" : "ACTIVE",
+    featured: true,
+    updatedAt: repo.pushedAt ?? repo.updatedAt ?? undefined,
+  };
+}
+
 export default async function Home() {
   const { profile, skills, projects, blogs, resume, github, testimonials, certificates } =
     await getHomeData();
 
+  const currentRepoUrl = (github.currentRepo ?? github.contributionData?.currentRepo)?.url;
   const inFlight =
-    projects.find((p) => p.featured) ?? (projects.length ? projects[0] : null);
+    projects.find((p) => currentRepoUrl && p.githubUrl?.toLowerCase() === currentRepoUrl.toLowerCase()) ??
+    projectFromCurrentRepo(github) ??
+    projects.find((p) => p.featured) ??
+    (projects.length ? projects[0] : null);
 
   const personSchema = {
     "@context": "https://schema.org",

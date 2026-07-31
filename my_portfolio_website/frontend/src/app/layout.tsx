@@ -25,25 +25,25 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hzlabs.dev"),
   title: {
-    default: "Hz Labs — Software Engineer · Command Center",
-    template: "%s | Hz Labs",
+    default: "Hertz Labs - Software Engineer Command Center",
+    template: "%s | Hertz Labs",
   },
   description:
-    "Hz Labs is the operations console of Mohamed Hajith — full-stack software engineer. Live systems, projects, and architecture in one command-center portfolio.",
+    "Hertz Labs is the operations console of Mohamed Hajith, full-stack software engineer. Live systems, projects, and architecture in one command-center portfolio.",
   authors: [{ name: "Mohamed Hajith" }],
   openGraph: {
-    title: "Hz Labs — Software Engineer · Command Center",
+    title: "Hertz Labs - Software Engineer Command Center",
     description:
-      "The operations console of Mohamed Hajith — full-stack software engineer. Live systems, projects, and architecture.",
+      "The operations console of Mohamed Hajith, full-stack software engineer. Live systems, projects, and architecture.",
     url: "/",
-    siteName: "Hz Labs",
+    siteName: "Hertz Labs",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hz Labs — Software Engineer · Command Center",
+    title: "Hertz Labs - Software Engineer Command Center",
     description:
-      "The operations console of Mohamed Hajith — full-stack software engineer.",
+      "The operations console of Mohamed Hajith, full-stack software engineer.",
   },
 };
 

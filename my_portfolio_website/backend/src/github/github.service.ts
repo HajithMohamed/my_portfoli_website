@@ -16,11 +16,17 @@ type GithubRepo = {
   description: string | null;
   language: string | null;
   pushed_at: string;
+  updated_at?: string;
   homepage: string | null;
   topics?: string[];
   fork: boolean;
   stargazers_count: number;
   forks_count: number;
+  default_branch?: string;
+  open_issues_count?: number;
+  visibility?: string;
+  archived?: boolean;
+  private?: boolean;
 };
 
 type GithubEvent = {
@@ -28,6 +34,16 @@ type GithubEvent = {
   repo?: { name: string };
   created_at: string;
   payload?: { commits?: unknown[] };
+};
+
+type GithubCommit = {
+  sha: string;
+  html_url: string;
+  commit: {
+    message: string;
+    author?: { name?: string; date?: string };
+  };
+  author?: { login?: string } | null;
 };
 
 type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
@@ -44,14 +60,45 @@ export type ContributionData = {
   technologies: string[];
   followers: number | null;
   following: number | null;
+  currentRepo: CurrentRepoStatus | null;
+};
+
+export type CurrentRepoStatus = {
+  name: string;
+  fullName: string;
+  url: string;
+  description: string | null;
+  language: string | null;
+  languages: string[];
+  topics: string[];
+  defaultBranch: string;
+  updatedAt: string | null;
+  pushedAt: string | null;
+  homepage: string | null;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  visibility: string;
+  isArchived: boolean;
+  latestCommit: {
+    sha: string;
+    url: string;
+    message: string;
+    authoredAt: string | null;
+    author: string | null;
+  } | null;
+  activityStatus: 'active' | 'recent' | 'quiet' | 'stale' | 'unknown' | 'archived';
+  statusLabel: string;
+  statusTone: 'green' | 'amber' | 'cyan' | 'red';
 };
 
 const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const DEFAULT_GITHUB_USERNAME = 'HajithMohamed';
+const DEFAULT_CURRENT_REPO = 'SHOE_Bank_Mrnstack';
 
 @Injectable()
 export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(GithubService.name);
-  private readonly username = 'HajithMohamed';
   private syncing = false;
   private syncTimer?: NodeJS.Timeout;
 
@@ -83,8 +130,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
   private async safeSync(trigger: string) {
     if (!this.configService.get<string>('GITHUB_TOKEN')) {
-      this.logger.warn(`Skipping GitHub sync (${trigger}): GITHUB_TOKEN not set`);
-      return;
+      this.logger.warn(
+        `GitHub sync (${trigger}) using public REST API only: GITHUB_TOKEN not set`,
+      );
     }
     try {
       await this.sync();
@@ -98,16 +146,136 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
   // ---- reads ---------------------------------------------------------------
 
-  latestSummary() {
-    return this.prisma.githubSnapshot.findFirst({
+  async latestSummary() {
+    const snapshot = await this.prisma.githubSnapshot.findFirst({
       orderBy: { syncedAt: 'desc' },
     });
+    return this.decorateSnapshot(snapshot);
   }
 
   suggestions() {
     return this.prisma.syncSuggestion.findMany({
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  private decorateSnapshot<T extends { contributionData: unknown; recentRepos: unknown }>(
+    snapshot: T | null,
+  ) {
+    if (!snapshot) {
+      return null;
+    }
+
+    const contributionData = isRecord(snapshot.contributionData)
+      ? snapshot.contributionData
+      : {};
+    const currentRepo = isRecord(contributionData.currentRepo)
+      ? contributionData.currentRepo
+      : this.currentRepoFromRecent(snapshot.recentRepos);
+
+    return {
+      ...snapshot,
+      currentRepo,
+      contributionData: {
+        ...contributionData,
+        currentRepo,
+      },
+    };
+  }
+
+  private currentRepoFromRecent(recentRepos: unknown): CurrentRepoStatus | null {
+    const configured = this.configuredCurrentRepoFullName();
+    const repos = Array.isArray(recentRepos) ? recentRepos.filter(isRecord) : [];
+    const selected = configured
+      ? (repos.find((repo) => {
+          const fullName = stringValue(repo.fullName);
+          const url = stringValue(repo.url);
+          const name = stringValue(repo.name);
+          return (
+            fullName?.toLowerCase() === configured.toLowerCase() ||
+            url?.toLowerCase().endsWith(`/${configured.toLowerCase()}`) ||
+            configured.toLowerCase().endsWith(`/${name?.toLowerCase() ?? ''}`)
+          );
+        }) ?? null)
+      : (repos[0] ?? null);
+
+    if (!selected) {
+      return this.configuredCurrentRepoPlaceholder();
+    }
+
+    const name = stringValue(selected.name) ?? repoNameFromFullName(configured) ?? 'repository';
+    const fullName = stringValue(selected.fullName) ?? configured ?? `${this.githubUsername()}/${name}`;
+    const activity = this.repoActivity(stringValue(selected.updatedAt));
+
+    return {
+      name,
+      fullName,
+      url: stringValue(selected.url) ?? `https://github.com/${fullName}`,
+      description: stringValue(selected.description) ?? null,
+      language: stringValue(selected.language) ?? null,
+      languages: stringValue(selected.language) ? [stringValue(selected.language) as string] : [],
+      topics: Array.isArray(selected.topics)
+        ? selected.topics.filter((topic): topic is string => typeof topic === 'string')
+        : [],
+      defaultBranch: 'main',
+      updatedAt: stringValue(selected.updatedAt) ?? null,
+      pushedAt: stringValue(selected.updatedAt) ?? null,
+      homepage: stringValue(selected.homepage) ?? null,
+      stars: numberValue(selected.stars),
+      forks: numberValue(selected.forks),
+      openIssues: 0,
+      visibility: 'public',
+      isArchived: false,
+      latestCommit: null,
+      activityStatus: activity.activityStatus,
+      statusLabel: activity.statusLabel,
+      statusTone: activity.statusTone,
+    };
+  }
+
+  private configuredCurrentRepoPlaceholder(): CurrentRepoStatus | null {
+    const fullName = this.configuredCurrentRepoFullName();
+    if (!fullName) {
+      return null;
+    }
+    const name = repoNameFromFullName(fullName) ?? fullName;
+    return {
+      name,
+      fullName,
+      url: `https://github.com/${fullName}`,
+      description: 'Configured current repository; live GitHub status sync is pending.',
+      language: null,
+      languages: [],
+      topics: [],
+      defaultBranch: 'main',
+      updatedAt: null,
+      pushedAt: null,
+      homepage: null,
+      stars: 0,
+      forks: 0,
+      openIssues: 0,
+      visibility: 'public',
+      isArchived: false,
+      latestCommit: null,
+      activityStatus: 'unknown',
+      statusLabel: 'awaiting sync',
+      statusTone: 'cyan',
+    };
+  }
+
+  private githubUsername() {
+    return (
+      this.configService.get<string>('GITHUB_USERNAME')?.trim() || DEFAULT_GITHUB_USERNAME
+    );
+  }
+
+  private configuredCurrentRepoFullName() {
+    const configured =
+      this.configService.get<string>('GITHUB_CURRENT_REPO')?.trim() ||
+      this.configService.get<string>('GITHUB_REPOSITORY')?.trim() ||
+      DEFAULT_CURRENT_REPO;
+
+    return normalizeRepoFullName(configured, this.githubUsername());
   }
 
   // ---- sync ----------------------------------------------------------------
@@ -119,14 +287,16 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     this.syncing = true;
     try {
       const previous = await this.latestSummary();
+      const username = this.githubUsername();
       const repos = await this.fetchJson<GithubRepo[]>(
-        `https://api.github.com/users/${this.username}/repos?sort=updated&per_page=100`,
+        `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`,
       );
       const events = await this.fetchJson<GithubEvent[]>(
-        `https://api.github.com/users/${this.username}/events/public?per_page=50`,
+        `https://api.github.com/users/${username}/events/public?per_page=50`,
       ).catch(() => [] as GithubEvent[]);
 
       const sourceRepos = repos.filter((repo) => !repo.fork);
+      const currentRepo = await this.resolveCurrentRepoStatus(sourceRepos);
 
       const languagePairs = await Promise.all(
         sourceRepos.slice(0, 20).map((repo) =>
@@ -163,12 +333,13 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       const userProfile = await this.fetchJson<{
         followers?: number;
         following?: number;
-      }>(`https://api.github.com/users/${this.username}`).catch(() => null);
+      }>(`https://api.github.com/users/${username}`).catch(() => null);
 
       const technologies = this.detectTechnologies(languages, sourceRepos);
 
       const recentRepos = sourceRepos.slice(0, 8).map((repo) => ({
         name: repo.name,
+        fullName: repo.full_name,
         description: repo.description,
         url: repo.html_url,
         language: repo.language,
@@ -193,11 +364,12 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         technologies,
         followers: userProfile?.followers ?? null,
         following: userProfile?.following ?? null,
+        currentRepo,
       };
 
       const snapshot = await this.prisma.githubSnapshot.create({
         data: {
-          username: this.username,
+          username,
           repositoryCount: sourceRepos.length,
           commitCount,
           languages,
@@ -208,7 +380,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       });
 
       await this.createSuggestions(previous?.recentRepos, recentRepos);
-      return snapshot;
+      return this.decorateSnapshot(snapshot);
     } finally {
       this.syncing = false;
     }
@@ -220,6 +392,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     if (!token) {
       return null;
     }
+    const username = this.githubUsername();
     const query = `
       query($login: String!) {
         user(login: $login) {
@@ -240,7 +413,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         'Content-Type': 'application/json',
         'User-Agent': 'hz-labs-portfolio-platform',
       },
-      body: JSON.stringify({ query, variables: { login: this.username } }),
+      body: JSON.stringify({ query, variables: { login: username } }),
     });
     if (!response.ok) {
       throw new Error(`GitHub GraphQL failed: ${response.status}`);
@@ -303,6 +476,118 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     Object.keys(languages).forEach(add);
     repos.forEach((repo) => (repo.topics ?? []).forEach(add));
     return [...seen.values()];
+  }
+
+  private async resolveCurrentRepoStatus(
+    sourceRepos: GithubRepo[],
+  ): Promise<CurrentRepoStatus | null> {
+    const configuredFullName = this.configuredCurrentRepoFullName();
+    let repo: GithubRepo | null = null;
+
+    if (configuredFullName) {
+      repo =
+        sourceRepos.find(
+          (item) => item.full_name.toLowerCase() === configuredFullName.toLowerCase(),
+        ) ??
+        (await this.fetchJson<GithubRepo>(
+          `https://api.github.com/repos/${encodeRepoFullName(configuredFullName)}`,
+        ).catch((error) => {
+          this.logger.warn(
+            `Configured current repo ${configuredFullName} could not be fetched: ${
+              error instanceof Error ? error.message : 'unknown'
+            }`,
+          );
+          return null;
+        }));
+    }
+
+    repo ??= sourceRepos[0] ?? null;
+    if (!repo) {
+      return this.configuredCurrentRepoPlaceholder();
+    }
+
+    return this.buildCurrentRepoStatus(repo);
+  }
+
+  private async buildCurrentRepoStatus(repo: GithubRepo): Promise<CurrentRepoStatus> {
+    const defaultBranch = repo.default_branch ?? 'main';
+    const [languageBytes, latestCommit] = await Promise.all([
+      this.fetchJson<Record<string, number>>(
+        `https://api.github.com/repos/${repo.full_name}/languages`,
+      ).catch(() => ({})),
+      this.fetchLatestCommit(repo.full_name, defaultBranch).catch(() => null),
+    ]);
+    const activity = this.repoActivity(repo.pushed_at, Boolean(repo.archived));
+
+    return {
+      name: repo.name,
+      fullName: repo.full_name,
+      url: repo.html_url,
+      description: repo.description,
+      language: repo.language,
+      languages: Object.keys(languageBytes),
+      topics: repo.topics ?? [],
+      defaultBranch,
+      updatedAt: repo.updated_at ?? repo.pushed_at ?? null,
+      pushedAt: repo.pushed_at ?? null,
+      homepage: repo.homepage,
+      stars: repo.stargazers_count ?? 0,
+      forks: repo.forks_count ?? 0,
+      openIssues: repo.open_issues_count ?? 0,
+      visibility: repo.visibility ?? (repo.private ? 'private' : 'public'),
+      isArchived: Boolean(repo.archived),
+      latestCommit,
+      activityStatus: activity.activityStatus,
+      statusLabel: activity.statusLabel,
+      statusTone: activity.statusTone,
+    };
+  }
+
+  private async fetchLatestCommit(fullName: string, branch: string) {
+    const commits = await this.fetchJson<GithubCommit[]>(
+      `https://api.github.com/repos/${fullName}/commits?sha=${encodeURIComponent(
+        branch,
+      )}&per_page=1`,
+    );
+    const latest = commits[0];
+    if (!latest) {
+      return null;
+    }
+
+    return {
+      sha: latest.sha.slice(0, 7),
+      url: latest.html_url,
+      message: latest.commit.message.split('\n')[0].slice(0, 120),
+      authoredAt: latest.commit.author?.date ?? null,
+      author: latest.author?.login ?? latest.commit.author?.name ?? null,
+    };
+  }
+
+  private repoActivity(
+    pushedAt?: string | null,
+    archived = false,
+  ): Pick<CurrentRepoStatus, 'activityStatus' | 'statusLabel' | 'statusTone'> {
+    if (archived) {
+      return { activityStatus: 'archived', statusLabel: 'archived', statusTone: 'amber' };
+    }
+    if (!pushedAt) {
+      return { activityStatus: 'unknown', statusLabel: 'awaiting sync', statusTone: 'cyan' };
+    }
+    const timestamp = new Date(pushedAt).getTime();
+    if (Number.isNaN(timestamp)) {
+      return { activityStatus: 'unknown', statusLabel: 'awaiting sync', statusTone: 'cyan' };
+    }
+    const days = (Date.now() - timestamp) / 86_400_000;
+    if (days <= 7) {
+      return { activityStatus: 'active', statusLabel: 'active now', statusTone: 'green' };
+    }
+    if (days <= 30) {
+      return { activityStatus: 'recent', statusLabel: 'recent push', statusTone: 'green' };
+    }
+    if (days <= 90) {
+      return { activityStatus: 'quiet', statusLabel: 'quiet', statusTone: 'amber' };
+    }
+    return { activityStatus: 'stale', statusLabel: 'needs update', statusTone: 'red' };
   }
 
   // ---- suggestions & dynamic case studies ----------------------------------
@@ -378,7 +663,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       : null;
     const overview = readme
       ? firstParagraph(readme)
-      : (payload.description ?? `${payload.title} is a project from the Hz Labs GitHub.`);
+      : (payload.description ?? `${payload.title} is a project from the Hertz Labs GitHub.`);
     const stack = payload.techStack?.length
       ? payload.techStack.join(', ')
       : 'a modern full-stack toolchain';
@@ -411,6 +696,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     previousJson: unknown,
     recentRepos: Array<{
       name: string;
+      fullName?: string;
       description?: string | null;
       url: string;
       language?: string | null;
@@ -446,7 +732,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
           description: repo.description,
           githubUrl: repo.url,
           liveUrl: repo.homepage ?? null,
-          fullName: `${this.username}/${repo.name}`,
+          fullName: repo.fullName ?? `${this.githubUsername()}/${repo.name}`,
           techStack: [
             repo.language,
             ...(repo.topics ?? []).map(canonicalizeTech),
@@ -505,6 +791,48 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 }
 
 // ---- module-level helpers ---------------------------------------------------
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function numberValue(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function normalizeRepoFullName(value: string | undefined, fallbackOwner: string): string | null {
+  if (!value?.trim()) {
+    return null;
+  }
+  const cleaned = value
+    .trim()
+    .replace(/^https?:\/\/github\.com\//i, '')
+    .replace(/^git@github\.com:/i, '')
+    .replace(/\.git$/i, '')
+    .replace(/\/$/g, '');
+
+  if (cleaned.includes('/')) {
+    const [owner, repo] = cleaned.split('/').filter(Boolean);
+    return owner && repo ? `${owner}/${repo}` : null;
+  }
+
+  return `${fallbackOwner}/${cleaned}`;
+}
+
+function repoNameFromFullName(fullName: string | null | undefined): string | null {
+  if (!fullName) {
+    return null;
+  }
+  return fullName.split('/').filter(Boolean).at(-1) ?? null;
+}
+
+function encodeRepoFullName(fullName: string): string {
+  return fullName.split('/').map(encodeURIComponent).join('/');
+}
 
 // Map GitHub topics / language variants onto canonical technology names.
 const TECH_ALIASES: Record<string, string> = {

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { HertzLogo } from "@/components/brand/hertz-logo";
 
 const NAV = [
   ["home", "/"],
@@ -94,7 +95,7 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-green opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-green"></span>
             </span>
-            <span className="font-semibold tracking-widest text-foreground group-hover:text-glow">Hz LABS</span>
+            <HertzLogo className="max-w-[180px]" />
             <span className="text-[10px] text-cyan/60 hidden sm:inline-block">/ {VERSION}</span>
           </Link>
 
@@ -232,7 +233,7 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-green opacity-75"></span>
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-green"></span>
                   </span>
-                  <span className="font-semibold tracking-widest text-foreground">Hz LABS</span>
+                  <HertzLogo className="max-w-[170px]" />
                   <span className="text-[10px] text-cyan/60">/ {VERSION}</span>
                 </div>
                 <button

@@ -36,9 +36,9 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Hz Labs Portfolio API')
+    .setTitle('Hertz Labs Portfolio API')
     .setDescription(
-      'CMS, portfolio, GitHub intelligence, resume, and message APIs for Hz Labs.',
+      'CMS, portfolio, GitHub intelligence, resume, and message APIs for Hertz Labs.',
     )
     .setVersion('0.1.0')
     .addBearerAuth()
@@ -50,7 +50,7 @@ async function bootstrap() {
 
   try {
     await app.listen(port);
-    console.log(`🚀 Hz Labs API running on http://localhost:${port}`);
+    console.log(`🚀 Hertz Labs API running on http://localhost:${port}`);
     console.log(`📄 Swagger docs at http://localhost:${port}/docs`);
   } catch (error: unknown) {
     if (

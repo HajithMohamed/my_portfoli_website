@@ -6,6 +6,7 @@ import { motion, Variants } from "framer-motion";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
 import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { HertzLogo } from "@/components/brand/hertz-logo";
 
 const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
   ssr: false,
@@ -84,6 +85,13 @@ function BootStatusRow({
   );
 }
 
+function diagnosticTone(tone?: string): "green" | "amber" | "cyan" {
+  if (tone === "green" || tone === "amber") {
+    return tone;
+  }
+  return "cyan";
+}
+
 export function CommandDeck({
   profile,
   github,
@@ -100,8 +108,10 @@ export function CommandDeck({
   
   const device = isDesktop ? "laptop" : isTablet ? "tablet" : "phone";
   const particleCount = isDesktop ? 60 : isTablet ? 30 : 15;
+  const currentRepo = github.currentRepo ?? github.contributionData?.currentRepo ?? null;
 
   const githubLink =
+    currentRepo?.url ??
     profile.socialLinks?.find((l) => l.url.includes("github.com"))?.url ??
     `https://github.com/${github.username}`;
 
@@ -162,9 +172,10 @@ export function CommandDeck({
 
             <motion.h1 
               variants={itemVariants}
-              className="mt-8 font-display font-bold tracking-tight text-gradient text-hero relative"
+              className="mt-8 max-w-[640px]"
+              aria-label="Hertz Labs"
             >
-              Hz LABS
+              <HertzLogo variant="hero" />
             </motion.h1>
 
             <motion.div variants={itemVariants} className="mt-6 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
@@ -209,7 +220,7 @@ export function CommandDeck({
                 className="group flex items-center justify-center sm:justify-start gap-3 border border-cyan/30 bg-surface/80 backdrop-blur-sm px-6 py-4 text-foreground transition-all hover:border-cyan hover:text-cyan hover:bg-surface-2 touch-target-lg w-full sm:w-auto"
               >
                 <Github size={16} className="opacity-70 group-hover:text-glow" />
-                <span>github</span>
+                <span>{currentRepo ? "current repo" : "github"}</span>
               </a>
             </motion.div>
 
@@ -251,6 +262,11 @@ export function CommandDeck({
                   label="github.api"
                   value={githubFresh ? "connected" : "cached"}
                   tone={githubFresh ? "green" : "amber"}
+                />
+                <BootStatusRow
+                  label="repo.focus"
+                  value={currentRepo?.name ?? "auto-detect"}
+                  tone={diagnosticTone(currentRepo?.statusTone)}
                 />
                 <BootStatusRow label="mailbox" value="accepting" tone="green" />
                 <BootStatusRow label="deploy.pipeline" value="idle" tone="amber" />

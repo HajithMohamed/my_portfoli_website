@@ -143,42 +143,41 @@ async function main() {
   });
 
   await prisma.project.upsert({
-    where: { slug: 'saga-elite' },
+    where: { slug: 'shoe-bank-mernstack' },
     update: {},
     create: {
-      title: 'Saga Elite',
-      slug: 'saga-elite',
+      title: 'Shoe Bank MERN Stack',
+      slug: 'shoe-bank-mernstack',
       description:
-        'A premium, highly interactive web platform featuring real-time data sync, advanced visualizations, and 3D experiences.',
-      techStack: ['Next.js', 'Three.js', 'Framer Motion', 'Tailwind CSS'],
-      githubUrl: 'https://github.com/HajithMohamed/saga-elite',
-      liveUrl: 'https://saga-elite.dev',
-      category: 'Interactive Platforms',
+        'A MERN-stack shoe banking and commerce platform with product workflows, account logic, and admin-ready foundations.',
+      techStack: ['React', 'Node.js', 'Express', 'MongoDB'],
+      githubUrl: 'https://github.com/HajithMohamed/SHOE_Bank_Mrnstack',
+      category: 'MERN Commerce',
       status: 'ACTIVE',
       featured: true,
       coverImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2000&auto=format&fit=crop',
       outcome:
-        'Delivered a cutting-edge interactive experience with flawless 60fps performance and stunning visuals.',
+        'Current working repository connected through the live GitHub telemetry layer.',
       caseStudy: {
         create: [
           {
             heading: 'Problem',
-            body: 'Users demand highly engaging, premium digital experiences that stand out from flat UI.',
+            body: 'Shoe commerce workflows need clear product handling, reliable account flows, and maintainable MERN architecture.',
             order: 1,
           },
           {
             heading: 'Solution',
-            body: 'Built an immersive 3D-integrated frontend utilizing WebGL and physics-based animations.',
+            body: 'Built a focused MERN-stack foundation with React UI, Node/Express services, and MongoDB persistence.',
             order: 2,
           },
           {
             heading: 'Architecture',
-            body: 'Next.js -> Three.js (R3F) -> Framer Motion -> Vercel Edge',
+            body: 'React -> Node.js -> Express -> MongoDB',
             order: 3,
           },
           {
             heading: 'Outcome',
-            body: 'Increased user dwell time by 300% and established a premium brand identity.',
+            body: 'The project is now treated as the portfolio current GitHub focus.',
             order: 4,
           },
         ],
@@ -193,9 +192,9 @@ async function main() {
       title: 'Building Operational Web Platforms',
       slug: 'building-operational-web-platforms',
       excerpt:
-        'How Hz Labs approaches maintainable full-stack systems for real business workflows.',
+        'How Hertz Labs approaches maintainable full-stack systems for real business workflows.',
       content:
-        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. Hz Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
+        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. Hertz Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
       status: 'PUBLISHED',
       publishedAt: new Date(),
       tags: {
@@ -221,6 +220,30 @@ async function main() {
       languages: ['TypeScript', 'JavaScript', 'PHP', 'SQL'],
       recentRepos: [],
       recentActivity: [],
+      contributionData: {
+        currentRepo: {
+          name: 'SHOE_Bank_Mrnstack',
+          fullName: 'HajithMohamed/SHOE_Bank_Mrnstack',
+          url: 'https://github.com/HajithMohamed/SHOE_Bank_Mrnstack',
+          description: 'Configured current repository; live GitHub status sync is pending.',
+          language: null,
+          languages: [],
+          topics: [],
+          defaultBranch: 'main',
+          updatedAt: null,
+          pushedAt: null,
+          homepage: null,
+          stars: 0,
+          forks: 0,
+          openIssues: 0,
+          visibility: 'public',
+          isArchived: false,
+          latestCommit: null,
+          activityStatus: 'unknown',
+          statusLabel: 'awaiting sync',
+          statusTone: 'cyan',
+        },
+      },
     },
   });
 }

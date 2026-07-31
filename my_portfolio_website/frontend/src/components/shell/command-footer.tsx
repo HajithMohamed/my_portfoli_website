@@ -2,7 +2,7 @@
 
 import type { Profile } from "@/lib/types";
 import { ArrowUp, Github, Linkedin, Mail } from "lucide-react";
-import { motion } from "framer-motion";
+import { HertzLogo } from "@/components/brand/hertz-logo";
 
 const VERSION = "v4.0.0";
 
@@ -35,7 +35,10 @@ export function CommandFooter({ profile }: { profile: Profile }) {
               <span className="h-[1px] w-4 bg-cyan/50" />
               System
             </div>
-            <div className="text-foreground font-semibold">HZ-LABS — {VERSION}</div>
+            <div className="flex items-center gap-2 text-foreground font-semibold">
+              <HertzLogo className="max-w-[170px]" />
+              <span className="text-cyan/60">/ {VERSION}</span>
+            </div>
             <div className="mt-2 text-muted-foreground leading-relaxed">next.js · nestjs · postgres</div>
           </div>
           

@@ -76,6 +76,35 @@ export type CvAsset = {
 
 export type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
 
+export type CurrentRepositoryStatus = {
+  name: string;
+  fullName: string;
+  url: string;
+  description?: string | null;
+  language?: string | null;
+  languages?: string[];
+  topics?: string[];
+  defaultBranch?: string;
+  updatedAt?: string | null;
+  pushedAt?: string | null;
+  homepage?: string | null;
+  stars?: number;
+  forks?: number;
+  openIssues?: number;
+  visibility?: string;
+  isArchived?: boolean;
+  latestCommit?: {
+    sha: string;
+    url: string;
+    message: string;
+    authoredAt?: string | null;
+    author?: string | null;
+  } | null;
+  activityStatus?: "active" | "recent" | "quiet" | "stale" | "unknown" | "archived" | string;
+  statusLabel?: string;
+  statusTone?: "green" | "amber" | "cyan" | "red" | string;
+};
+
 export type ContributionData = {
   calendar?: { totalContributions: number; weeks: { days: ContributionDay[] }[] } | null;
   totalStars?: number;
@@ -84,6 +113,7 @@ export type ContributionData = {
   technologies?: string[];
   followers?: number;
   following?: number;
+  currentRepo?: CurrentRepositoryStatus | null;
 };
 
 export type GithubSummary = {
@@ -93,6 +123,7 @@ export type GithubSummary = {
   languages: Record<string, number> | string[];
   recentRepos: Array<{
     name: string;
+    fullName?: string;
     description?: string | null;
     url: string;
     language?: string | null;
@@ -103,6 +134,7 @@ export type GithubSummary = {
   }>;
   recentActivity: Array<{ type: string; repo?: string; createdAt: string }>;
   contributionData?: ContributionData | null;
+  currentRepo?: CurrentRepositoryStatus | null;
   syncedAt?: string;
 };
 
