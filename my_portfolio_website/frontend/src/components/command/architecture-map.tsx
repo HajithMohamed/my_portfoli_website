@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 /** The actual production architecture of this platform. */
 const NODES = [
   { id: "client", label: "Client / Web", x: 13, y: 28, type: "edge" },
-  { id: "edge", label: "Netlify Edge", x: 13, y: 66, type: "edge" },
+  { id: "edge", label: "Vercel Edge", x: 13, y: 66, type: "edge" },
   { id: "next", label: "Next.js SSR", x: 38, y: 20, type: "app" },
   { id: "bff", label: "BFF Proxy", x: 38, y: 52, type: "app" },
   { id: "auth", label: "JWT Auth", x: 55, y: 32, type: "app" },

@@ -31,7 +31,6 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deployment
 
-This frontend is deployed on **Netlify**; the NestJS backend API is deployed on
-**Render**. Deploy config lives at the repository root (`netlify.toml`,
-`render.yaml`). See [`docs/deployment.md`](../docs/deployment.md) for the full
-setup and required environment variables.
+This frontend is deployed on **Vercel**; the NestJS backend API is deployed on
+**Render**. See [`docs/deployment.md`](../docs/deployment.md) for the Vercel
+project settings and required environment variables.

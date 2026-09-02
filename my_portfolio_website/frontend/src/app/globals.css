@@ -8,6 +8,9 @@
 
 :root {
   --radius: 0.5rem;
+  --font-inter: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-space-grotesk: "Space Grotesk", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-jetbrains: "JetBrains Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
 
   /* Base */
   --background: #030711;

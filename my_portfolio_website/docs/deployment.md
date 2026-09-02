@@ -1,27 +1,26 @@
 # Deployment
 
-Two services: the **frontend** (Next.js) on **Netlify** and the **backend**
+Two services: the **frontend** (Next.js) on **Vercel** and the **backend**
 (NestJS API) on **Render**. PostgreSQL is hosted on **Supabase** (external to
-both). All deploy config lives at the repository root: `netlify.toml` and
-`render.yaml`.
+both). Backend deploy configuration is in `render.yaml` at the repository root.
 
-## Netlify — Frontend
+## Vercel — Frontend
 
-Config: `netlify.toml` (repo root). Connect the repo and keep the site's **Base
-directory empty** so the root `netlify.toml` is authoritative. It builds the
-`frontend` workspace nested under `my_portfolio_website/`:
+Import the repository into Vercel. The committed `vercel.json` supports a
+repository-root deployment; leave Root Directory unset. Alternatively, set Root
+Directory to `my_portfolio_website/frontend` and remove the custom Vercel build
+settings.
 
-- Base directory: `my_portfolio_website`
-- Build command: `npm run build --workspace frontend`
-- Publish directory: `frontend/.next`
-- Plugin: `@netlify/plugin-nextjs`
+- Framework Preset: Next.js (automatically detected)
+- Build Command: `npm run build`
+- Install Command: `npm ci`
 
-Required environment variables (Site settings → Environment variables):
+Required environment variables (Project Settings → Environment Variables):
 
 - `NEXT_PUBLIC_API_URL` — the Render backend URL, e.g. `https://hz-labs-api.onrender.com`
-- `NEXT_PUBLIC_SITE_URL` — the Netlify site URL, e.g. `https://hz-labs.netlify.app`
+- `NEXT_PUBLIC_SITE_URL` — the Vercel production URL, e.g. `https://your-project.vercel.app`
 
-Do not deploy the NestJS backend to Netlify.
+Do not deploy the NestJS backend to Vercel.
 
 ## Render — Backend
 
@@ -35,7 +34,7 @@ reads `render.yaml`, which sets `rootDir: my_portfolio_website` and runs:
 Set these secrets in the Render dashboard (they are `sync: false` in the blueprint):
 
 - `DATABASE_URL` — Supabase IPv4 **Session pooler** connection string
-- `FRONTEND_URL` and `NETLIFY_URL` — the Netlify site URL (used for CORS)
+- `FRONTEND_URL` — the Vercel production URL (used for CORS)
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD`
 - `GITHUB_TOKEN`
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
