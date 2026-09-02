@@ -13,6 +13,7 @@ Import the repository into Vercel and set **Root Directory** to
 - Framework Preset: Next.js (automatically detected)
 - Build Command: `npm run build` (the default)
 - Install Command: `npm install` (the default)
+- Output Directory: leave unset; Next.js manages `.next` automatically.
 
 Required environment variables (Project Settings → Environment Variables):
 
