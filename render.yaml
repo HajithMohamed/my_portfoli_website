@@ -26,10 +26,8 @@ services:
       # Supabase Postgres — IPv4 Session pooler URL (not the direct connection).
       - key: DATABASE_URL
         sync: false
-      # Public URL of the Netlify frontend (used for CORS + cookie origin).
+      # Public URL of the Vercel frontend (used for CORS + cookie origin).
       - key: FRONTEND_URL
-        sync: false
-      - key: NETLIFY_URL
         sync: false
       # Hidden-admin credentials (single administrator).
       - key: ADMIN_EMAIL
