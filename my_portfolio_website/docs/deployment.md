@@ -6,14 +6,13 @@ both). Backend deploy configuration is in `render.yaml` at the repository root.
 
 ## Vercel — Frontend
 
-Import the repository into Vercel. The committed `vercel.json` supports a
-repository-root deployment; leave Root Directory unset. Alternatively, set Root
-Directory to `my_portfolio_website/frontend` and remove the custom Vercel build
-settings.
+Import the repository into Vercel and set **Root Directory** to
+`my_portfolio_website/frontend`. This is the directory containing the Next.js
+`package.json`; do not use the repository root.
 
 - Framework Preset: Next.js (automatically detected)
-- Build Command: `npm run build`
-- Install Command: `npm ci`
+- Build Command: `npm run build` (the default)
+- Install Command: `npm install` (the default)
 
 Required environment variables (Project Settings → Environment Variables):
 
