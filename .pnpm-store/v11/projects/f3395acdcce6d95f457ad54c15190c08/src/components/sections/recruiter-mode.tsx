@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Profile, Skill, Project, GithubSummary, CvAsset } from "@/lib/types";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 interface RecruiterModeProps {
   profile: Profile;
@@ -80,6 +81,8 @@ export function RecruiterMode({ profile, skills, projects, github, resume }: Rec
                 <Badge className="mb-3">Profile</Badge>
                 <h2 className="text-2xl font-bold text-white">{profile.name}</h2>
                 <p className="text-blue-300 mt-1 text-sm">{profile.title}</p>
+                <p className="text-slate-400 text-sm leading-6 mt-3">{PERSONAL_IDENTITY.education}</p>
+                <p className="text-slate-400 text-xs leading-5 mt-2">{PERSONAL_IDENTITY.location}</p>
                 <p className="text-slate-400 text-sm leading-6 mt-3">{profile.bio}</p>
                 <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />

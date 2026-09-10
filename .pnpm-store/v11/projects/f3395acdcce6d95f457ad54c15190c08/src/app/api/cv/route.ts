@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { absoluteApiUrl } from "@/lib/utils";
-import type { CvAsset, Profile } from "@/lib/types";
+import type { CvAsset } from "@/lib/types";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 // The CMS stores the CV as a Cloudinary `raw` upload, so the file is served as
 // application/octet-stream under its opaque public id — linking straight to it
@@ -16,10 +17,7 @@ function filenameFor(name?: string): string {
 }
 
 export async function GET() {
-  const [resumeRes, profileRes] = await Promise.all([
-    fetch(absoluteApiUrl("/resume/latest"), { cache: "no-store" }),
-    fetch(absoluteApiUrl("/profile"), { cache: "no-store" }),
-  ]);
+  const resumeRes = await fetch(absoluteApiUrl("/resume/latest"), { cache: "no-store" });
 
   if (!resumeRes.ok) {
     return NextResponse.json({ error: "CV unavailable" }, { status: 502 });
@@ -30,8 +28,6 @@ export async function GET() {
     return NextResponse.json({ error: "No CV published" }, { status: 404 });
   }
 
-  const profile = profileRes.ok ? ((await profileRes.json()) as Profile) : null;
-
   const file = await fetch(resume.fileUrl, { cache: "no-store" });
   if (!file.ok || !file.body) {
     return NextResponse.json({ error: "CV fetch failed" }, { status: 502 });
@@ -39,7 +35,7 @@ export async function GET() {
 
   const headers = new Headers({
     "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="${filenameFor(profile?.name)}"`,
+    "Content-Disposition": `attachment; filename="${filenameFor(PERSONAL_IDENTITY.name)}"`,
     "Cache-Control": "public, max-age=300",
   });
   const length = file.headers.get("content-length");

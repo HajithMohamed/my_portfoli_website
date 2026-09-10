@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "node:path";
 
 // The admin API is reached through a same-origin proxy so the session cookie is
 // first-party on the site's own domain (works whether the API is same-domain or
@@ -9,12 +8,6 @@ const backendOrigin = (
 ).replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
-  // This is an npm workspace: deps hoist to the monorepo root one level up.
-  // Pin Turbopack's root there so it resolves `next` and doesn't mis-infer from
-  // a stray lockfile elsewhere in the tree.
-  turbopack: {
-    root: path.join(__dirname, ".."),
-  },
   images: {
     remotePatterns: [
       // GitHub-generated repo social cards used as project cover images.

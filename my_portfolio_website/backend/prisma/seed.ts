@@ -25,12 +25,12 @@ async function main() {
     where: { id: 'hz-labs-profile' },
     update: {
       name: 'Mohamed Hajith',
-      title: 'Independent Software Engineer',
+      title: 'Full Stack Developer',
       tagline: 'Building Digital Products, Platforms, and Scalable Systems',
-      bio: 'Full Stack Developer building modern web platforms, booking systems, authentication infrastructure, e-commerce solutions, and business automation software.',
+      bio: "I'm Mohamed Hajith, a full stack developer based in Batticaloa, Sri Lanka. My work spans web applications, APIs, and tools, with projects and progress documented on GitHub.",
       philosophy:
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
-      location: 'Sri Lanka',
+      location: 'Beach Road Palamunai-11, Arayampathy, Batticaloa',
       email: 'hello@hzlabs.dev',
       availabilityStatus:
         'Available for internships and software engineering opportunities',
@@ -42,7 +42,7 @@ async function main() {
         'AI Integration',
       ],
       timeline: [
-        { label: 'Education', value: 'Computer Science undergraduate' },
+        { label: 'Education', value: 'BICT (Hons), Faculty of Technology, University of Ruhuna' },
         {
           label: 'Major Projects',
           value: 'Commerce, booking, authentication, and admin systems',
@@ -56,12 +56,12 @@ async function main() {
     create: {
       id: 'hz-labs-profile',
       name: 'Mohamed Hajith',
-      title: 'Independent Software Engineer',
+      title: 'Full Stack Developer',
       tagline: 'Building Digital Products, Platforms, and Scalable Systems',
-      bio: 'Full Stack Developer building modern web platforms, booking systems, authentication infrastructure, e-commerce solutions, and business automation software.',
+      bio: "I'm Mohamed Hajith, a full stack developer based in Batticaloa, Sri Lanka. My work spans web applications, APIs, and tools, with projects and progress documented on GitHub.",
       philosophy:
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
-      location: 'Sri Lanka',
+      location: 'Beach Road Palamunai-11, Arayampathy, Batticaloa',
       email: 'hello@hzlabs.dev',
       availabilityStatus:
         'Available for internships and software engineering opportunities',
@@ -73,7 +73,7 @@ async function main() {
         'AI Integration',
       ],
       timeline: [
-        { label: 'Education', value: 'Computer Science undergraduate' },
+        { label: 'Education', value: 'BICT (Hons), Faculty of Technology, University of Ruhuna' },
         {
           label: 'Major Projects',
           value: 'Commerce, booking, authentication, and admin systems',
@@ -192,9 +192,9 @@ async function main() {
       title: 'Building Operational Web Platforms',
       slug: 'building-operational-web-platforms',
       excerpt:
-        'How Hertz Labs approaches maintainable full-stack systems for real business workflows.',
+        'How Mohamed Hajith approaches maintainable full-stack systems for real business workflows.',
       content:
-        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. Hertz Labs focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
+        '# Building Operational Web Platforms\n\nGreat platforms start with clear workflows, durable data models, and interfaces that make daily work easier. Mohamed Hajith focuses on systems that combine reliable APIs, thoughtful dashboards, and fast public experiences.',
       status: 'PUBLISHED',
       publishedAt: new Date(),
       tags: {

@@ -2,7 +2,7 @@
 
 import type { Profile } from "@/lib/types";
 import { ArrowUp, Github, Linkedin, Mail } from "lucide-react";
-import { HertzLogo } from "@/components/brand/hertz-logo";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 const VERSION = "v4.0.0";
 
@@ -36,10 +36,10 @@ export function CommandFooter({ profile }: { profile: Profile }) {
               System
             </div>
             <div className="flex items-center gap-2 text-foreground font-semibold">
-              <HertzLogo className="max-w-[170px]" />
+              <span className="font-display text-lg">{PERSONAL_IDENTITY.name}</span>
               <span className="text-cyan/60">/ {VERSION}</span>
             </div>
-            <div className="mt-2 text-muted-foreground leading-relaxed">next.js · nestjs · postgres</div>
+            <div className="mt-2 text-muted-foreground leading-relaxed">{PERSONAL_IDENTITY.title}</div>
           </div>
           
           <div>
@@ -47,8 +47,8 @@ export function CommandFooter({ profile }: { profile: Profile }) {
               <span className="h-[1px] w-4 bg-cyan/50" />
               Operator
             </div>
-            <div className="text-foreground font-semibold">{profile.name}</div>
-            <div className="mt-2 text-muted-foreground">{profile.location}</div>
+            <div className="text-foreground font-semibold">{PERSONAL_IDENTITY.education}</div>
+            <div className="mt-2 text-muted-foreground leading-relaxed">{PERSONAL_IDENTITY.location}</div>
           </div>
           
           <div>
