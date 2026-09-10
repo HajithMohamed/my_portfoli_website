@@ -28,5 +28,5 @@ Thumbs.db
 # Prisma
 backend/prisma/dev.db
 
-# Netlify
-.netlify/
+# Vercel
+.vercel/

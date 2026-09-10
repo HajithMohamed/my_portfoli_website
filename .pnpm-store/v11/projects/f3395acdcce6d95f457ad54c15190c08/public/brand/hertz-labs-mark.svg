@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Hertz Labs mark</title>
+  <desc id="desc">A neon cyan stylized HZ monogram with a diagonal energy slash.</desc>
+  <defs>
+    <linearGradient id="mark-fill" x1="42" y1="24" x2="276" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3ff9ff"/>
+      <stop offset="0.45" stop-color="#10c9df"/>
+      <stop offset="1" stop-color="#1d67ff"/>
+    </linearGradient>
+    <linearGradient id="mark-edge" x1="64" y1="16" x2="300" y2="174" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d8ffff"/>
+      <stop offset="0.35" stop-color="#5cd0ff"/>
+      <stop offset="1" stop-color="#124aff"/>
+    </linearGradient>
+    <filter id="cyan-glow" x="-30%" y="-35%" width="160%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.1 0 0 0 0 0.85 0 0 0 0 1 0 0 0 0.9 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#cyan-glow)">
+    <path d="M37 191 88 28h54l-19 60h56l19-60h53l-51 163h-53l20-64h-57l-20 64H37Z" fill="url(#mark-fill)" stroke="url(#mark-edge)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M174 28h114l-10 34-67 50h55l-12 39H139l11-35 68-50h-56l12-38Z" fill="url(#mark-fill)" stroke="url(#mark-edge)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M76 206 300 18l12 9L88 216l-12-10Z" fill="#66f6ff" opacity="0.95"/>
+    <path d="M76 206 300 18" stroke="#0c56ff" stroke-width="5" stroke-linecap="round" opacity="0.75"/>
+  </g>
+</svg>
