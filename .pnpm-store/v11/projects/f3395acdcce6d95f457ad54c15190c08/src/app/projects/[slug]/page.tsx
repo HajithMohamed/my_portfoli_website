@@ -1,9 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { Panel } from "@/components/hud/panel";
-import { getHomeData, getProject } from "@/lib/api";
+import { getHomeData, getProject } from "@/lib/public-data";
 import {
   HUD_STATUS_STYLE,
   projectCodename,
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: PageProps) {
   const project = await getProject(slug);
   return {
     title: project ? `${project.title} — Dossier` : "Dossier not found",
-    description: project?.description ?? "Hertz Labs project dossier.",
+    description: project?.description ?? "Mohamed Hajith project dossier.",
   };
 }
 
@@ -63,12 +64,22 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <p className="mt-6 max-w-3xl text-lg text-foreground/90">{project.description}</p>
 
             {project.coverImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={project.coverImage}
-                alt={project.title}
-                className="mt-6 max-h-96 w-full border border-cyan/20 object-cover"
-              />
+              <figure className="mt-6">
+                <div className="relative aspect-[16/7] w-full overflow-hidden border border-cyan/20 bg-black/30">
+                  <Image
+                    src={project.coverImage}
+                    alt={project.coverImageAlt ?? project.title}
+                    fill
+                    sizes="(max-width: 1200px) 100vw, 1200px"
+                    className="object-cover"
+                  />
+                </div>
+                {project.coverImageKind === "concept" ? (
+                  <figcaption className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    Concept illustration generated from the README-described project goal.
+                  </figcaption>
+                ) : null}
+              </figure>
             ) : null}
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -103,11 +114,63 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                   rel="noreferrer"
                   className="flex items-center justify-center border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan touch-target-lg w-full sm:w-auto"
                 >
-                  {"> live system →"}
+                  {"> listed website →"}
+                </a>
+              ) : null}
+              {project.sourceUrl && project.sourceUrl !== project.githubUrl ? (
+                <a
+                  href={project.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex w-full items-center justify-center border border-cyan/20 bg-surface/40 px-5 py-3 text-muted-foreground transition-colors hover:border-cyan/60 hover:text-cyan touch-target-lg sm:w-auto"
+                >
+                  {"> README source ↗"}
                 </a>
               ) : null}
             </div>
           </header>
+
+          <Panel label="repository.evidence" subtitle="public GitHub metadata">
+            <div className="grid gap-3 font-mono text-xs md:grid-cols-3">
+              <div className="border border-cyan/10 bg-black/10 p-3">
+                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">repository</div>
+                <div className="mt-1 break-all text-foreground">
+                  {project.repositoryFullName ?? "Public repository"}
+                </div>
+              </div>
+              <div className="border border-cyan/10 bg-black/10 p-3">
+                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">hosting</div>
+                <div className="mt-1 text-foreground">
+                  {project.isHosted ? "Public website listed in GitHub" : "No public website listed"}
+                </div>
+              </div>
+              <div className="border border-cyan/10 bg-black/10 p-3">
+                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">readiness</div>
+                <div className="mt-1 text-foreground">
+                  {project.isProductionReady
+                    ? "Explicit production-ready evidence found"
+                    : project.readinessChecked === false
+                      ? "Production evidence check unavailable"
+                      : "No explicit production-ready evidence"}
+                </div>
+              </div>
+            </div>
+            {project.readinessEvidence?.length ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {project.readinessEvidence.map((evidence) => (
+                  <a
+                    key={`${evidence.kind}-${evidence.url}`}
+                    href={evidence.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="border border-cyan/20 bg-cyan/5 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-cyan hover:border-cyan/60"
+                  >
+                    {evidence.label} ↗
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </Panel>
 
           {sections.length > 0 ? (
             <div className="grid gap-4 lg:grid-cols-2">
@@ -134,7 +197,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </Panel>
           ) : null}
 
-          <Panel label="stack" subtitle="deployed technology">
+          <Panel label="stack" subtitle="documented technology">
             <div className="flex flex-wrap gap-2">
               {project.techStack.map((s) => (
                 <span

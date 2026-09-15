@@ -35,5 +35,22 @@ export const fallbackProjects = projectsFromGithub(fallbackGithub);
 export const fallbackBlogs = reviewedBlogPosts();
 export const fallbackResume: CvAsset | null = null;
 export const fallbackTestimonials: Testimonial[] = [];
-export const fallbackCertificates: Certificate[] = [];
+export const fallbackCertificates: Certificate[] = [
+  {
+    id: "udemy-full-stack-web-development-bootcamp",
+    title: "The Complete Full-Stack Web Development Bootcamp",
+    issuer: "Udemy",
+    type: "certification",
+    issueDate: "2026-06-21T00:00:00.000Z",
+    credentialUrl: "https://ude.my/UC-8df6ecc3-ffca-4dd1-aafa-c240922d4c5e",
+    imageUrl: "/certificates/full-stack-web-development-bootcamp.jpg",
+    description: "This certificate confirms that Mohamed Hajith successfully completed the entire course. Udemy validates completion based on the student finishing all course content; the listed length reflects the total video and article lecture time at the most recent completion.",
+    courseUrl: "https://www.udemy.com/course/the-complete-web-development-bootcamp/",
+    instructor: "Dr. Angela Yu, Developer and Lead Instructor",
+    instructorUrl: "https://www.udemy.com/user/4b4368a3-b5c8-4529-aa65-2056ec31f37e/",
+    studentUrl: "https://www.udemy.com/user/mohamed-hajith/",
+    durationHours: 62,
+    order: 1,
+  },
+];
 export const fallbackGallery: MediaAsset[] = [];

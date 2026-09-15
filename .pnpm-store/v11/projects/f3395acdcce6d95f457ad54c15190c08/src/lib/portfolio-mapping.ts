@@ -42,7 +42,7 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       featured: Boolean(story || repo.fullName.toLowerCase() === current),
       githubUrl: repo.url,
       liveUrl: publicWebsite(repo.liveUrl ?? repo.homepage),
-      coverImage: story?.coverImage ?? cms?.coverImage ?? null,
+      coverImage: story?.coverImage ?? cms?.coverImage ?? (repo.fullName.toLowerCase() === "hajithmohamed/tech_bridge" ? "/projects/tech-bridge-cover.png" : null),
       coverImageKind: story?.coverImage ? 'concept' : undefined,
       coverImageAlt: story?.coverImage ? `Concept illustration of ${story.title}: ${story.goal}` : undefined,
       caseStudy: story?.sections ?? (repo.goal ? [{ heading: 'Project goal', body: repo.goal }] : []),
@@ -53,9 +53,13 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       isCurrent: repo.fullName.toLowerCase() === current,
       isHosted: Boolean(publicWebsite(repo.liveUrl ?? repo.homepage)),
       isProductionReady: repo.isProductionReady ?? false,
+      readinessChecked: repo.readinessChecked,
       readinessEvidence: repo.readinessEvidence ?? [],
       sourceUrl: story?.sourceUrl ?? repo.goalSourceUrl ?? repo.url,
     } satisfies Project;
+  }).filter(project => {
+    const override = project.githubUrl ? cmsByRepo.get(project.githubUrl.replace(/\/$/, '').toLowerCase()) : undefined;
+    return !override || override.status === 'ACTIVE';
   }).sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent) || Number(b.featured) - Number(a.featured) || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
 }
 

@@ -12,7 +12,7 @@ const NAV = [
   ["home", "/"],
   ["projects", "/projects"],
   ["about", "/about"],
-  ["signal", "/blog"],
+  ["certificates", "/certificates"],
   ["comms", "/#comms"],
 ] as const;
 
@@ -49,11 +49,6 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   // Lock body scroll when menu is open
   useEffect(() => {

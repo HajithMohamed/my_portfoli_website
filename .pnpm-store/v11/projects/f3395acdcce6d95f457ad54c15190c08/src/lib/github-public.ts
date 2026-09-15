@@ -1,5 +1,4 @@
 import 'server-only';
-import { unstable_cache } from 'next/cache';
 import type { GithubSummary, PortfolioRepository } from './types';
 import { publicWebsite } from './portfolio-mapping';
 
@@ -11,37 +10,42 @@ async function githubFetch<T>(path: string): Promise<T | null> {
   const response = await fetch(`https://api.github.com${path}`, {
     headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Mohamed-Hajith-Portfolio',
       ...(process.env.GITHUB_TOKEN ? {Authorization: `Bearer ${process.env.GITHUB_TOKEN}`} : {}) },
-    signal: AbortSignal.timeout(7000), next: { revalidate: 3600 },
+    signal: AbortSignal.timeout(7000), cache: 'no-store',
   });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`GitHub response ${response.status}`);
   return response.json() as Promise<T>;
 }
 
-const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
+async function loadPublicGithub(): Promise<GithubSummary> {
   const all: Repo[] = [];
   for (let page = 1; page <= 20; page++) {
-    const batch = await githubFetch<Repo[]>(`/users/${USERNAME}/repos?type=owner&sort=pushed&per_page=100&page=${page}`);
+    const batch = await githubFetch<Repo[]>(`/users/${USERNAME}/repos?type=all&sort=pushed&per_page=100&page=${page}`);
     if (!Array.isArray(batch)) throw new Error('GitHub repositories unavailable');
-    all.push(...batch.filter(repo => !repo.private && repo.owner.login.toLowerCase() === USERNAME.toLowerCase()));
+    all.push(...batch.filter(repo => !repo.private));
     if (batch.length < 100) break;
     if (page === 20) throw new Error('GitHub pagination incomplete');
   }
-  const owned = all.filter(repo => !repo.fork).sort((a, b) => b.pushed_at.localeCompare(a.pushed_at));
+  const publicRepos = [...new Map(all.map(repo => [repo.full_name.toLowerCase(), repo])).values()]
+    .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at));
+  const owned = publicRepos.filter(repo => !repo.fork && repo.owner.login.toLowerCase() === USERNAME.toLowerCase());
   const now = new Date();
   const since = now.getTime() - 30 * 86400000;
   let readinessComplete = true;
   const repositories: PortfolioRepository[] = [];
   // Bounded concurrency; website URLs are display-only, never requested server-side.
-  for (let start = 0; start < owned.length; start += 6) {
-    repositories.push(...await Promise.all(owned.slice(start, start + 6).map(async repo => {
+  for (let start = 0; start < publicRepos.length; start += 6) {
+    repositories.push(...await Promise.all(publicRepos.slice(start, start + 6).map(async repo => {
       const readinessEvidence: NonNullable<PortfolioRepository['readinessEvidence']> = [];
+      let readinessChecked = Boolean(repo.archived);
       if ((repo.topics ?? []).includes('production-ready') && !repo.archived) {
         readinessEvidence.push({kind:'topic', label:'Maintainer marked production-ready', url:repo.html_url});
+        readinessChecked = true;
       }
       if (!repo.archived) {
         try {
           const release = await githubFetch<Release>(`/repos/${repo.full_name}/releases/latest`);
+          readinessChecked = true;
           if (release && !release.draft && !release.prerelease && release.published_at) {
             readinessEvidence.push({kind:'release', label:`Stable release ${release.tag_name}`, url:release.html_url});
           }
@@ -54,6 +58,7 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
         pushedAt:repo.pushed_at, updatedAt:repo.updated_at, homepage, liveUrl:homepage,
         stars:repo.stargazers_count, forks:repo.forks_count, defaultBranch:repo.default_branch,
         isArchived:repo.archived, isHosted:Boolean(homepage), isProductionReady:readinessEvidence.length > 0,
+        readinessChecked,
         readinessEvidence,
       };
     })));
@@ -72,13 +77,13 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
     } catch { /* The latest push remains valid without commit detail. */ }
   }
   return {
-    username:USERNAME, repositoryCount:all.length, commitCount:0, languages:{}, currentRepo,
+    username:USERNAME, repositoryCount:publicRepos.length, commitCount:0, languages:{}, currentRepo,
     recentRepos:repositories.slice(0,8), recentActivity:[], syncedAt:now.toISOString(), dataStatus:'synced',
     contributionData:{schemaVersion:2, currentRepo, repositories,
       totalStars:owned.reduce((sum,r)=>sum+r.stargazers_count,0),
       totalForks:owned.reduce((sum,r)=>sum+r.forks_count,0),
-      technologies:[...new Set(owned.map(r=>r.language).filter((v):v is string=>Boolean(v)))],
-      stats:{publicRepositories:all.length, createdRepositories:owned.length,
+      technologies:[...new Set(publicRepos.map(r=>r.language).filter((v):v is string=>Boolean(v)))],
+      stats:{publicRepositories:publicRepos.length, createdRepositories:owned.length,
         activeRepositories:owned.filter(r=>!r.archived && Date.parse(r.pushed_at)>=since).length,
         newRepositories:owned.filter(r=>Date.parse(r.created_at)>=since).length,
         hostedProjects:repositories.filter(r=>r.isHosted).length,
@@ -88,7 +93,7 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
         productionReadyDefinition:'A stable GitHub release or an explicit production-ready topic. These are maintainer signals, not a production audit.',readinessComplete},
     },
   };
-}, ['public-github-portfolio-v1'], { revalidate:3600 });
+}
 
 export async function getPublicGithub(): Promise<GithubSummary | null> {
   try { return await loadPublicGithub(); }

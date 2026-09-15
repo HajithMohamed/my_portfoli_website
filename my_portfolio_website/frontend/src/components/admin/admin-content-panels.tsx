@@ -263,6 +263,12 @@ export function CertificatesPanel() {
         issueDate: form.get("issueDate") || undefined,
         credentialUrl: form.get("credentialUrl") || undefined,
         imageUrl: imageUrl || undefined,
+        description: form.get("description") || undefined,
+        courseUrl: form.get("courseUrl") || undefined,
+        instructor: form.get("instructor") || undefined,
+        instructorUrl: form.get("instructorUrl") || undefined,
+        studentUrl: form.get("studentUrl") || undefined,
+        durationHours: form.get("durationHours") ? Number(form.get("durationHours")) : undefined,
       }),
     });
     currentForm.reset();
@@ -290,6 +296,12 @@ export function CertificatesPanel() {
               <Input name="issueDate" type="date" />
             </div>
             <Input name="credentialUrl" placeholder="Credential URL (optional)" />
+            <Textarea name="description" placeholder="Certificate details and validation notes" />
+            <Input name="courseUrl" placeholder="Course URL (optional)" />
+            <Input name="instructor" placeholder="Instructor name and role (optional)" />
+            <Input name="instructorUrl" placeholder="Instructor profile URL (optional)" />
+            <Input name="studentUrl" placeholder="Student profile URL (optional)" />
+            <Input min={1} name="durationHours" placeholder="Course duration in hours" type="number" />
             <Input accept="image/*" name="file" type="file" />
             <Input name="imageUrl" placeholder="…or image URL (optional)" />
             <Button disabled={uploading} type="submit">

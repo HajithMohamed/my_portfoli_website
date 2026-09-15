@@ -392,9 +392,9 @@ export default function WorkspaceScene({
 
   return (
     <Canvas
-      dpr={[1, device === "laptop" ? 1.5 : 1]}
+      dpr={1}
       camera={{ position: cameraPos, fov: device === "phone" ? 38 : 42 }}
-      gl={{ antialias: device === "laptop", alpha: true }}
+      gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
       style={{ background: "transparent" }}
     >
       <ambientLight intensity={0.35} />

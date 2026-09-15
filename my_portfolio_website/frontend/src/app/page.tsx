@@ -7,13 +7,22 @@ import { NowDeploying } from "@/components/command/now-deploying";
 import { ProjectsShowcase } from "@/components/command/projects-showcase";
 import { ArchitectureMap } from "@/components/command/architecture-map";
 import { SkillsConstellation } from "@/components/command/skills-constellation";
-import { SignalLog } from "@/components/command/signal-log";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
 import { getHomeData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import type { GithubSummary, Project } from "@/lib/types";
+
+/** Only these projects appear on the homepage — the full list lives at /projects. */
+const HOMEPAGE_SLUGS = new Set([
+  "saga-elite",
+  "tech-bridge",
+  "shoe-bank",                          // Shoe Bank (CMS slug from SHOE_BANK_MERNSTACK)
+  "footwear-business-management-system", // Shoe Bank (story repo slug)
+  "nextgen-mobile-shop",                // NEXTGEN Mobile Shop
+  "library-management-system",          // University Library Management System
+]);
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -53,7 +62,7 @@ function projectFromCurrentRepo(github: GithubSummary): Project | null {
 }
 
 export default async function Home() {
-  const { profile, skills, projects, blogs, resume, github, testimonials, certificates } =
+  const { profile, skills, projects, resume, github, testimonials, certificates } =
     await getHomeData();
 
   const currentRepoUrl = (github.currentRepo ?? github.contributionData?.currentRepo)?.url;
@@ -110,9 +119,9 @@ export default async function Home() {
 
           <SectionDivider label="sys.portfolio" />
 
-          {/* Projects */}
+          {/* Projects — curated highlights only; full list at /projects */}
           <div id="projects" className="scroll-mt-24">
-            <ProjectsShowcase projects={projects} />
+            <ProjectsShowcase projects={projects.filter((p) => HOMEPAGE_SLUGS.has(p.slug))} />
           </div>
 
           <SectionDivider label="sys.infrastructure" />
@@ -125,9 +134,8 @@ export default async function Home() {
 
           <SectionDivider label="sys.intelligence" />
 
-          {/* Blog & Intel */}
+          {/* Credentials & testimonials */}
           <div className="space-y-6">
-            <SignalLog posts={blogs} />
             <IntelDossier testimonials={testimonials} certificates={certificates} />
           </div>
 

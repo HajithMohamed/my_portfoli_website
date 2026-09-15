@@ -315,6 +315,12 @@ model Certificate {
   issueDate     DateTime?
   credentialUrl String?
   imageUrl      String?
+  description   String?
+  courseUrl     String?
+  instructor    String?
+  instructorUrl String?
+  studentUrl    String?
+  durationHours Int?
   order         Int       @default(0)
   createdAt     DateTime  @default(now())
 

@@ -10,7 +10,7 @@ const backendOrigin = (
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // GitHub-generated repo social cards used as project cover images.
+      // Optional remote images supplied by repository metadata or the CMS.
       { protocol: "https", hostname: "opengraph.githubassets.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "raw.githubusercontent.com" },
@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
       // Admin CMS uploads.
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
+  },
+  async redirects() {
+    // The protected control center moved away from an encoded leading-underscore
+    // segment because Next 16 generates incompatible route types for that form.
+    // Keep existing private bookmarks working without exposing a second route.
+    return [
+      {
+        source: "/_internal/:path*",
+        destination: "/admin/:path*",
+        permanent: false,
+      },
+    ];
   },
   async rewrites() {
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];

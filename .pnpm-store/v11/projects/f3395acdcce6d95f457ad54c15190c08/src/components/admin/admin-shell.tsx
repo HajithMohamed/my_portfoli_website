@@ -10,17 +10,17 @@ import { cn } from "@/lib/utils";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 const nav = [
-  ["Dashboard", "/_internal/dashboard"],
-  ["Analytics", "/_internal/analytics"],
-  ["Profile", "/_internal/profile"],
-  ["Projects", "/_internal/projects"],
-  ["Blog", "/_internal/blog"],
-  ["Skills", "/_internal/skills"],
-  ["Photos", "/_internal/media"],
-  ["Testimonials", "/_internal/testimonials"],
-  ["Credentials", "/_internal/credentials"],
-  ["Resume", "/_internal/resume"],
-  ["Messages", "/_internal/messages"],
+  ["Dashboard", "/admin/dashboard"],
+  ["Analytics", "/admin/analytics"],
+  ["Profile", "/admin/profile"],
+  ["Projects", "/admin/projects"],
+  ["Blog", "/admin/blog"],
+  ["Skills", "/admin/skills"],
+  ["Photos", "/admin/media"],
+  ["Testimonials", "/admin/testimonials"],
+  ["Credentials", "/admin/credentials"],
+  ["Resume", "/admin/resume"],
+  ["Messages", "/admin/messages"],
 ] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {

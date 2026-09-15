@@ -23,6 +23,11 @@ export class ProjectsController {
     return this.projectsService.publicProjects();
   }
 
+  @Get('projects/visibility')
+  publicVisibility() {
+    return this.projectsService.publicVisibility();
+  }
+
   @Get('projects/:slug')
   publicBySlug(@Param('slug') slug: string) {
     return this.projectsService.findBySlug(slug);

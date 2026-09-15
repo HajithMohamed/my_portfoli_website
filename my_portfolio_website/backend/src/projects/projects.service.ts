@@ -22,6 +22,13 @@ export class ProjectsService {
     });
   }
 
+  publicVisibility() {
+    return this.prisma.project.findMany({
+      where: { githubUrl: { not: null } },
+      select: { id: true, githubUrl: true, status: true },
+    });
+  }
+
   async findBySlug(slug: string, includeDrafts = false) {
     const project = await this.prisma.project.findUnique({
       where: { slug },

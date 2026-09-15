@@ -4,14 +4,13 @@ import { getSiteUrl } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
-  const { projects, blogs } = await getHomeData();
+  const { projects } = await getHomeData();
   return [
     "",
     "/projects",
     "/about",
-    "/blog",
+    "/certificates",
     ...projects.map((project) => `/projects/${project.slug}`),
-    ...blogs.map((post) => `/blog/${post.slug}`),
   ].map((path) => ({
     url: `${siteUrl}${path}`,
     lastModified: new Date(),

@@ -118,7 +118,12 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   // ---- scheduling ----------------------------------------------------------
 
   async onApplicationBootstrap() {
-    const latest = await this.latestSummary();
+    const latest = await this.latestSummary().catch((error) => {
+      this.logger.warn(
+        `GitHub snapshot unavailable at startup: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+      return null;
+    });
     const stale =
       !latest ||
       !isRecord(latest.contributionData) ||

@@ -7,12 +7,22 @@ import { NowDeploying } from "@/components/command/now-deploying";
 import { ProjectsShowcase } from "@/components/command/projects-showcase";
 import { ArchitectureMap } from "@/components/command/architecture-map";
 import { SkillsConstellation } from "@/components/command/skills-constellation";
-import { SignalLog } from "@/components/command/signal-log";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
-import { getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/public-data";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 import type { GithubSummary, Project } from "@/lib/types";
+
+/** Only these projects appear on the homepage — the full list lives at /projects. */
+const HOMEPAGE_SLUGS = new Set([
+  "saga-elite",
+  "tech-bridge",
+  "shoe-bank",                          // Shoe Bank (CMS slug from SHOE_BANK_MERNSTACK)
+  "footwear-business-management-system", // Shoe Bank (story repo slug)
+  "nextgen-mobile-shop",                // NEXTGEN Mobile Shop
+  "library-management-system",          // University Library Management System
+]);
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -40,11 +50,11 @@ function projectFromCurrentRepo(github: GithubSummary): Project | null {
     id: repo.fullName,
     title: titleFromRepoName(repo.name),
     slug: repo.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-    description: repo.description ?? "Current GitHub repository synced from the live portfolio integration.",
+    description: repo.description ?? "Most recently pushed public repository on GitHub.",
     techStack: repo.languages?.length ? repo.languages : [repo.language ?? "MERN Stack"].filter(Boolean),
     githubUrl: repo.url,
     liveUrl: repo.homepage,
-    category: "GitHub Focus",
+    category: "GitHub repository",
     status: repo.isArchived ? "ARCHIVED" : "ACTIVE",
     featured: true,
     updatedAt: repo.pushedAt ?? repo.updatedAt ?? undefined,
@@ -52,11 +62,11 @@ function projectFromCurrentRepo(github: GithubSummary): Project | null {
 }
 
 export default async function Home() {
-  const { profile, skills, projects, blogs, resume, github, testimonials, certificates } =
+  const { profile, skills, projects, resume, github, testimonials, certificates } =
     await getHomeData();
 
   const currentRepoUrl = (github.currentRepo ?? github.contributionData?.currentRepo)?.url;
-  const inFlight =
+  const latestRepository =
     projects.find((p) => currentRepoUrl && p.githubUrl?.toLowerCase() === currentRepoUrl.toLowerCase()) ??
     projectFromCurrentRepo(github) ??
     projects.find((p) => p.featured) ??
@@ -68,8 +78,19 @@ export default async function Home() {
     name: profile.name,
     jobTitle: profile.title,
     description: profile.bio,
-    email: `mailto:${profile.email}`,
-    address: { "@type": "PostalAddress", addressLocality: profile.location },
+    ...(profile.email ? { email: `mailto:${profile.email}` } : {}),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Beach Road Palamunai-11",
+      addressLocality: "Arayampathy",
+      addressRegion: "Batticaloa",
+      addressCountry: "LK",
+    },
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: PERSONAL_IDENTITY.university,
+      department: PERSONAL_IDENTITY.faculty,
+    },
     image: profile.profileImageUrl ?? undefined,
     sameAs: profile.socialLinks?.map((link) => link.url).filter(Boolean),
     knowsAbout: skills.map((skill) => skill.name),
@@ -93,14 +114,14 @@ export default async function Home() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
             <SystemStatus profile={profile} />
             <GithubTelemetry github={github} />
-            <NowDeploying project={inFlight} />
+            <NowDeploying project={latestRepository} />
           </div>
 
           <SectionDivider label="sys.portfolio" />
 
-          {/* Projects */}
+          {/* Projects — curated highlights only; full list at /projects */}
           <div id="projects" className="scroll-mt-24">
-            <ProjectsShowcase projects={projects} />
+            <ProjectsShowcase projects={projects.filter((p) => HOMEPAGE_SLUGS.has(p.slug))} />
           </div>
 
           <SectionDivider label="sys.infrastructure" />
@@ -113,9 +134,8 @@ export default async function Home() {
 
           <SectionDivider label="sys.intelligence" />
 
-          {/* Blog & Intel */}
+          {/* Credentials & testimonials */}
           <div className="space-y-6">
-            <SignalLog posts={blogs} />
             <IntelDossier testimonials={testimonials} certificates={certificates} />
           </div>
 

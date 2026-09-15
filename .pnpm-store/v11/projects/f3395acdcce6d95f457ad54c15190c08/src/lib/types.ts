@@ -57,6 +57,7 @@ export type Project = {
   isCurrent?: boolean;
   isHosted?: boolean;
   isProductionReady?: boolean;
+  readinessChecked?: boolean;
   readinessEvidence?: Array<{ kind: string; label: string; url: string }>;
   sourceUrl?: string;
   coverImageAlt?: string;
@@ -136,6 +137,7 @@ export type ContributionData = {
     hostedDefinition: string;
     productionReadyDefinition: string;
     readinessComplete: boolean;
+    languageRepositoriesSampled?: number;
   };
 };
 
@@ -166,9 +168,11 @@ export type PortfolioRepository = {
   isArchived?: boolean;
   isHosted?: boolean;
   isProductionReady?: boolean;
+  readinessChecked?: boolean;
   readinessEvidence?: Array<{ kind: string; label: string; url: string }>;
   goal?: string | null;
   goalSourceUrl?: string;
+  latestRelease?: { tag: string; url: string; publishedAt: string } | null;
 };
 
 export type GithubSummary = {
@@ -215,6 +219,12 @@ export type Certificate = {
   issueDate?: string | null;
   credentialUrl?: string | null;
   imageUrl?: string | null;
+  description?: string | null;
+  courseUrl?: string | null;
+  instructor?: string | null;
+  instructorUrl?: string | null;
+  studentUrl?: string | null;
+  durationHours?: number | null;
   order?: number;
 };
 

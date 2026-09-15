@@ -219,6 +219,12 @@ export type Certificate = {
   issueDate?: string | null;
   credentialUrl?: string | null;
   imageUrl?: string | null;
+  description?: string | null;
+  courseUrl?: string | null;
+  instructor?: string | null;
+  instructorUrl?: string | null;
+  studentUrl?: string | null;
+  durationHours?: number | null;
   order?: number;
 };
 
