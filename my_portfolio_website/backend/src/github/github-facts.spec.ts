@@ -25,13 +25,14 @@ const repo = (overrides: Partial<GithubRepo> = {}): GithubRepo => ({
 });
 
 describe('GitHub portfolio facts', () => {
-  it('never includes private, internal, or another owner repositories', () => {
+  it('includes only public repositories created by the configured owner', () => {
     expect(
       publicOwnerRepos(
         [
           repo(),
           repo({ private: true }),
           repo({ visibility: 'internal' }),
+          repo({ fork: true }),
           repo({ full_name: 'another-owner/portfolio' }),
         ],
         'hajithmohamed',

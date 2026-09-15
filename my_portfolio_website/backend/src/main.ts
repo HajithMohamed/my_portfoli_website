@@ -23,8 +23,6 @@ async function bootstrap() {
   // working when those vars are unset on the host — which is the case today.
   const allowedOrigins = [
     process.env.FRONTEND_URL,
-    'https://hzlabs.studio',
-    'https://www.hzlabs.studio',
     'http://localhost:3000',
     'http://localhost:3001',
   ].filter(Boolean) as string[];
@@ -35,9 +33,9 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Hertz Labs Portfolio API')
+    .setTitle('Mohamed Hajith Portfolio API')
     .setDescription(
-      'CMS, portfolio, GitHub intelligence, resume, and message APIs for Hertz Labs.',
+      'CMS, portfolio, GitHub repository data, resume, and message APIs for Mohamed Hajith.',
     )
     .setVersion('0.1.0')
     .addBearerAuth()
@@ -49,7 +47,7 @@ async function bootstrap() {
 
   try {
     await app.listen(port);
-    console.log(`🚀 Hertz Labs API running on http://localhost:${port}`);
+    console.log(`Portfolio API running on http://localhost:${port}`);
     console.log(`📄 Swagger docs at http://localhost:${port}/docs`);
   } catch (error: unknown) {
     if (

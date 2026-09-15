@@ -1,6 +1,6 @@
-# Hz Labs Architecture
+# Mohamed Hajith Portfolio Architecture
 
-Hz Labs is a separated monorepo with a public portfolio frontend and a backend CMS/API.
+Mohamed Hajith's portfolio is a separated monorepo with a public portfolio frontend and a backend CMS/API.
 
 ## Runtime
 

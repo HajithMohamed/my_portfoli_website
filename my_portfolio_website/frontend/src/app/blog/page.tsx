@@ -2,12 +2,13 @@ import Link from "next/link";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { Panel } from "@/components/hud/panel";
-import { getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/public-data";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = {
   title: "Signal Log",
-  description: "Engineering notes and product thinking from Hertz Labs.",
+  description:
+    "README-based project notes by Mohamed Hajith, covering the goals and design of public GitHub projects.",
 };
 
 export default async function BlogPage() {
@@ -26,8 +27,8 @@ export default async function BlogPage() {
               Signal Log
             </h1>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              Engineering notes broadcast from the console. No hype, no hot takes — only what
-              shipped and why.
+              Project notes based on public repository documentation: the goal, the design, and
+              the evidence available for each project.
             </p>
           </header>
 

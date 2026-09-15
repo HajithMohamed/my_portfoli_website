@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Panel } from "@/components/hud/panel";
-import { computeStreak, heatmapLevels, languageShares } from "@/lib/github-insights";
+import { heatmapLevels, languageShares } from "@/lib/github-insights";
 import type { CurrentRepositoryStatus, GithubSummary } from "@/lib/types";
 import { motion } from "framer-motion";
 import { CircleDot, ExternalLink, GitBranch, GitCommit, GitFork, Star } from "lucide-react";
@@ -125,7 +125,7 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-cyan/70">
-            <span>current repo</span>
+            <span>latest public repo</span>
             <span className={`flex shrink-0 items-center gap-1 rounded-sm border ${tone.border} px-1.5 py-0.5 ${tone.text}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
               {repo.statusLabel ?? "synced"}
@@ -151,7 +151,7 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
         <GitCommit size={13} className="mt-0.5 shrink-0 text-cyan/70" />
         <div className="min-w-0">
           <div className="truncate text-foreground">
-            {repo.latestCommit?.message ?? "Waiting for first live GitHub sync"}
+            {repo.latestCommit?.message ?? "Latest commit details were not returned by GitHub"}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
             {repo.latestCommit?.sha ? <span>{repo.latestCommit.sha}</span> : null}
@@ -177,15 +177,11 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
 }
 
 export function GithubTelemetry({ github }: { github: GithubSummary }) {
-  const contributions = github.contributionData?.totalContributions ?? github.commitCount;
-  const streak = computeStreak(github);
-  const stars = github.contributionData?.totalStars ?? 0;
+  const stats = github.contributionData?.stats;
+  const unavailable = github.dataStatus === "unavailable";
   const currentRepo = currentRepoFor(github);
-  
-  // Need to ensure heatmap is properly sized for grid
-  const rawHeatmap = heatmapLevels(github, 14); 
-  const heatmap = rawHeatmap.length ? rawHeatmap : Array(14 * 7).fill(0);
-  
+  const hasContributionCalendar = Boolean(github.contributionData?.calendar?.weeks?.length);
+  const heatmap = hasContributionCalendar ? heatmapLevels(github, 14) : [];
   const languages = languageShares(github, 3); // Reduced to 3 to fit better in height
 
   return (
@@ -194,11 +190,40 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
         {currentRepo ? <CurrentRepoCard repo={currentRepo} /> : null}
 
         <div className="grid grid-cols-2 gap-3 font-mono text-xs">
-          <Stat label="commits/yr" value={contributions.toLocaleString()} numValue={contributions} />
-          <Stat label="streak" value={`${streak}d`} accent />
-          <Stat label="repos" value={github.repositoryCount.toString()} numValue={github.repositoryCount} />
-          <Stat label="stars" value={stars.toLocaleString()} numValue={stars} />
+          <Stat
+            label="public repos"
+            value={unavailable ? "—" : (stats?.publicRepositories ?? github.repositoryCount).toString()}
+            numValue={unavailable ? undefined : (stats?.publicRepositories ?? github.repositoryCount)}
+          />
+          <Stat
+            label="created repos"
+            value={unavailable ? "—" : (stats?.createdRepositories ?? github.repositoryCount).toString()}
+            numValue={unavailable ? undefined : (stats?.createdRepositories ?? github.repositoryCount)}
+          />
+          <Stat
+            label="active / 30d"
+            value={unavailable ? "—" : (stats?.activeRepositories ?? 0).toString()}
+            numValue={unavailable ? undefined : stats?.activeRepositories}
+            accent
+          />
+          <Stat
+            label="sites listed"
+            value={unavailable ? "—" : (stats?.hostedProjects ?? 0).toString()}
+            numValue={unavailable ? undefined : stats?.hostedProjects}
+          />
         </div>
+
+        {stats ? (
+          <p className="-mt-2 font-mono text-[9px] leading-relaxed text-muted-foreground">
+            {stats.productionReadyProjects === 1 ? "1 repository has" : `${stats.productionReadyProjects} repositories have`} an explicit stable release or a <span className="text-cyan/80">production-ready</span> topic. Listed sites are GitHub homepage links; availability is not checked.
+          </p>
+        ) : null}
+
+        {unavailable ? (
+          <p className="rounded-md border border-cyan/15 bg-surface/40 p-3 font-mono text-[10px] leading-relaxed text-muted-foreground">
+            GitHub data is temporarily unavailable, so this panel does not substitute zeroes for live counts.
+          </p>
+        ) : null}
 
         {heatmap.length > 0 && (
           <div>

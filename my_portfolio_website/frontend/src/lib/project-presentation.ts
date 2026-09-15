@@ -14,23 +14,24 @@ export function projectCodename(project: Project, index = 0): string {
 }
 
 export function projectYear(project: Project): string {
-  if (!project.updatedAt) return new Date().getFullYear().toString();
-  return new Date(project.updatedAt).getFullYear().toString();
+  const value = project.updatedAt ?? project.createdAt;
+  if (!value || Number.isNaN(Date.parse(value))) return "date unavailable";
+  return new Date(value).getFullYear().toString();
 }
 
-export type HudStatus = "in-flight" | "shipped" | "maintenance";
+export type HudStatus = "latest-activity" | "repository" | "archived";
 
-/** Most recently updated project reads as in-flight; the rest as shipped. */
+/** A repository's latest push is activity, not evidence of a deployment. */
 export function projectHudStatus(project: Project, isLatest: boolean): HudStatus {
-  if (project.status === "ARCHIVED") return "maintenance";
-  if (isLatest) return "in-flight";
-  return "shipped";
+  if (project.status === "ARCHIVED") return "archived";
+  if (project.isCurrent || isLatest) return "latest-activity";
+  return "repository";
 }
 
 export const HUD_STATUS_STYLE: Record<HudStatus, string> = {
-  "in-flight": "text-signal-amber bg-signal-amber/10 border-signal-amber/30",
-  shipped: "text-signal-green bg-signal-green/10 border-signal-green/30",
-  maintenance: "text-muted-foreground bg-surface border-cyan/15",
+  "latest-activity": "text-cyan bg-cyan/10 border-cyan/30",
+  repository: "text-signal-green bg-signal-green/10 border-signal-green/30",
+  archived: "text-muted-foreground bg-surface border-cyan/15",
 };
 
 /** Pull a named section body out of the project's case study. */
@@ -47,8 +48,8 @@ export function caseStudySection(project: Project, headings: string[]): string |
 
 export function projectBriefing(project: Project) {
   return {
-    problem: caseStudySection(project, ["problem"]),
+    problem: caseStudySection(project, ["goal", "problem"]),
     approach: caseStudySection(project, ["solution", "approach", "architecture"]),
-    outcome: project.outcome ?? caseStudySection(project, ["outcome", "result"]),
+    outcome: project.outcome ?? caseStudySection(project, ["workflow", "outcome", "result"]),
   };
 }

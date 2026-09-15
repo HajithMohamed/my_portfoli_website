@@ -55,7 +55,13 @@ export type RepositoryInsight = {
   latestRelease: { tag: string; url: string; publishedAt: string } | null;
 };
 
-/** Owner repositories only: authenticated responses must never expose private work. */
+/**
+ * Public repositories created by the configured owner.
+ *
+ * `type=owner` can still include forks. They are public work owned by the
+ * account, but not repositories the portfolio owner created, so keep them out
+ * of the portfolio inventory and its counts.
+ */
 export function publicOwnerRepos(
   repos: GithubRepo[],
   username: string,
@@ -63,6 +69,7 @@ export function publicOwnerRepos(
   return repos.filter(
     (repo) =>
       repo.private !== true &&
+      !repo.fork &&
       (!repo.visibility || repo.visibility === 'public') &&
       repo.full_name.split('/')[0]?.toLowerCase() === username.toLowerCase(),
   );

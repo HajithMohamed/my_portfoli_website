@@ -53,6 +53,7 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       isCurrent: repo.fullName.toLowerCase() === current,
       isHosted: Boolean(publicWebsite(repo.liveUrl ?? repo.homepage)),
       isProductionReady: repo.isProductionReady ?? false,
+      readinessChecked: repo.readinessChecked,
       readinessEvidence: repo.readinessEvidence ?? [],
       sourceUrl: story?.sourceUrl ?? repo.goalSourceUrl ?? repo.url,
     } satisfies Project;

@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { Panel } from "@/components/hud/panel";
-import { getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import Link from "next/link";
 

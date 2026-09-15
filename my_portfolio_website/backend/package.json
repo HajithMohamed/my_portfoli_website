@@ -1,8 +1,8 @@
 {
   "name": "backend",
   "version": "0.0.1",
-  "description": "NestJS API for the Hz Labs portfolio CMS and GitHub intelligence platform.",
-  "author": "Hz Labs",
+  "description": "NestJS API for Mohamed Hajith's portfolio CMS and GitHub repository dashboard.",
+  "author": "Mohamed Hajith",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

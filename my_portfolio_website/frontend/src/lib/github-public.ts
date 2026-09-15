@@ -36,12 +36,15 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
   for (let start = 0; start < owned.length; start += 6) {
     repositories.push(...await Promise.all(owned.slice(start, start + 6).map(async repo => {
       const readinessEvidence: NonNullable<PortfolioRepository['readinessEvidence']> = [];
+      let readinessChecked = Boolean(repo.archived);
       if ((repo.topics ?? []).includes('production-ready') && !repo.archived) {
         readinessEvidence.push({kind:'topic', label:'Maintainer marked production-ready', url:repo.html_url});
+        readinessChecked = true;
       }
       if (!repo.archived) {
         try {
           const release = await githubFetch<Release>(`/repos/${repo.full_name}/releases/latest`);
+          readinessChecked = true;
           if (release && !release.draft && !release.prerelease && release.published_at) {
             readinessEvidence.push({kind:'release', label:`Stable release ${release.tag_name}`, url:release.html_url});
           }
@@ -54,6 +57,7 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
         pushedAt:repo.pushed_at, updatedAt:repo.updated_at, homepage, liveUrl:homepage,
         stars:repo.stargazers_count, forks:repo.forks_count, defaultBranch:repo.default_branch,
         isArchived:repo.archived, isHosted:Boolean(homepage), isProductionReady:readinessEvidence.length > 0,
+        readinessChecked,
         readinessEvidence,
       };
     })));
@@ -72,13 +76,13 @@ const loadPublicGithub = unstable_cache(async (): Promise<GithubSummary> => {
     } catch { /* The latest push remains valid without commit detail. */ }
   }
   return {
-    username:USERNAME, repositoryCount:all.length, commitCount:0, languages:{}, currentRepo,
+    username:USERNAME, repositoryCount:owned.length, commitCount:0, languages:{}, currentRepo,
     recentRepos:repositories.slice(0,8), recentActivity:[], syncedAt:now.toISOString(), dataStatus:'synced',
     contributionData:{schemaVersion:2, currentRepo, repositories,
       totalStars:owned.reduce((sum,r)=>sum+r.stargazers_count,0),
       totalForks:owned.reduce((sum,r)=>sum+r.forks_count,0),
       technologies:[...new Set(owned.map(r=>r.language).filter((v):v is string=>Boolean(v)))],
-      stats:{publicRepositories:all.length, createdRepositories:owned.length,
+      stats:{publicRepositories:owned.length, createdRepositories:owned.length,
         activeRepositories:owned.filter(r=>!r.archived && Date.parse(r.pushed_at)>=since).length,
         newRepositories:owned.filter(r=>Date.parse(r.created_at)>=since).length,
         hostedProjects:repositories.filter(r=>r.isHosted).length,

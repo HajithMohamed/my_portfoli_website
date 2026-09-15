@@ -387,10 +387,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
           repositoryCount: sourceRepos.length,
           commitCount,
           languages,
-          recentRepos: recentRepos as unknown as Prisma.InputJsonValue,
+          recentRepos: inputJson(recentRepos),
           recentActivity,
-          contributionData:
-            contributionData as unknown as Prisma.InputJsonValue,
+          contributionData: inputJson(contributionData),
         },
       });
 
@@ -936,6 +935,11 @@ function numberValue(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
+/** Values assembled for snapshots contain only JSON-safe API data. */
+function inputJson(value: unknown): Prisma.InputJsonValue {
+  return value as Prisma.InputJsonValue;
+}
+
 function encodeRepoFullName(fullName: string): string {
   return fullName.split('/').map(encodeURIComponent).join('/');
 }
@@ -975,7 +979,6 @@ const TECH_ALIASES: Record<string, string> = {
   jwt: 'JWT',
   cloudinary: 'Cloudinary',
   vercel: 'Vercel',
-  netlify: 'Netlify',
   supabase: 'Supabase',
 };
 

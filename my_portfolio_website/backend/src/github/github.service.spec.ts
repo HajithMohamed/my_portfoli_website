@@ -1,6 +1,25 @@
 import { GithubService } from './github.service';
 import { GithubRepo } from './github-facts';
 
+type SnapshotInput = {
+  repositoryCount: number;
+  contributionData: {
+    stats: Record<string, number>;
+    repositories: {
+      goal: string | null;
+      readinessChecked: boolean;
+      isProductionReady: boolean;
+    }[];
+    provenance: { readinessComplete: boolean };
+  };
+};
+
+function fetchInputUrl(input: RequestInfo | URL): string {
+  if (typeof input === 'string') return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
 describe('GithubService sync', () => {
   afterEach(() => jest.restoreAllMocks());
 
@@ -43,20 +62,28 @@ describe('GithubService sync', () => {
       homepage: 'https://current.vercel.app',
       pushed_at: '2026-09-09T00:00:00Z',
     };
+    let createdData: SnapshotInput | undefined;
+    let suggestionData: unknown[] = [];
     const prisma = {
       githubSnapshot: {
         findFirst: jest.fn().mockResolvedValue(null),
         create: jest
           .fn()
-          .mockImplementation(({ data }: { data: Record<string, unknown> }) =>
-            Promise.resolve({ ...data, syncedAt: new Date() }),
-          ),
+          .mockImplementation(({ data }: { data: SnapshotInput }) => {
+            createdData = data;
+            return Promise.resolve({ ...data, syncedAt: new Date() });
+          }),
       },
       syncSuggestion: {
         findMany: jest
           .fn()
           .mockResolvedValue([{ payload: { fullName: second.full_name } }]),
-        createMany: jest.fn().mockResolvedValue({ count: 1 }),
+        createMany: jest
+          .fn()
+          .mockImplementation(({ data }: { data: unknown[] }) => {
+            suggestionData = data;
+            return Promise.resolve({ count: data.length });
+          }),
       },
     };
     const config = {
@@ -68,8 +95,8 @@ describe('GithubService sync', () => {
         })[key],
     };
     const requested: string[] = [];
-    jest.spyOn(global, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
+    jest.spyOn(global, 'fetch').mockImplementation((input) => {
+      const url = fetchInputUrl(input);
       requested.push(url);
       const json = (body: unknown, status = 200) =>
         new Response(JSON.stringify(body), {
@@ -77,19 +104,25 @@ describe('GithubService sync', () => {
           headers: { 'Content-Type': 'application/json' },
         });
       if (url.includes('/users/HajithMohamed/repos?'))
-        return json(url.includes('page=2') ? [second] : firstPage);
-      if (url.endsWith('/graphql')) return json({ data: {} });
-      if (url.includes('/events/public')) return json([]);
-      if (url.endsWith('/users/HajithMohamed'))
-        return json({ followers: 2, following: 3 });
-      if (url.endsWith('/languages')) return json({ TypeScript: 100 });
-      if (url.includes('/commits?')) return json([]);
-      if (url.endsWith('/releases/latest')) return json({}, 404);
-      if (url.endsWith('/readme'))
-        return new Response(
-          '# Project\n\n## Goal\nHelp people organize their research and project work in one place.',
+        return Promise.resolve(
+          json(url.includes('page=2') ? [second] : firstPage),
         );
-      throw new Error(`Unexpected request ${url}`);
+      if (url.endsWith('/graphql')) return Promise.resolve(json({ data: {} }));
+      if (url.includes('/events/public')) return Promise.resolve(json([]));
+      if (url.endsWith('/users/HajithMohamed'))
+        return Promise.resolve(json({ followers: 2, following: 3 }));
+      if (url.endsWith('/languages'))
+        return Promise.resolve(json({ TypeScript: 100 }));
+      if (url.includes('/commits?')) return Promise.resolve(json([]));
+      if (url.endsWith('/releases/latest'))
+        return Promise.resolve(json({}, 404));
+      if (url.endsWith('/readme'))
+        return Promise.resolve(
+          new Response(
+            '# Project\n\n## Goal\nHelp people organize their research and project work in one place.',
+          ),
+        );
+      return Promise.reject(new Error(`Unexpected request ${url}`));
     });
     const service = new GithubService(prisma as never, config as never);
     const snapshot = await service.sync();
@@ -98,18 +131,17 @@ describe('GithubService sync', () => {
     );
     expect(
       requested.some(
-        (url) => url.includes('/secret/') || url.includes('/someone-else/'),
+        (url) =>
+          url.includes('/secret/') ||
+          url.includes('/someone-else/') ||
+          url.includes('/HajithMohamed/fork'),
       ),
     ).toBe(false);
     expect(snapshot?.repositoryCount).toBe(2);
     expect(snapshot?.currentRepo?.name).toBe('current');
-    const data = prisma.githubSnapshot.create.mock.calls[0][0].data as {
-      contributionData: {
-        stats: Record<string, number>;
-        repositories: { goal: string; readinessChecked: boolean }[];
-      };
-    };
-    expect(data.contributionData.stats.publicRepositories).toBe(99);
+    if (!createdData) throw new Error('Expected a GitHub snapshot');
+    const data = createdData;
+    expect(data.contributionData.stats.publicRepositories).toBe(2);
     expect(data.contributionData.stats.hostedProjects).toBe(1);
     expect(data.contributionData.repositories[0].goal).toContain(
       'organize their research',
@@ -117,9 +149,7 @@ describe('GithubService sync', () => {
     expect(
       data.contributionData.repositories.every((repo) => repo.readinessChecked),
     ).toBe(true);
-    expect(prisma.syncSuggestion.createMany.mock.calls[0][0].data).toHaveLength(
-      1,
-    );
+    expect(suggestionData).toHaveLength(1);
   });
 
   it('does not label release lookup failures as a completed readiness check', async () => {
@@ -135,44 +165,39 @@ describe('GithubService sync', () => {
       stargazers_count: 0,
       forks_count: 0,
     };
+    let createdData: SnapshotInput | undefined;
     const prisma = {
       githubSnapshot: {
         findFirst: jest.fn().mockResolvedValue(null),
         create: jest
           .fn()
-          .mockImplementation(({ data }: { data: Record<string, unknown> }) =>
-            Promise.resolve(data),
-          ),
+          .mockImplementation(({ data }: { data: SnapshotInput }) => {
+            createdData = data;
+            return Promise.resolve(data);
+          }),
       },
       syncSuggestion: {
         findMany: jest.fn().mockResolvedValue([]),
         createMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };
-    jest.spyOn(global, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
+    jest.spyOn(global, 'fetch').mockImplementation((input) => {
+      const url = fetchInputUrl(input);
       if (url.includes('/users/HajithMohamed/repos?'))
-        return new Response(JSON.stringify([repo]));
+        return Promise.resolve(new Response(JSON.stringify([repo])));
       if (url.endsWith('/releases/latest') || url.endsWith('/readme'))
-        return new Response('{}', { status: 403 });
+        return Promise.resolve(new Response('{}', { status: 403 }));
       if (url.includes('/events/') || url.includes('/commits?'))
-        return new Response('[]');
-      return new Response('{}');
+        return Promise.resolve(new Response('[]'));
+      return Promise.resolve(new Response('{}'));
     });
     const service = new GithubService(
       prisma as never,
       { get: () => undefined } as never,
     );
     await service.sync();
-    const data = prisma.githubSnapshot.create.mock.calls[0][0].data as {
-      contributionData: {
-        provenance: { readinessComplete: boolean };
-        repositories: {
-          readinessChecked: boolean;
-          isProductionReady: boolean;
-        }[];
-      };
-    };
+    if (!createdData) throw new Error('Expected a GitHub snapshot');
+    const data = createdData;
     expect(data.contributionData.provenance.readinessComplete).toBe(false);
     expect(data.contributionData.repositories[0].readinessChecked).toBe(false);
     expect(data.contributionData.repositories[0].isProductionReady).toBe(false);

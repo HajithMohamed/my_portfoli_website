@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { Panel } from "@/components/hud/panel";
-import { getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/public-data";
 import {
   HUD_STATUS_STYLE,
   projectBriefing,
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 export const metadata = {
   title: "Systems",
   description:
-    "Shipped and in-flight software projects by Mohamed Hajith — commerce platforms, booking systems, authentication infrastructure.",
+    "Public GitHub repositories and README-backed project case studies by Mohamed Hajith.",
 };
 
 function LabelRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
@@ -50,8 +50,8 @@ export default async function ProjectsPage() {
                 <span className="inline-block h-2 w-2 rounded-full bg-cyan/80 animate-pulse-dot" />
               </h1>
               <p className="mt-4 max-w-xl text-muted-foreground leading-relaxed border-l-2 border-cyan/30 pl-4 py-1">
-                Every shipped project, in-flight system, and archived module — managed from the
-                CMS.
+                Public repositories from Mohamed Hajith&apos;s GitHub. Hosting and production-ready
+                labels appear only when the repository provides the relevant public evidence.
               </p>
             </div>
             <div className="hidden font-mono text-xs text-muted-foreground md:flex items-center gap-2 border border-cyan/10 bg-black/20 px-3 py-1.5 rounded-sm">
@@ -60,7 +60,7 @@ export default async function ProjectsPage() {
             </div>
           </header>
 
-          <Panel label="reactor.grid" subtitle="all missions" bodyClassName="p-0">
+          <Panel label="reactor.grid" subtitle="public repositories" bodyClassName="p-0">
             <div className="grid gap-px bg-cyan/10 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((p, i) => {
                 const status = projectHudStatus(p, i === 0);
@@ -77,8 +77,9 @@ export default async function ProjectsPage() {
                       {p.coverImage ? (
                         <Image
                           src={p.coverImage}
-                          alt={p.title}
+                          alt={p.coverImageAlt ?? p.title}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-105 group-hover:opacity-80"
                         />
                       ) : (
