@@ -1,17 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 
-// A fallback smooth scroller since Lenis isn't installed.
+/**
+ * Wrapper kept for backward-compatibility with layout.tsx imports.
+ * Delegates to the real Lenis-powered SmoothScroll component.
+ */
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    // We just ensure native smooth scrolling is set on html
-    document.documentElement.style.scrollBehavior = "smooth";
-    
-    return () => {
-      document.documentElement.style.scrollBehavior = "";
-    };
-  }, []);
-
-  return <>{children}</>;
+  return <SmoothScroll>{children}</SmoothScroll>;
 }
