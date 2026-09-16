@@ -62,6 +62,8 @@ export type Project = {
   sourceUrl?: string;
   coverImageAlt?: string;
   coverImageKind?: "concept";
+  dedupeKey?: string;
+  relatedRepositories?: string[];
 };
 
 export type BlogPost = {

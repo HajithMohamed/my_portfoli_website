@@ -18,6 +18,19 @@ export function publicWebsite(value?: string | null): string | null {
   } catch { return null; }
 }
 
+export function getProjectDedupeKey(repoFullName?: string | null, slug?: string | null): string {
+  const normalized = (repoFullName ?? slug ?? "").toLowerCase();
+  if (
+    normalized.includes("footwear_business_management_system") ||
+    normalized.includes("footwear-business-management-system") ||
+    normalized.includes("shoe_bank") ||
+    normalized.includes("shoe-bank")
+  ) {
+    return "shoe-bank";
+  }
+  return repoFullName?.toLowerCase() || slug?.toLowerCase() || "";
+}
+
 export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[] = []): Project[] {
   const repos = github.contributionData?.repositories;
   const cmsByRepo = new Map(cmsProjects.filter(p => p.githubUrl).map(p => [p.githubUrl!.replace(/\/$/, '').toLowerCase(), p]));
@@ -27,13 +40,17 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
     name: story.repository.split('/')[1], fullName: story.repository,
     url: `https://github.com/${story.repository}`, description: story.summary,
   }));
-  return available.map(repo => {
+  
+  const mappedProjects = available.map(repo => {
     const story = projectStories.find(s => s.repository.toLowerCase() === repo.fullName.toLowerCase());
     const cms = cmsByRepo.get(repo.url.toLowerCase());
+    const slug = cms?.slug ?? repositorySlug(repo.name);
+    const dedupeKey = getProjectDedupeKey(repo.fullName, slug);
     return {
       ...cms,
       id: `github:${repo.fullName}`,
-      slug: cms?.slug ?? repositorySlug(repo.name),
+      slug,
+      dedupeKey,
       title: story?.title ?? repo.name.replace(/[-_]+/g, ' '),
       description: story?.summary ?? repo.goal ?? repo.description ?? 'Public repository by Mohamed Hajith. View the source for project details.',
       techStack: story?.technologies ?? cms?.techStack ?? (repo.language ? [repo.language] : []),
@@ -60,7 +77,45 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
   }).filter(project => {
     const override = project.githubUrl ? cmsByRepo.get(project.githubUrl.replace(/\/$/, '').toLowerCase()) : undefined;
     return !override || override.status === 'ACTIVE';
-  }).sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent) || Number(b.featured) - Number(a.featured) || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  });
+
+  // Presentation grouping by dedupeKey to combine related repositories (e.g., Shoe Bank MERN + PHP versions)
+  const grouped = new Map<string, Project[]>();
+  for (const p of mappedProjects) {
+    const key = p.dedupeKey || p.slug;
+    const existing = grouped.get(key) ?? [];
+    existing.push(p);
+    grouped.set(key, existing);
+  }
+
+  const deduplicated: Project[] = [];
+  for (const [, group] of grouped) {
+    if (group.length === 1) {
+      deduplicated.push(group[0]);
+    } else {
+      // Prioritize the project that has a rich case study, cover image, or is current
+      group.sort((a, b) => {
+        const aScore = (a.caseStudy?.length ? 10 : 0) + (a.coverImage ? 5 : 0) + (a.isCurrent ? 20 : 0);
+        const bScore = (b.caseStudy?.length ? 10 : 0) + (b.coverImage ? 5 : 0) + (b.isCurrent ? 20 : 0);
+        return bScore - aScore;
+      });
+      const primary = { ...group[0] };
+      // Combine techStack without duplicates
+      const allTech = new Set(primary.techStack);
+      const relatedRepos: string[] = [];
+      for (const other of group.slice(1)) {
+        other.techStack.forEach(t => allTech.add(t));
+        if (other.githubUrl) relatedRepos.push(other.githubUrl);
+        if (!primary.liveUrl && other.liveUrl) primary.liveUrl = other.liveUrl;
+        if (other.featured) primary.featured = true;
+      }
+      primary.techStack = Array.from(allTech);
+      primary.relatedRepositories = relatedRepos;
+      deduplicated.push(primary);
+    }
+  }
+
+  return deduplicated.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent) || Number(b.featured) - Number(a.featured) || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
 }
 
 export function reviewedBlogPosts(): BlogPost[] {

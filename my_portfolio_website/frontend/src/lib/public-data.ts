@@ -102,7 +102,15 @@ export async function getHomeData(): Promise<HomeData> {
 
 export async function getProject(slug: string): Promise<Project | null> {
   const { projects } = await getHomeData();
-  return projects.find((project) => project.slug === slug) ?? null;
+  const normalizedSlug = slug.toLowerCase();
+  return (
+    projects.find(
+      (project) =>
+        project.slug.toLowerCase() === normalizedSlug ||
+        project.dedupeKey?.toLowerCase() === normalizedSlug ||
+        project.relatedRepositories?.some((r) => r.toLowerCase().includes(normalizedSlug))
+    ) ?? null
+  );
 }
 
 export async function getBlogPost(slug: string) {

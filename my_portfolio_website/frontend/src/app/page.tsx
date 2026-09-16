@@ -129,7 +129,7 @@ export default async function Home() {
           {/* Architecture & Skills */}
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-stretch">
             <ArchitectureMap />
-            <SkillsConstellation skills={skills} />
+            <SkillsConstellation skills={skills} projects={projects} />
           </div>
 
           <SectionDivider label="sys.intelligence" />
