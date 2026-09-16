@@ -7,6 +7,7 @@ import { heatmapLevels, languageShares } from "@/lib/github-insights";
 import type { CurrentRepositoryStatus, GithubSummary } from "@/lib/types";
 import { motion } from "framer-motion";
 import { CircleDot, ExternalLink, GitBranch, GitCommit, GitFork, Star } from "lucide-react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 const LEVEL_BG = [
   "rgba(92,208,255,0.03)",
@@ -67,25 +68,32 @@ function currentRepoFor(github: GithubSummary): CurrentRepositoryStatus | null {
 }
 
 function AnimatedCounter({ value }: { value: number }) {
-  const [count, setCount] = useState(0);
+  const prefersReduced = useReducedMotion();
+  const [count, setCount] = useState(() => (prefersReduced ? value : 0));
   
   useEffect(() => {
+    if (prefersReduced) {
+      setCount(value);
+      return;
+    }
     let start = 0;
     const end = value;
-    if (start === end) return;
-    const duration = 1500;
+    if (start === end) {
+      setCount(end);
+      return;
+    }
+    const duration = 1200;
     const startTime = Date.now();
     
     const tick = () => {
       const now = Date.now();
       const progress = Math.min((now - startTime) / duration, 1);
-      // easeOutQuart
       const ease = 1 - Math.pow(1 - progress, 4);
       setCount(Math.floor(ease * end));
       if (progress < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-  }, [value]);
+  }, [value, prefersReduced]);
   
   return <>{count.toLocaleString()}</>;
 }
@@ -178,7 +186,7 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
 
 export function GithubTelemetry({ github }: { github: GithubSummary }) {
   const stats = github.contributionData?.stats;
-  const unavailable = github.dataStatus === "unavailable";
+  const unavailable = github.dataStatus === "unavailable" || (!stats && github.repositoryCount === 0);
   const currentRepo = currentRepoFor(github);
   const hasContributionCalendar = Boolean(github.contributionData?.calendar?.weeks?.length);
   const heatmap = hasContributionCalendar ? heatmapLevels(github, 14) : [];
@@ -202,14 +210,14 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
           />
           <Stat
             label="active / 30d"
-            value={unavailable ? "—" : (stats?.activeRepositories ?? 0).toString()}
-            numValue={unavailable ? undefined : stats?.activeRepositories}
+            value={unavailable || stats?.activeRepositories === undefined ? "—" : stats.activeRepositories.toString()}
+            numValue={unavailable || stats?.activeRepositories === undefined ? undefined : stats.activeRepositories}
             accent
           />
           <Stat
             label="sites listed"
-            value={unavailable ? "—" : (stats?.hostedProjects ?? 0).toString()}
-            numValue={unavailable ? undefined : stats?.hostedProjects}
+            value={unavailable || stats?.hostedProjects === undefined ? "—" : stats.hostedProjects.toString()}
+            numValue={unavailable || stats?.hostedProjects === undefined ? undefined : stats.hostedProjects}
           />
         </div>
 

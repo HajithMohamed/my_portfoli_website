@@ -7,16 +7,18 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const NAV = [
   ["home", "/"],
-  ["projects", "/projects"],
   ["about", "/about"],
+  ["skills", "/#skills"],
+  ["projects", "/projects"],
   ["certificates", "/certificates"],
   ["comms", "/#comms"],
 ] as const;
 
-const VERSION = "v4.0.0";
+const VERSION = "v5.0.0";
 
 function useClock() {
   const [now, setNow] = useState<string>("");
@@ -156,9 +158,10 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
             })}
           </nav>
 
-          {/* Desktop Diagnostic */}
-          <div className="hidden shrink-0 items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground lg:flex">
-            <span className="text-cyan/70" title={location}>{PERSONAL_IDENTITY.shortLocation}</span>
+          {/* Desktop Diagnostic & Controls */}
+          <div className="hidden shrink-0 items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:flex">
+            <ThemeToggle />
+            <span className="hidden text-cyan/70 lg:inline-block" title={location}>{PERSONAL_IDENTITY.shortLocation}</span>
             <span className="font-semibold tabular-nums text-foreground bg-surface-2 px-2 py-1 rounded border border-cyan/10">
               {clock ? `${clock} LK` : "--:--:-- LK"}
             </span>
@@ -292,6 +295,10 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
                 <div className="flex justify-between items-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   <span>{location}</span>
                   <span className="text-cyan tabular-nums">{clock ? `${clock} LK` : "--:--:-- LK"}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">System Palette</span>
+                  <ThemeToggle />
                 </div>
                 <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
                 <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-cyan/40 text-center">

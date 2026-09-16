@@ -3,6 +3,7 @@ import { Providers } from "@/components/providers";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { AdminAccess } from "@/components/admin/admin-access";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
+import { ThemeScript } from "@/components/theme/theme-script";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -41,8 +42,13 @@ export default function RootLayout({
     <html
       lang="en"
       className="h-full antialiased"
+      data-theme="jarvis"
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="relative min-h-full bg-background text-foreground">
         {/* Global backdrop layers */}
         <div className="pointer-events-none fixed inset-0 bg-grid opacity-70" aria-hidden />
@@ -52,7 +58,7 @@ export default function RootLayout({
           aria-hidden
           style={{
             background:
-              "radial-gradient(ellipse at 20% 0%, rgba(92,208,255,0.10), transparent 55%), radial-gradient(ellipse at 100% 100%, rgba(30,58,95,0.35), transparent 60%)",
+              "radial-gradient(ellipse at 20% 0%, var(--accent-muted), transparent 55%), radial-gradient(ellipse at 100% 100%, color-mix(in oklab, var(--surface-2) 40%, transparent), transparent 60%)",
           }}
         />
         <SmoothScrollProvider>

@@ -326,3 +326,142 @@ model Certificate {
 
   @@index([type])
 }
+
+enum RequestStatus {
+  NEW
+  REVIEWING
+  PROPOSAL
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  ARCHIVED
+}
+
+enum RequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ClientProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model SiteSettings {
+  id                     String   @id @default(cuid())
+  defaultTheme           String   @default("jarvis")
+  contactFormEnabled     Boolean  @default(true)
+  projectRequestsEnabled Boolean  @default(true)
+  notificationEmail      String?
+  updatedAt              DateTime @updatedAt
+}
+
+model ProjectPresentation {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  linkKey             String?
+  isFeatured          Boolean  @default(false)
+  isVisible           Boolean  @default(true)
+  order               Int      @default(0)
+  category            String?
+  descriptionOverride String?
+  liveUrlOverride     String?
+  coverImageUrl       String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([isFeatured])
+  @@index([isVisible])
+  @@index([order])
+}
+
+model ProjectRequest {
+  id               String              @id @default(cuid())
+  referenceId      String              @unique
+  name             String
+  company          String?
+  email            String
+  phone            String?
+  projectType      String
+  details          String
+  requiredFeatures String[]
+  referenceSites   String?
+  timeline         String?
+  budgetRange      String?
+  preferredContact String              @default("email")
+  status           RequestStatus       @default(NEW)
+  priority         RequestPriority     @default(MEDIUM)
+  internalNotes    String?
+  tags             String[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  attachments      RequestAttachment[]
+  clientProject    ClientProject?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model RequestAttachment {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ProjectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  publicId  String?
+  fileName  String
+  fileSize  Int
+  fileType  String
+  createdAt DateTime       @default(now())
+}
+
+model ClientProject {
+  id            String              @id @default(cuid())
+  name          String
+  requestId     String?             @unique
+  request       ProjectRequest?     @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  clientName    String
+  clientEmail   String
+  clientCompany String?
+  status        ClientProjectStatus @default(PLANNING)
+  startDate     DateTime?
+  deadline      DateTime?
+  budget        String?
+  notes         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  milestones    Milestone[]
+  tasks         ClientTask[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Milestone {
+  id        String        @id @default(cuid())
+  projectId String
+  project   ClientProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  dueDate   DateTime?
+  isDone    Boolean       @default(false)
+  order     Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ClientTask {
+  id          String        @id @default(cuid())
+  projectId   String
+  project     ClientProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  isCompleted Boolean       @default(false)
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+

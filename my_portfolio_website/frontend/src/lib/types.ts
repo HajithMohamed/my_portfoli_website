@@ -62,6 +62,8 @@ export type Project = {
   sourceUrl?: string;
   coverImageAlt?: string;
   coverImageKind?: "concept";
+  dedupeKey?: string;
+  relatedRepositories?: string[];
 };
 
 export type BlogPost = {
@@ -248,4 +250,102 @@ export type HomeData = {
   testimonials: Testimonial[];
   certificates: Certificate[];
   gallery: MediaAsset[];
+};
+
+export type RequestStatus =
+  | "NEW"
+  | "REVIEWING"
+  | "PROPOSAL"
+  | "APPROVED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "ARCHIVED";
+
+export type RequestAttachment = {
+  id: string;
+  requestId: string;
+  filename: string;
+  url: string;
+  sizeBytes?: number | null;
+  contentType?: string | null;
+  createdAt: string;
+};
+
+export type ProjectRequest = {
+  id: string;
+  referenceId: string;
+  name: string;
+  email: string;
+  company?: string | null;
+  projectType: string;
+  timeline?: string | null;
+  budget?: string | null;
+  overview: string;
+  deliverables: string[];
+  preferredTech: string[];
+  status: RequestStatus;
+  internalNotes?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  honeypot?: string | null;
+  durationSeconds?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  attachments?: RequestAttachment[];
+  clientProjects?: Array<{ id: string; title: string }>;
+};
+
+export type ClientProjectStatus = "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
+export type MilestoneStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
+
+export type Milestone = {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string | null;
+  dueDate?: string | null;
+  status: MilestoneStatus;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientTask = {
+  id: string;
+  projectId: string;
+  title: string;
+  completed: boolean;
+  dueDate?: string | null;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientProject = {
+  id: string;
+  title: string;
+  clientName: string;
+  clientEmail: string;
+  clientCompany?: string | null;
+  status: ClientProjectStatus;
+  budget?: string | null;
+  startDate?: string | null;
+  targetEndDate?: string | null;
+  description?: string | null;
+  notes?: string | null;
+  requestId?: string | null;
+  request?: { id: string; referenceId: string; name: string } | null;
+  milestones: Milestone[];
+  tasks: ClientTask[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SiteSettings = {
+  id: string;
+  defaultTheme: "jarvis" | "ember" | string;
+  contactEnabled: boolean;
+  requestsEnabled: boolean;
+  maintenanceMode: boolean;
+  updatedAt: string;
 };

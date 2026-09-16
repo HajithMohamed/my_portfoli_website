@@ -1,66 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion, Variants } from "framer-motion";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
 import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
+import gsap from "gsap";
 
 const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
   ssr: false,
 });
 
-function useBootLog() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [visible, setVisible] = useState(0);
-
-  useEffect(() => {
-    setSessionId(`vst_${Math.random().toString(36).slice(2, 8)}`);
-  }, []);
-
-  const lines = useMemo(() => {
-    const stamp = (offset: number) => {
-      const d = new Date(Date.now() - offset);
-      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
-    };
-    return [
-      `[${stamp(2000)}] init.core_systems`,
-      `[${stamp(1500)}] decrypting.dossier`,
-      `[${stamp(1000)}] visitor.id=${sessionId ?? "…"}`,
-      `[${stamp(500)}] connection.secure=true`,
-      `[${stamp(0)}] welcome, operator.`,
-    ];
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (!sessionId) return;
-    setVisible(0);
-    const id = setInterval(() => {
-      setVisible((v) => {
-        if (v >= lines.length) {
-          clearInterval(id);
-          return v;
-        }
-        return v + 1;
-      });
-    }, 350);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
-
-  return lines.slice(0, visible);
-}
-
 function BootStatusRow({
   label,
   value,
   tone,
+  isLive = false,
 }: {
   label: string;
   value: string;
   tone: "green" | "amber" | "cyan";
+  isLive?: boolean;
 }) {
   const toneClass =
     tone === "green"
@@ -68,16 +30,29 @@ function BootStatusRow({
       : tone === "amber"
         ? "text-signal-amber"
         : "text-cyan";
+
+  const dotBg =
+    tone === "green"
+      ? "bg-signal-green"
+      : tone === "amber"
+        ? "bg-signal-amber"
+        : "bg-cyan";
+
   return (
-    <div className="flex items-center justify-between border-b border-cyan/10 py-2.5 last:border-0 hover:bg-cyan/5 transition-colors px-2 -mx-2 rounded-sm">
+    <div className="boot-status-row flex items-center justify-between border-b border-cyan/10 py-2.5 last:border-0 hover:bg-cyan/5 transition-colors px-2 -mx-2 rounded-sm">
       <span className="text-muted-foreground flex items-center gap-2">
         <span className="text-cyan/40">▸</span>
         {label}
       </span>
       <span className={`flex items-center gap-2 font-semibold tracking-wider ${toneClass}`}>
         <span className="relative flex h-2 w-2 items-center justify-center">
-          <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-50 ${tone === 'green' ? 'bg-signal-green' : tone === 'amber' ? 'bg-signal-amber' : 'bg-cyan'}`}></span>
-          <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${tone === 'green' ? 'bg-signal-green' : tone === 'amber' ? 'bg-signal-amber' : 'bg-cyan'}`}></span>
+          {isLive && (
+            <span
+              className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-50 ${dotBg}`}
+              style={{ animationDuration: "2s" }}
+            />
+          )}
+          <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${dotBg}`} />
         </span>
         {value}
       </span>
@@ -101,11 +76,13 @@ export function CommandDeck({
   github: GithubSummary;
   resume: CvAsset | null;
 }) {
-  const log = useBootLog();
+  const containerRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
 
   const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  
+
   const device = isDesktop ? "laptop" : isTablet ? "tablet" : "phone";
   const particleCount = isDesktop ? 60 : isTablet ? 30 : 15;
   const currentRepo = github.currentRepo ?? github.contributionData?.currentRepo ?? null;
@@ -116,37 +93,197 @@ export function CommandDeck({
     `https://github.com/${github.username}`;
 
   const githubFresh =
-    github.syncedAt &&
-    Date.now() - new Date(github.syncedAt).getTime() < 1000 * 60 * 60 * 24;
+    Boolean(github.syncedAt) &&
+    Date.now() - new Date(github.syncedAt ?? 0).getTime() < 1000 * 60 * 60 * 24;
 
   const focus = profile.currentlyExploring?.slice(0, 2).join(" · ") || "Full-stack systems";
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
+  // Boot log lines
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [logCount, setLogCount] = useState(0);
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
-  };
+  useEffect(() => {
+    setSessionId(`vst_${Math.random().toString(36).slice(2, 8)}`);
+  }, []);
+
+  const bootLines = useMemo(() => {
+    const stamp = (offset: number) => {
+      const d = new Date(Date.now() - offset);
+      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+    };
+    return [
+      `[${stamp(1600)}] init.core_systems`,
+      `[${stamp(1200)}] decrypting.dossier`,
+      `[${stamp(800)}] visitor.id=${sessionId ?? "…"}`,
+      `[${stamp(400)}] connection.secure=true`,
+      `[${stamp(0)}] welcome, operator.`,
+    ];
+  }, [sessionId]);
+
+  // Master GSAP Boot Sequence Timeline (Capped at 1.6s)
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const alreadyBooted = typeof window !== "undefined" && Boolean(sessionStorage.getItem("hz_hero_booted"));
+
+    if (prefersReduced || alreadyBooted) {
+      // Instant final state
+      setLogCount(bootLines.length);
+      if (containerRef.current) {
+        gsap.set(
+          containerRef.current.querySelectorAll(
+            ".hero-eyebrow, .hero-name-word, .hero-role, .hero-bio, .hero-cta, .hero-metrics, .hero-right-panel, .boot-status-row"
+          ),
+          { opacity: 1, y: 0, x: 0, filter: "blur(0px)" }
+        );
+      }
+      return;
+    }
+
+    // Set initial state for animated elements
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          try {
+            sessionStorage.setItem("hz_hero_booted", "true");
+          } catch {
+            // storage may be restricted
+          }
+        },
+      });
+
+      // Stream boot log lines in sync with the 1.6s timeline
+      bootLines.forEach((_, idx) => {
+        tl.call(() => setLogCount(idx + 1), undefined, idx * 0.28);
+      });
+
+      // Choreographed sequence: eyebrow -> name words -> role -> description -> CTA -> metrics & diagnostics
+      tl.fromTo(
+        ".hero-eyebrow",
+        { opacity: 0, y: -10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        0
+      )
+        // Per-word blur-and-rise
+        .fromTo(
+          ".hero-name-word",
+          { opacity: 0, y: 16, filter: "blur(8px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.36,
+            stagger: 0.1,
+            ease: "power2.out",
+          },
+          0.12
+        )
+        // Role & Degree
+        .fromTo(
+          ".hero-role",
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+          0.32
+        )
+        // Bio description
+        .fromTo(
+          ".hero-bio",
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+          0.48
+        )
+        // CTA Buttons
+        .fromTo(
+          ".hero-cta",
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" },
+          0.62
+        )
+        // Bottom quick metrics
+        .fromTo(
+          ".hero-metrics",
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: "power2.out" },
+          0.75
+        )
+        // Right diagnostics & boot log panels
+        .fromTo(
+          ".hero-right-panel",
+          { opacity: 0, x: 16 },
+          { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" },
+          0.4
+        )
+        // Diagnostics rows staggered at 60ms
+        .fromTo(
+          ".boot-status-row",
+          { opacity: 0, x: 10 },
+          { opacity: 1, x: 0, duration: 0.22, stagger: 0.06, ease: "power2.out" },
+          0.55
+        );
+
+      // Total duration is strictly capped at 1.6s
+      if (tl.totalDuration() > 1.6) {
+        tl.timeScale(tl.totalDuration() / 1.6);
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [sessionId, bootLines, prefersReduced]);
+
+  // Pointer parallax on background grid only (Desktop only, damped, max 12px)
+  useEffect(() => {
+    if (!isDesktop || prefersReduced || !containerRef.current || !gridRef.current) return;
+
+    const grid = gridRef.current;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let animId = 0;
+
+    const handlePointerMove = (e: MouseEvent) => {
+      const { innerWidth, innerHeight } = window;
+      const nx = (e.clientX / innerWidth - 0.5) * 2; // -1 to 1
+      const ny = (e.clientY / innerHeight - 0.5) * 2;
+      targetX = Math.max(-12, Math.min(12, nx * 12));
+      targetY = Math.max(-12, Math.min(12, ny * 12));
+    };
+
+    const damp = () => {
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+      grid.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
+      animId = requestAnimationFrame(damp);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    animId = requestAnimationFrame(damp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      cancelAnimationFrame(animId);
+    };
+  }, [isDesktop, prefersReduced]);
+
+  const nameWords = PERSONAL_IDENTITY.name.split(" ");
 
   return (
-    <section className="relative min-h-[90vh] flex items-center border-b border-cyan/15 overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-grid opacity-30" />
+    <section
+      ref={containerRef}
+      className="relative min-h-[90vh] flex items-center border-b border-cyan/15 overflow-hidden"
+    >
+      {/* Background Effects with pointer parallax on grid only */}
+      <div
+        ref={gridRef}
+        className="absolute inset-0 bg-grid opacity-30 pointer-events-none will-change-transform"
+      />
       <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none md:w-[40vw] md:h-[40vw]" />
-      <div className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]" style={{ animationDelay: '-10s' }} />
+      <div
+        className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]"
+        style={{ animationDelay: "-10s" }}
+      />
 
-      {/* 3D backdrop — responsive. On phones the copy runs the full width, so the scene is
-          confined to a band above it instead of spanning the section: a tall, narrow canvas
-          also makes the device fill most of the width, which a wider band avoids. */}
+      {/* 3D backdrop */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[42vh] opacity-[0.25] md:inset-0 md:h-auto md:opacity-[0.3] lg:opacity-[0.35]"
         aria-hidden
@@ -159,44 +296,47 @@ export function CommandDeck({
       </div>
 
       <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 pt-32 pb-16 md:pt-40 lg:pt-32">
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 items-center"
-        >
+        <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 items-center">
           {/* Left — identity */}
           <div className="min-w-0 w-full">
-            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] w-full min-w-0">
-              <span className="flex max-w-full min-w-0 items-center gap-2 text-signal-green bg-signal-green/10 border border-signal-green/20 px-3 py-1 rounded-sm" title={profile.availabilityStatus}>
+            <div className="hero-eyebrow flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] w-full min-w-0">
+              <span
+                className="flex max-w-full min-w-0 items-center gap-2 text-signal-green bg-signal-green/10 border border-signal-green/20 px-3 py-1 rounded-sm"
+                title={profile.availabilityStatus}
+              >
                 <span className="shrink-0 inline-block h-1.5 w-1.5 rounded-full bg-signal-green animate-pulse-dot" />
                 <span className="truncate min-w-0">{profile.availabilityStatus}</span>
               </span>
-              <span className="hidden text-muted-foreground sm:inline-block border border-cyan/10 px-3 py-1 rounded-sm shrink-0">sys.sector_01</span>
-            </motion.div>
+              <span className="hidden text-muted-foreground sm:inline-block border border-cyan/10 px-3 py-1 rounded-sm shrink-0">
+                sys.sector_01
+              </span>
+            </div>
 
-            <motion.h1 
-              variants={itemVariants}
-              className="mt-8 max-w-[640px] font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
-            >
-              {PERSONAL_IDENTITY.name}
-            </motion.h1>
+            {/* Name reveal: per-word blur-and-rise */}
+            <h1 className="mt-8 max-w-[640px] font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+              {nameWords.map((word, i) => (
+                <span key={i} className="hero-name-word inline-block mr-3">
+                  {word}
+                </span>
+              ))}
+            </h1>
 
-            <motion.div variants={itemVariants} className="mt-6 space-y-3">
+            <div className="hero-role mt-6 space-y-3">
               <p className="font-mono text-sm uppercase tracking-[0.2em] text-cyan">
                 {PERSONAL_IDENTITY.title}
               </p>
               <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-                {PERSONAL_IDENTITY.degree} · {PERSONAL_IDENTITY.faculty}<br />
+                {PERSONAL_IDENTITY.degree} · {PERSONAL_IDENTITY.faculty}
+                <br />
                 {PERSONAL_IDENTITY.university}
               </p>
-            </motion.div>
+            </div>
 
-            <motion.p variants={itemVariants} className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg border-l-2 border-cyan/30 pl-4 py-1">
+            <p className="hero-bio mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg border-l-2 border-cyan/30 pl-4 py-1">
               {profile.bio}
-            </motion.p>
+            </p>
 
-            <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
+            <div className="hero-cta mt-10 flex flex-col sm:flex-row flex-wrap gap-4 font-mono text-xs uppercase tracking-[0.2em]">
               {resume?.fileUrl ? (
                 <a
                   href="/api/cv"
@@ -227,12 +367,14 @@ export function CommandDeck({
                 <Github size={16} className="opacity-70 group-hover:text-glow" />
                 <span>{currentRepo ? "current repo" : "github"}</span>
               </a>
-            </motion.div>
+            </div>
 
-            <motion.div variants={itemVariants} className="mt-12 grid max-w-2xl grid-cols-2 md:grid-cols-3 gap-6 font-mono border-t border-cyan/15 pt-8">
+            <div className="hero-metrics mt-12 grid max-w-2xl grid-cols-2 md:grid-cols-3 gap-6 font-mono border-t border-cyan/15 pt-8">
               <div className="relative group">
                 <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">response</div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">
+                  response
+                </div>
                 <div className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <span className="text-signal-green">⚡</span> &lt; 24h
                 </div>
@@ -240,7 +382,9 @@ export function CommandDeck({
               <div className="relative group">
                 <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
                 <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/70 mb-2">focus</div>
-                <div className="text-sm font-semibold text-foreground text-balance leading-snug">{focus}</div>
+                <div className="text-sm font-semibold text-foreground text-balance leading-snug">
+                  {focus}
+                </div>
               </div>
               <div className="relative group col-span-2 md:col-span-1">
                 <div className="absolute -inset-2 rounded-lg bg-cyan/5 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -250,11 +394,11 @@ export function CommandDeck({
                   <span className="text-cyan/70">Full-time</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right — boot status + log tail */}
-          <motion.div variants={itemVariants} className="flex flex-col justify-center gap-8 lg:pl-10 relative z-10 min-w-0 w-full">
+          <div className="hero-right-panel flex flex-col justify-center gap-8 lg:pl-10 relative z-10 min-w-0 w-full">
             {/* Status Panel */}
             <div className="hud-panel-glass p-6">
               <div className="mb-4 flex items-center gap-3 border-b border-cyan/20 pb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70">
@@ -262,20 +406,23 @@ export function CommandDeck({
                 System Diagnostics
               </div>
               <div className="font-mono text-[11px]">
-                <BootStatusRow label="sys.core" value="online" tone="green" />
+                {/* Genuine live states pulse slowly; idle pipeline does not pulse */}
+                <BootStatusRow label="sys.core" value="online" tone="green" isLive />
                 <BootStatusRow
                   label="github.api"
                   value={githubFresh ? "connected" : "cached"}
                   tone={githubFresh ? "green" : "amber"}
+                  isLive={githubFresh}
                 />
                 <BootStatusRow
                   label="repo.focus"
                   value={currentRepo?.name ?? "auto-detect"}
                   tone={diagnosticTone(currentRepo?.statusTone)}
+                  isLive={Boolean(currentRepo)}
                 />
-                <BootStatusRow label="mailbox" value="accepting" tone="green" />
-                <BootStatusRow label="deploy.pipeline" value="idle" tone="amber" />
-                <BootStatusRow label="threat.level" value="low" tone="cyan" />
+                <BootStatusRow label="mailbox" value="accepting" tone="green" isLive />
+                <BootStatusRow label="deploy.pipeline" value="idle" tone="amber" isLive={false} />
+                <BootStatusRow label="threat.level" value="low" tone="cyan" isLive={false} />
               </div>
             </div>
 
@@ -292,21 +439,23 @@ export function CommandDeck({
                 </span>
               </div>
               <div className="mt-4 min-h-[90px] space-y-1.5 font-mono text-[11px] text-muted-foreground">
-                {log.map((line, i) => (
-                  <div key={i} className="animate-ticker flex items-start gap-2">
+                {bootLines.slice(0, logCount).map((line, i) => (
+                  <div key={i} className="flex items-start gap-2">
                     <span className="text-cyan/40 shrink-0">❯</span>
-                    <span className={i === log.length - 1 ? "text-foreground" : ""}>{line}</span>
+                    <span className={i === logCount - 1 ? "text-foreground font-medium" : ""}>
+                      {line}
+                    </span>
                   </div>
                 ))}
-                {log.length > 0 && (
+                {logCount < bootLines.length && (
                   <span className="ml-5 inline-block h-[14px] w-2 translate-y-0.5 bg-cyan animate-typing-cursor" />
                 )}
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
-      
+
       {/* Decorative gradient border bottom */}
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan/50 to-transparent opacity-60" />
     </section>

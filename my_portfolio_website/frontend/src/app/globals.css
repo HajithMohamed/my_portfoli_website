@@ -6,56 +6,133 @@
    gradient accents, and micro-animations.
    ──────────────────────────────────────────────────────────── */
 
-:root {
+:root,
+[data-theme="jarvis"] {
   --radius: 0.5rem;
   --font-inter: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-space-grotesk: "Space Grotesk", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-jetbrains: "JetBrains Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
 
-  /* Base */
-  --background: #030711;
-  --foreground: #e2ecff;
+  /* Theme Tokens — JARVIS (Default) */
+  --bg-base:        #030711;
+  --bg-surface:     #0a1628;
+  --bg-elevated:    #0f2038;
+  --bg-highest:     #142a48;
+  --border-subtle:  #1a3050;
+  --border-strong:  #2a4870;
+  --accent:         #5cd0ff;
+  --accent-hover:   #3a8fb8;
+  --accent-muted:   rgba(92, 208, 255, 0.14);
+  --accent-glow:    rgba(92, 208, 255, 0.28);
+  --text-primary:   #e2ecff;
+  --text-secondary: #7b9bc0;
+  --text-muted:     #4a6b8c;
+  --status-ok:      #34d399;
+  --status-warn:    #fbbf24;
+  --status-error:   #f87171;
+  --chart-1:        #5cd0ff;
+  --chart-2:        #a78bfa;
+  --chart-3:        #34d399;
+  --grid:           rgba(92, 208, 255, 0.04);
+  --hud:            rgba(10, 22, 40, 0.75);
 
-  /* JARVIS surfaces */
-  --surface: #0a1628;
-  --surface-2: #0f2038;
-  --surface-3: #142a48;
-  --hud: rgba(10, 22, 40, 0.75);
-  --grid: rgba(92, 208, 255, 0.04);
+  /* Semantic mappings to theme tokens */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --surface: var(--bg-surface);
+  --surface-2: var(--bg-elevated);
+  --surface-3: var(--bg-highest);
 
-  /* Primary accent */
-  --cyan: #5cd0ff;
-  --cyan-dim: #3a8fb8;
-  --cyan-glow: rgba(92, 208, 255, 0.25);
+  --cyan: var(--accent);
+  --cyan-dim: var(--accent-hover);
+  --cyan-glow: var(--accent-glow);
 
-  /* Secondary accent — purple/violet */
-  --violet: #a78bfa;
+  --violet: var(--chart-2);
   --violet-dim: #7c5cbf;
   --violet-glow: rgba(167, 139, 250, 0.2);
 
-  /* Signals */
-  --signal-green: #34d399;
-  --signal-amber: #fbbf24;
-  --signal-red: #f87171;
+  --signal-green: var(--status-ok);
+  --signal-amber: var(--status-warn);
+  --signal-red: var(--status-error);
 
-  /* Semantic mappings */
-  --card: #0a1628;
-  --card-foreground: #e2ecff;
-  --popover: #0a1628;
-  --popover-foreground: #e2ecff;
-  --primary: #5cd0ff;
-  --primary-foreground: #030711;
-  --secondary: #0f2038;
-  --secondary-foreground: #e2ecff;
-  --muted: #0f2038;
-  --muted-foreground: #7b9bc0;
-  --accent: #0f2038;
-  --accent-foreground: #5cd0ff;
-  --destructive: #f87171;
-  --destructive-foreground: #030711;
-  --border: #1a3050;
-  --input: #1a3050;
-  --ring: #5cd0ff;
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--bg-base);
+  --secondary: var(--bg-elevated);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-elevated);
+  --muted-foreground: var(--text-secondary);
+  --accent-surface: var(--bg-elevated);
+  --accent-surface-foreground: var(--accent);
+  --destructive: var(--status-error);
+  --destructive-foreground: var(--bg-base);
+  --border: var(--border-subtle);
+  --input: var(--border-subtle);
+  --ring: var(--accent);
+}
+
+[data-theme="ember"] {
+  --bg-base:        #0B0B0E;
+  --bg-surface:     #141418;
+  --bg-elevated:    #1C1C21;
+  --bg-highest:     #24242B;
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.14);
+  --accent:         #F97316;
+  --accent-hover:   #FB923C;
+  --accent-muted:   rgba(249, 115, 22, 0.14);
+  --accent-glow:    rgba(249, 115, 22, 0.28);
+  --text-primary:   #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted:     #71717A;
+  --status-ok:      #22C55E;
+  --status-warn:    #EAB308;
+  --status-error:   #EF4444;
+  --chart-1:        #F97316;
+  --chart-2:        #8B5CF6;
+  --chart-3:        #3B82F6;
+  --grid:           rgba(249, 115, 22, 0.04);
+  --hud:            rgba(20, 20, 24, 0.75);
+
+  /* Semantic mappings for ember */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --surface: var(--bg-surface);
+  --surface-2: var(--bg-elevated);
+  --surface-3: var(--bg-highest);
+
+  --cyan: var(--accent);
+  --cyan-dim: var(--accent-hover);
+  --cyan-glow: var(--accent-glow);
+
+  --violet: var(--chart-2);
+  --violet-dim: #7c3aed;
+  --violet-glow: rgba(139, 92, 246, 0.2);
+
+  --signal-green: var(--status-ok);
+  --signal-amber: var(--status-warn);
+  --signal-red: var(--status-error);
+
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--bg-base);
+  --secondary: var(--bg-elevated);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-elevated);
+  --muted-foreground: var(--text-secondary);
+  --accent-surface: var(--bg-elevated);
+  --accent-surface-foreground: var(--accent);
+  --destructive: var(--status-error);
+  --destructive-foreground: var(--bg-base);
+  --border: var(--border-subtle);
+  --input: var(--border-subtle);
+  --ring: var(--accent);
 }
 
 @theme inline {
@@ -76,15 +153,33 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* JARVIS semantic tokens */
+  /* Swappable HUD design system tokens */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-glow: var(--accent-glow);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-status-ok: var(--status-ok);
+  --color-status-warn: var(--status-warn);
+  --color-status-error: var(--status-error);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+
+  /* Legacy aliases for maximum backwards-compatibility with existing HUD components */
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
@@ -141,7 +236,7 @@
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(92, 208, 255, 0.02) 3px,
+    color-mix(in oklab, var(--cyan) 2%, transparent) 3px,
     transparent 4px
   );
 }
@@ -168,7 +263,7 @@
 
 /* ─── HUD panel variants ─── */
 @utility hud-panel {
-  background: linear-gradient(180deg, rgba(15, 32, 56, 0.6), rgba(10, 22, 40, 0.4));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--surface-2) 60%, transparent), color-mix(in oklab, var(--surface) 40%, transparent));
   border: 1px solid color-mix(in oklab, var(--cyan) 18%, transparent);
   backdrop-filter: blur(12px);
   border-radius: var(--radius);
@@ -183,7 +278,7 @@
 }
 
 @utility hud-panel-glass {
-  background: rgba(10, 22, 40, 0.5);
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid color-mix(in oklab, var(--cyan) 12%, transparent);
@@ -192,12 +287,12 @@
 }
 
 @utility hud-panel-glow {
-  background: linear-gradient(180deg, rgba(15, 32, 56, 0.7), rgba(10, 22, 40, 0.5));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--surface-2) 70%, transparent), color-mix(in oklab, var(--surface) 50%, transparent));
   border: 1px solid color-mix(in oklab, var(--cyan) 22%, transparent);
   backdrop-filter: blur(12px);
   border-radius: var(--radius);
   position: relative;
-  box-shadow: 0 0 30px rgba(92, 208, 255, 0.05), inset 0 1px 0 rgba(92, 208, 255, 0.08);
+  box-shadow: 0 0 30px var(--cyan-glow), inset 0 1px 0 var(--cyan-glow);
 }
 
 /* ─── Corner brackets ─── */
@@ -230,20 +325,20 @@
 
 /* ─── Glow effects ─── */
 @utility glow-cyan {
-  box-shadow: 0 0 20px rgba(92, 208, 255, 0.15), 0 0 60px rgba(92, 208, 255, 0.05);
+  box-shadow: 0 0 20px var(--cyan-glow), 0 0 60px var(--cyan-glow);
 }
 
 @utility glow-cyan-strong {
-  box-shadow: 0 0 20px rgba(92, 208, 255, 0.3), 0 0 60px rgba(92, 208, 255, 0.1);
+  box-shadow: 0 0 25px var(--cyan-glow), 0 0 70px var(--cyan-glow);
 }
 
 @utility glow-violet {
-  box-shadow: 0 0 20px rgba(167, 139, 250, 0.15), 0 0 60px rgba(167, 139, 250, 0.05);
+  box-shadow: 0 0 20px var(--violet-glow), 0 0 60px var(--violet-glow);
 }
 
 @utility border-glow {
   border: 1px solid color-mix(in oklab, var(--cyan) 35%, transparent);
-  box-shadow: 0 0 15px rgba(92, 208, 255, 0.08), inset 0 0 15px rgba(92, 208, 255, 0.03);
+  box-shadow: 0 0 15px var(--cyan-glow), inset 0 0 15px color-mix(in oklab, var(--cyan) 10%, transparent);
 }
 
 /* ─── Gradient borders ─── */
@@ -414,10 +509,10 @@
 
 /* ─── Legacy utilities (admin + transitional) ─── */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.4);
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .text-balance {

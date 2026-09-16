@@ -28,8 +28,8 @@ export default function GlobalError({
           alignItems: "center",
           justifyContent: "center",
           padding: "1rem",
-          background: "#05070d",
-          color: "#e6f0fa",
+          background: "var(--background, var(--bg-base))",
+          color: "var(--foreground, var(--text-primary))",
           fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
         }}
       >
@@ -39,8 +39,8 @@ export default function GlobalError({
             maxWidth: "28rem",
             padding: "2rem",
             textAlign: "center",
-            border: "1px solid #1e3a5f",
-            background: "rgba(10,22,40,0.6)",
+            border: "1px solid var(--border, var(--border-subtle))",
+            background: "color-mix(in oklab, var(--surface, var(--bg-surface)) 60%, transparent)",
           }}
         >
           <div
@@ -48,7 +48,7 @@ export default function GlobalError({
               fontSize: "0.75rem",
               letterSpacing: "0.3em",
               textTransform: "uppercase",
-              color: "#f87171",
+              color: "var(--signal-red, var(--status-error))",
             }}
           >
             Critical fault
@@ -56,7 +56,7 @@ export default function GlobalError({
           <h1 style={{ marginTop: "1rem", fontSize: "1.5rem", fontWeight: 600 }}>
             System offline
           </h1>
-          <p style={{ marginTop: "0.75rem", fontSize: "0.875rem", color: "#6b8caf" }}>
+          <p style={{ marginTop: "0.75rem", fontSize: "0.875rem", color: "var(--muted-foreground, var(--text-secondary))" }}>
             A top-level exception took the console down. Reboot to reconnect.
           </p>
           <div
@@ -76,9 +76,9 @@ export default function GlobalError({
                 fontSize: "0.75rem",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                color: "#5cd0ff",
-                border: "1px solid rgba(92,208,255,0.4)",
-                background: "rgba(92,208,255,0.1)",
+                color: "var(--cyan, var(--accent))",
+                border: "1px solid color-mix(in oklab, var(--cyan, var(--accent)) 40%, transparent)",
+                background: "color-mix(in oklab, var(--cyan, var(--accent)) 10%, transparent)",
                 cursor: "pointer",
               }}
             >
@@ -91,8 +91,8 @@ export default function GlobalError({
                 fontSize: "0.75rem",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                color: "#e6f0fa",
-                border: "1px solid #1e3a5f",
+                color: "var(--foreground, var(--text-primary))",
+                border: "1px solid var(--border, var(--border-subtle))",
                 textDecoration: "none",
               }}
             >

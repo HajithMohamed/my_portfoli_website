@@ -6,6 +6,35 @@ import { Suspense, useMemo, useRef } from "react";
 import type { Group } from "three";
 import { Color } from "three";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
+import { useTheme } from "@/components/theme/theme-provider";
+
+export const THEME_PALETTES = {
+  jarvis: {
+    accent: "#5cd0ff",
+    accentDim: "#3a8fb8",
+    surface: "#0a1628",
+    border: "#1a3050",
+    base: "#030711",
+    text: "#d6ecff",
+  },
+  ember: {
+    accent: "#F97316",
+    accentDim: "#FB923C",
+    surface: "#141418",
+    border: "#24242B",
+    base: "#0B0B0E",
+    text: "#FAFAFA",
+  },
+} as const;
+
+interface Palette {
+  readonly accent: string;
+  readonly accentDim: string;
+  readonly surface: string;
+  readonly border: string;
+  readonly base: string;
+  readonly text: string;
+}
 
 /** Portrait aspect the screen geometry below is built around (w:h = 4:5). */
 const PORTRAIT_W = 400;
@@ -30,10 +59,12 @@ function OperatorPortrait({
   url,
   width,
   position,
+  accentColor,
 }: {
   url: string;
   width: number;
   position: readonly [number, number, number];
+  accentColor: string;
 }) {
   const texture = useTexture(portraitSrc(url));
   const height = width * (PORTRAIT_H / PORTRAIT_W);
@@ -42,7 +73,7 @@ function OperatorPortrait({
     <group position={position as unknown as [number, number, number]}>
       <mesh position={[0, 0, -0.002]}>
         <planeGeometry args={[width + 0.05, height + 0.05]} />
-        <meshBasicMaterial color="#5cd0ff" transparent opacity={0.45} />
+        <meshBasicMaterial color={accentColor} transparent opacity={0.45} />
       </mesh>
       <mesh>
         <planeGeometry args={[width, height]} />
@@ -78,7 +109,7 @@ const NODES_MOBILE = [
 ];
 
 /* ── Device: Laptop (desktop) ── */
-function Laptop({ portraitUrl }: { portraitUrl?: string }) {
+function Laptop({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -92,24 +123,31 @@ function Laptop({ portraitUrl }: { portraitUrl?: string }) {
       {/* Base */}
       <mesh position={[0, -0.15, 0]} castShadow>
         <boxGeometry args={[2.4, 0.08, 1.6]} />
-        <meshStandardMaterial color="#0a1628" metalness={0.9} roughness={0.35} />
+        <meshStandardMaterial color={palette.surface} metalness={0.9} roughness={0.35} />
       </mesh>
       {/* Screen back */}
       <group position={[0, 0.55, -0.75]} rotation={[-0.35, 0, 0]}>
         <mesh castShadow>
           <boxGeometry args={[2.4, 1.5, 0.08]} />
-          <meshStandardMaterial color="#0a1628" metalness={0.9} roughness={0.4} />
+          <meshStandardMaterial color={palette.surface} metalness={0.9} roughness={0.4} />
         </mesh>
         {/* Screen glow */}
         <mesh position={[0, 0, 0.045]}>
           <planeGeometry args={[2.25, 1.35]} />
-          <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.35)} />
+          <meshBasicMaterial color={new Color(palette.accent).multiplyScalar(0.35)} />
         </mesh>
-        {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.72} position={[-0.62, 0, 0.05]} /> : null}
+        {portraitUrl ? (
+          <OperatorPortrait
+            url={portraitUrl}
+            width={0.72}
+            position={[-0.62, 0, 0.05]}
+            accentColor={palette.accent}
+          />
+        ) : null}
         <Text
           position={portraitUrl ? [0.45, 0, 0.05] : [0, 0, 0.05]}
           fontSize={0.11}
-          color="#d6ecff"
+          color={palette.text}
           anchorX="center"
           anchorY="middle"
           maxWidth={portraitUrl ? 1.1 : 2}
@@ -122,7 +160,7 @@ function Laptop({ portraitUrl }: { portraitUrl?: string }) {
 }
 
 /* ── Device: Tablet (tablet viewports) ── */
-function Tablet({ portraitUrl }: { portraitUrl?: string }) {
+function Tablet({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -138,13 +176,13 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
       {/* Tablet body — flat slab */}
       <mesh castShadow>
         <boxGeometry args={[1.8, 2.4, 0.08]} />
-        <meshStandardMaterial color="#0a1628" metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial color={palette.surface} metalness={0.85} roughness={0.3} />
       </mesh>
       {/* Bezel edge glow */}
       <mesh position={[0, 0, 0.001]}>
         <boxGeometry args={[1.82, 2.42, 0.075]} />
         <meshStandardMaterial
-          color="#1a3050"
+          color={palette.border}
           metalness={0.9}
           roughness={0.4}
           transparent
@@ -154,14 +192,21 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
       {/* Screen */}
       <mesh position={[0, 0, 0.045]}>
         <planeGeometry args={[1.6, 2.15]} />
-        <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.3)} />
+        <meshBasicMaterial color={new Color(palette.accent).multiplyScalar(0.3)} />
       </mesh>
       {/* Screen content */}
-      {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.8} position={[0, 0.5, 0.05]} /> : null}
+      {portraitUrl ? (
+        <OperatorPortrait
+          url={portraitUrl}
+          width={0.8}
+          position={[0, 0.5, 0.05]}
+          accentColor={palette.accent}
+        />
+      ) : null}
       <Text
         position={[0, portraitUrl ? -0.15 : 0.6, 0.05]}
         fontSize={0.1}
-        color="#d6ecff"
+        color={palette.text}
         anchorX="center"
         anchorY="middle"
         maxWidth={1.4}
@@ -171,7 +216,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
       <Text
         position={[0, portraitUrl ? -0.35 : 0.3, 0.05]}
         fontSize={0.06}
-        color="#5cd0ff"
+        color={palette.accent}
         anchorX="center"
         anchorY="middle"
         maxWidth={1.4}
@@ -183,7 +228,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
         <mesh key={i} position={[-0.2 + i * 0.05, y, 0.048]}>
           <planeGeometry args={[0.9 - i * 0.1, 0.025]} />
           <meshBasicMaterial
-            color={new Color("#5cd0ff").multiplyScalar(0.15 + i * 0.05)}
+            color={new Color(palette.accent).multiplyScalar(0.15 + i * 0.05)}
             transparent
             opacity={0.6}
           />
@@ -193,7 +238,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
       <mesh position={[0, -1.1, 0.045]}>
         <planeGeometry args={[0.35, 0.03]} />
         <meshBasicMaterial
-          color={new Color("#5cd0ff").multiplyScalar(0.5)}
+          color={new Color(palette.accent).multiplyScalar(0.5)}
           transparent
           opacity={0.6}
         />
@@ -203,7 +248,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
 }
 
 /* ── Device: Phone (mobile viewports) ── */
-function Phone({ portraitUrl }: { portraitUrl?: string }) {
+function Phone({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -219,13 +264,13 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
       {/* Phone body */}
       <mesh castShadow>
         <boxGeometry args={[0.9, 1.9, 0.06]} />
-        <meshStandardMaterial color="#0a1628" metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial color={palette.surface} metalness={0.85} roughness={0.3} />
       </mesh>
       {/* Edge frame */}
       <mesh position={[0, 0, 0.001]}>
         <boxGeometry args={[0.92, 1.92, 0.055]} />
         <meshStandardMaterial
-          color="#1a3050"
+          color={palette.border}
           metalness={0.9}
           roughness={0.35}
           transparent
@@ -235,19 +280,26 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
       {/* Screen */}
       <mesh position={[0, 0, 0.035]}>
         <planeGeometry args={[0.78, 1.7]} />
-        <meshBasicMaterial color={new Color("#5cd0ff").multiplyScalar(0.28)} />
+        <meshBasicMaterial color={new Color(palette.accent).multiplyScalar(0.28)} />
       </mesh>
       {/* Notch / Dynamic Island */}
       <mesh position={[0, 0.78, 0.04]}>
         <planeGeometry args={[0.28, 0.06]} />
-        <meshBasicMaterial color="#030711" />
+        <meshBasicMaterial color={palette.base} />
       </mesh>
       {/* Screen content */}
-      {portraitUrl ? <OperatorPortrait url={portraitUrl} width={0.46} position={[0, 0.36, 0.04]} /> : null}
+      {portraitUrl ? (
+        <OperatorPortrait
+          url={portraitUrl}
+          width={0.46}
+          position={[0, 0.36, 0.04]}
+          accentColor={palette.accent}
+        />
+      ) : null}
       <Text
         position={[0, portraitUrl ? -0.12 : 0.45, 0.04]}
         fontSize={0.07}
-        color="#d6ecff"
+        color={palette.text}
         anchorX="center"
         anchorY="middle"
         maxWidth={0.7}
@@ -257,7 +309,7 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
       <Text
         position={[0, portraitUrl ? -0.27 : 0.25, 0.04]}
         fontSize={0.04}
-        color="#5cd0ff"
+        color={palette.accent}
         anchorX="center"
         anchorY="middle"
         maxWidth={0.7}
@@ -269,7 +321,7 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
         <mesh key={i} position={[0, y, 0.038]}>
           <planeGeometry args={[0.55 - i * 0.04, 0.02]} />
           <meshBasicMaterial
-            color={new Color("#5cd0ff").multiplyScalar(0.12 + i * 0.04)}
+            color={new Color(palette.accent).multiplyScalar(0.12 + i * 0.04)}
             transparent
             opacity={0.5}
           />
@@ -279,7 +331,7 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
       <mesh position={[0, -0.78, 0.037]}>
         <planeGeometry args={[0.2, 0.02]} />
         <meshBasicMaterial
-          color={new Color("#5cd0ff").multiplyScalar(0.4)}
+          color={new Color(palette.accent).multiplyScalar(0.4)}
           transparent
           opacity={0.5}
         />
@@ -288,15 +340,23 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
   );
 }
 
-function Node({ label, pos }: { label: string; pos: readonly [number, number, number] }) {
+function Node({
+  label,
+  pos,
+  palette,
+}: {
+  label: string;
+  pos: readonly [number, number, number];
+  palette: Palette;
+}) {
   return (
     <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.6}>
       <group position={pos as unknown as [number, number, number]}>
         <mesh>
           <icosahedronGeometry args={[0.18, 0]} />
           <meshStandardMaterial
-            color="#5cd0ff"
-            emissive="#5cd0ff"
+            color={palette.accent}
+            emissive={palette.accent}
             emissiveIntensity={0.7}
             metalness={0.6}
             roughness={0.3}
@@ -305,7 +365,7 @@ function Node({ label, pos }: { label: string; pos: readonly [number, number, nu
         <Text
           position={[0, 0.42, 0]}
           fontSize={0.15}
-          color="#d6ecff"
+          color={palette.text}
           anchorX="center"
           anchorY="middle"
         >
@@ -316,7 +376,13 @@ function Node({ label, pos }: { label: string; pos: readonly [number, number, nu
   );
 }
 
-function Connections({ nodes }: { nodes: readonly { label: string; pos: readonly [number, number, number] }[] }) {
+function Connections({
+  nodes,
+  accentColor,
+}: {
+  nodes: readonly { label: string; pos: readonly [number, number, number] }[];
+  accentColor: string;
+}) {
   const points = useMemo(
     () =>
       nodes.map((n) => [
@@ -328,13 +394,13 @@ function Connections({ nodes }: { nodes: readonly { label: string; pos: readonly
   return (
     <>
       {points.map((seg, i) => (
-        <Line key={i} points={seg} color="#5cd0ff" lineWidth={0.6} transparent opacity={0.25} />
+        <Line key={i} points={seg} color={accentColor} lineWidth={0.6} transparent opacity={0.25} />
       ))}
     </>
   );
 }
 
-function Particles({ count = 60 }: { count?: number }) {
+function Particles({ count = 60, accentColor }: { count?: number; accentColor: string }) {
   const ref = useRef<Group>(null);
   const items = useMemo(
     () =>
@@ -355,7 +421,7 @@ function Particles({ count = 60 }: { count?: number }) {
       {items.map((p, i) => (
         <mesh key={i} position={[p.x, p.y, p.z]}>
           <sphereGeometry args={[p.s, 6, 6]} />
-          <meshBasicMaterial color="#5cd0ff" transparent opacity={0.6} />
+          <meshBasicMaterial color={accentColor} transparent opacity={0.6} />
         </mesh>
       ))}
     </group>
@@ -376,6 +442,9 @@ export default function WorkspaceScene({
   particleCount = 60,
   portraitUrl,
 }: WorkspaceSceneProps) {
+  const { theme } = useTheme();
+  const palette = THEME_PALETTES[theme] ?? THEME_PALETTES.jarvis;
+
   const nodes =
     device === "phone"
       ? NODES_MOBILE
@@ -398,21 +467,21 @@ export default function WorkspaceScene({
       style={{ background: "transparent" }}
     >
       <ambientLight intensity={0.35} />
-      <directionalLight position={[5, 5, 5]} intensity={0.6} color="#5cd0ff" />
-      <pointLight position={[-4, -2, 3]} intensity={0.8} color="#3a8fb8" />
+      <directionalLight position={[5, 5, 5]} intensity={0.6} color={palette.accent} />
+      <pointLight position={[-4, -2, 3]} intensity={0.8} color={palette.accentDim} />
 
       {/* The portrait texture loads async; the device renders without it until then. */}
       <Suspense fallback={null}>
-        {device === "laptop" && <Laptop portraitUrl={portraitUrl} />}
-        {device === "tablet" && <Tablet portraitUrl={portraitUrl} />}
-        {device === "phone" && <Phone portraitUrl={portraitUrl} />}
+        {device === "laptop" && <Laptop portraitUrl={portraitUrl} palette={palette} />}
+        {device === "tablet" && <Tablet portraitUrl={portraitUrl} palette={palette} />}
+        {device === "phone" && <Phone portraitUrl={portraitUrl} palette={palette} />}
       </Suspense>
 
-      <Connections nodes={nodes} />
+      <Connections nodes={nodes} accentColor={palette.accent} />
       {nodes.map((n) => (
-        <Node key={n.label} label={n.label} pos={n.pos} />
+        <Node key={n.label} label={n.label} pos={n.pos} palette={palette} />
       ))}
-      <Particles count={particleCount} />
+      <Particles count={particleCount} accentColor={palette.accent} />
     </Canvas>
   );
 }

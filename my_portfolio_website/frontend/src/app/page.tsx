@@ -5,7 +5,6 @@ import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
 import { NowDeploying } from "@/components/command/now-deploying";
 import { ProjectsShowcase } from "@/components/command/projects-showcase";
-import { ArchitectureMap } from "@/components/command/architecture-map";
 import { SkillsConstellation } from "@/components/command/skills-constellation";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
@@ -17,6 +16,7 @@ import type { GithubSummary, Project } from "@/lib/types";
 /** Only these projects appear on the homepage — the full list lives at /projects. */
 const HOMEPAGE_SLUGS = new Set([
   "saga-elite",
+  "saga-elite-web-project",
   "tech-bridge",
   "shoe-bank",                          // Shoe Bank (CMS slug from SHOE_BANK_MERNSTACK)
   "footwear-business-management-system", // Shoe Bank (story repo slug)
@@ -124,12 +124,11 @@ export default async function Home() {
             <ProjectsShowcase projects={projects.filter((p) => HOMEPAGE_SLUGS.has(p.slug))} />
           </div>
 
-          <SectionDivider label="sys.infrastructure" />
+          <SectionDivider label="sys.skills" />
 
-          {/* Architecture & Skills */}
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-stretch">
-            <ArchitectureMap />
-            <SkillsConstellation skills={skills} />
+          {/* Skills — Technologies I Work With */}
+          <div id="skills" className="scroll-mt-24">
+            <SkillsConstellation skills={skills} projects={projects} />
           </div>
 
           <SectionDivider label="sys.intelligence" />
