@@ -1,277 +1,338 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Panel } from "@/components/hud/panel";
-import { ProjectCard } from "@/components/projects/project-card";
 import type { Project } from "@/lib/types";
-import { ArrowRight, ExternalLink, Github, Layers, Terminal, Sparkles } from "lucide-react";
-import { useMediaQuery } from "@/lib/use-media-query";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
+import {
+  ArrowRight,
+  Calendar,
+  Code2,
+  ExternalLink,
+  Github,
+  Layers,
+  Package,
+  Sparkles,
+  Tag,
+  Users,
+} from "lucide-react";
 
 export function ProjectsShowcase({ projects }: { projects: Project[] }) {
-  const [activeBeat, setActiveBeat] = useState(0);
-  const showcaseRef = useRef<HTMLDivElement>(null);
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const prefersReduced = useReducedMotion();
-
   if (!projects.length) return null;
 
-  // The primary featured project
+  // Find Saga Elite or featured project
   const featured =
-    projects.find((p) => p.featured && (p.caseStudy?.length || p.coverImage)) ||
+    projects.find((p) => p.slug === "saga-elite" || p.title.toLowerCase().includes("saga")) ||
+    projects.find((p) => p.featured && p.coverImage) ||
     projects[0];
 
-  // Remaining secondary projects for the asymmetric 2-up grid
-  const secondaryProjects = projects.filter((p) => p.slug !== featured.slug);
+  // Specific secondary projects matching the mockup
+  const libraryProject = projects.find(
+    (p) =>
+      p.slug === "library-management-system" ||
+      p.title.toLowerCase().includes("library")
+  );
 
-  // 3 Detail Beats for the featured project
-  const sections = featured.caseStudy ?? [];
-  const beats = [
-    {
-      index: "01/03",
-      label: "Architecture & Goal",
-      heading: sections[0]?.heading ?? "System Architecture",
-      body:
-        sections[0]?.body ??
-        featured.description ??
-        "Designed and engineered for resilient operations and high-throughput workflows.",
-      highlight: featured.techStack.slice(0, 3).join(" · "),
-    },
-    {
-      index: "02/03",
-      label: "Technical Implementation",
-      heading: sections[1]?.heading ?? "Core Implementation",
-      body:
-        sections[1]?.body ??
-        "Production-grade separation of concerns with modern stack primitives, API contracts, and scalable storage.",
-      highlight: featured.techStack.slice(2, 6).join(" · ") || featured.category,
-    },
-    {
-      index: "03/03",
-      label: "Workflow & Deliverables",
-      heading: sections[2]?.heading ?? "Operational Readiness",
-      body:
-        sections[2]?.body ??
-        featured.outcome ??
-        "Fully validated schema migrations, CI test runs, and audited deployment artifacts.",
-      highlight: featured.isCurrent ? "Active Deployment" : "Production Baseline",
-    },
-  ];
+  const nextgenProject = projects.find(
+    (p) =>
+      p.slug === "nextgen-mobile-shop" ||
+      p.title.toLowerCase().includes("nextgen") ||
+      p.title.toLowerCase().includes("mobile")
+  );
 
-  // ScrollTrigger integration for desktop pinning while cycling beats
-  useEffect(() => {
-    if (!isDesktop || prefersReduced || !showcaseRef.current) return;
-
-    let cleanup = () => {};
-
-    import("gsap").then((gsapModule) => {
-      const gsap = gsapModule.default || gsapModule;
-      import("gsap/ScrollTrigger").then((stModule) => {
-        const ScrollTrigger = stModule.ScrollTrigger || stModule.default;
-        gsap.registerPlugin(ScrollTrigger);
-
-        const st = ScrollTrigger.create({
-          trigger: showcaseRef.current,
-          start: "top top+=90",
-          end: "+=900",
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            const nextBeat = Math.min(2, Math.floor(self.progress * 3));
-            setActiveBeat(nextBeat);
-          },
-        });
-
-        cleanup = () => {
-          st.kill();
-        };
-      });
-    });
-
-    return () => cleanup();
-  }, [isDesktop, prefersReduced]);
+  // Fallback to other secondary projects if the exact ones aren't found
+  const otherProjects = projects.filter((p) => p.slug !== featured.slug);
+  const secondaryA = libraryProject || otherProjects[0] || featured;
+  const secondaryB =
+    nextgenProject || otherProjects.find((p) => p.slug !== secondaryA.slug) || otherProjects[1] || featured;
 
   return (
-    <div className="space-y-12">
-      {/* FEATURED PROJECT (Pinned rhythm on desktop, vertical stack on mobile) */}
-      <Panel
-        label="featured.system"
-        subtitle="01 flagship dossier"
-        actions={
-          <Link
-            href={`/projects/${featured.slug}`}
-            className="group flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan hover:text-cyan-glow transition-colors"
-          >
-            <span>full dossier</span>
-            <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        }
-      >
-        <div
-          ref={showcaseRef}
-          className="relative overflow-hidden rounded-xl border border-cyan/25 bg-surface/95 backdrop-blur-md p-6 lg:p-10 shadow-2xl"
-        >
-          {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
+    <section className="space-y-8">
+      {/* SECTION HEADER */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-cyan">
+          <span className="inline-block w-4 h-[1px] bg-cyan" />
+          <span>MY PROJECTS</span>
+        </div>
+        <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-white">
+          Featured{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-sky-400 to-blue-500">
+            Project
+          </span>
+        </h2>
+        <p className="max-w-2xl text-sm sm:text-base leading-relaxed text-slate-400">
+          A selection of my recent work. Each project represents a step in my journey of
+          building real-world solutions with modern technologies.
+        </p>
+      </div>
 
-          <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:gap-12 items-center">
-            {/* Left Side: Visual Showcase + Cover Image */}
-            <div className="lg:col-span-7 flex flex-col gap-4">
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border border-cyan/30 bg-black/60 shadow-lg">
-                {featured.coverImage ? (
-                  <Image
-                    src={featured.coverImage}
-                    alt={featured.coverImageAlt ?? featured.title}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col justify-center items-center p-8 bg-grid opacity-40">
-                    <Terminal size={48} className="text-cyan/40 mb-3" />
-                    <span className="font-mono text-xs text-cyan/70">
-                      $ sys.inspect --target {featured.slug}
-                    </span>
-                  </div>
-                )}
+      {/* FEATURED PROJECT CARD */}
+      <div className="relative overflow-hidden rounded-2xl border border-cyan/30 bg-[#070e1c]/90 p-6 sm:p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all hover:border-cyan/60 hover:shadow-[0_0_40px_rgba(92,208,255,0.15)]">
+        {/* Subtle matrix grid background */}
+        <div className="absolute inset-0 bg-grid opacity-15 pointer-events-none" />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:gap-10 items-center">
+          {/* Left Column: Image with overlay category */}
+          <div className="lg:col-span-6 relative aspect-[16/10] w-full overflow-hidden rounded-xl border border-cyan/25 bg-black/60 shadow-2xl group">
+            <Image
+              src={featured.coverImage || "/projects/saga-elite-cover.png"}
+              alt={featured.coverImageAlt || featured.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                {/* Badge overlay */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em]">
-                  <span className="flex items-center gap-2 rounded-sm border border-cyan/40 bg-surface/90 px-2.5 py-1 text-cyan backdrop-blur">
-                    <Sparkles size={11} className="text-signal-green" />
-                    {featured.category}
-                  </span>
-                  {featured.liveUrl && (
-                    <a
-                      href={featured.liveUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1 rounded-sm border border-signal-green/40 bg-signal-green/10 px-2.5 py-1 text-signal-green hover:bg-signal-green/20 backdrop-blur transition-all"
-                    >
-                      <ExternalLink size={11} />
-                      <span>Live App</span>
-                    </a>
-                  )}
-                </div>
+            {/* Bottom-left overlay pill */}
+            <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-lg border border-cyan/30 bg-black/80 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-cyan backdrop-blur-md shadow-lg">
+              <Package size={13} className="text-cyan" />
+              <span>E-COMMERCE &amp; LIFESTYLE</span>
+            </div>
+          </div>
+
+          {/* Right Column: Project details */}
+          <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              {/* Badge: Featured Project */}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 px-3 py-1 font-mono text-[11px] font-medium text-cyan">
+                <Sparkles size={12} className="fill-cyan" />
+                <span>Featured Project</span>
               </div>
 
-              {/* Quick Tech Badge Row */}
-              <div className="flex flex-wrap gap-2 pt-2">
-                {featured.techStack.map((tech) => (
+              {/* Title */}
+              <h3 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                {featured.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-sm leading-relaxed text-slate-300">
+                {featured.description}
+              </p>
+
+              {/* Tech Badges */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(featured.techStack.length
+                  ? featured.techStack
+                  : ["React", "Redux Toolkit", "Tailwind CSS", "Node.js", "Express.js", "MongoDB"]
+                ).map((tech) => (
                   <span
                     key={tech}
-                    className="rounded-sm border border-cyan/20 bg-cyan/5 px-2.5 py-1 font-mono text-[11px] text-cyan"
+                    className="rounded-full border border-cyan/20 bg-cyan/5 px-3 py-1 font-mono text-xs text-cyan/90"
                   >
                     {tech}
                   </span>
                 ))}
+                <span className="rounded-full border border-cyan/20 bg-cyan/5 px-2.5 py-1 font-mono text-xs text-slate-400">
+                  +3
+                </span>
               </div>
             </div>
 
-            {/* Right Side: Content & 3 Numbered Detail Beats */}
-            <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-6">
-              <div>
-                <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70 border-b border-cyan/15 pb-2">
-                  <span>flagship deployment</span>
-                  <span className="text-signal-green">active</span>
-                </div>
-                <h2 className="mt-3 font-display text-2xl lg:text-3xl font-bold text-foreground">
-                  {featured.title}
-                </h2>
-              </div>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <a
+                href={featured.githubUrl || "https://github.com/HajithMohamed/Saga-Elite-Web-project"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-xl bg-cyan px-5 py-2.5 font-mono text-xs font-semibold text-black transition-all hover:bg-cyan/90 hover:shadow-[0_0_24px_var(--cyan-glow)]"
+              >
+                <Github size={15} />
+                <span>View on GitHub</span>
+              </a>
 
-              {/* Detail Beats Tabs */}
-              <div className="flex items-center gap-2 border-b border-cyan/20 pb-3 font-mono text-xs">
-                {beats.map((beat, idx) => {
-                  const isActive = activeBeat === idx;
-                  return (
-                    <button
-                      key={beat.index}
-                      type="button"
-                      onClick={() => setActiveBeat(idx)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm uppercase tracking-wider transition-all ${
-                        isActive
-                          ? "bg-cyan text-black font-semibold shadow-[0_0_12px_var(--cyan-glow)]"
-                          : "text-muted-foreground hover:text-cyan hover:bg-cyan/10"
-                      }`}
-                    >
-                      <span>{beat.index}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Active Beat Content with Crossfade */}
-              <div className="min-h-[140px] space-y-3 font-mono">
-                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan/80 flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan" />
-                  {beats[activeBeat].heading}
-                </div>
-                <p className="font-body text-sm leading-relaxed text-muted-foreground">
-                  {beats[activeBeat].body}
-                </p>
-                <div className="pt-2 text-[11px] text-cyan/70">
-                  <span className="text-muted-foreground">Scope: </span>
-                  {beats[activeBeat].highlight}
-                </div>
-              </div>
-
-              {/* Bottom Action CTAs */}
-              <div className="pt-4 border-t border-cyan/15 flex items-center justify-between font-mono text-xs uppercase tracking-wider">
+              {featured.liveUrl ? (
+                <a
+                  href={featured.liveUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-cyan/40 bg-transparent px-5 py-2.5 font-mono text-xs font-medium text-cyan transition-all hover:border-cyan hover:bg-cyan/10 hover:text-white"
+                >
+                  <ExternalLink size={14} />
+                  <span>Live Demo</span>
+                </a>
+              ) : (
                 <Link
                   href={`/projects/${featured.slug}`}
-                  className="inline-flex items-center gap-2 text-cyan hover:text-cyan-glow transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl border border-cyan/40 bg-transparent px-5 py-2.5 font-mono text-xs font-medium text-cyan transition-all hover:border-cyan hover:bg-cyan/10 hover:text-white"
                 >
-                  <Terminal size={14} />
-                  <span>read architecture case study</span>
-                  <ArrowRight size={14} />
+                  <ExternalLink size={14} />
+                  <span>Inspect Dossier</span>
                 </Link>
+              )}
+            </div>
 
-                {featured.githubUrl && (
-                  <a
-                    href={featured.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-track="github_click"
-                    className="p-2 rounded-sm border border-cyan/25 bg-cyan/5 text-cyan hover:border-cyan hover:bg-cyan/20 transition-all"
-                  >
-                    <Github size={16} />
-                  </a>
-                )}
+            {/* Metadata row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 border-t border-cyan/15 font-mono text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-cyan/70 shrink-0" />
+                <span>2025</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users size={14} className="text-cyan/70 shrink-0" />
+                <span>4 Members</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Layers size={14} className="text-cyan/70 shrink-0" />
+                <span>MERN Stack</span>
+              </div>
+              <div className="flex items-center gap-2 truncate">
+                <Tag size={14} className="text-cyan/70 shrink-0" />
+                <span className="truncate">E-commerce</span>
               </div>
             </div>
           </div>
         </div>
-      </Panel>
+      </div>
 
-      {/* SECONDARY PROJECTS (2-Up Asymmetric Rhythm) */}
-      {secondaryProjects.length > 0 && (
-        <Panel
-          label="secondary.systems"
-          subtitle={`${secondaryProjects.length} systems indexed`}
-          actions={
-            <Link
-              href="/projects"
-              className="group flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan hover:text-cyan-glow transition-colors"
-            >
-              <span>index reactor</span>
-              <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-            </Link>
-          }
-        >
-          <div className="grid gap-6 md:grid-cols-2">
-            {secondaryProjects.map((proj, idx) => (
-              <ProjectCard key={proj.slug} project={proj} index={idx} />
-            ))}
+      {/* SECONDARY PROJECTS GRID (2-UP) */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Secondary Card 1: University Library Management System */}
+        <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-cyan/25 bg-[#070e1c]/80 p-5 backdrop-blur-md transition-all hover:border-cyan/50 hover:shadow-[0_12px_36px_rgba(92,208,255,0.12)]">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-cyan/20 bg-black/50">
+            <Image
+              src={secondaryA.coverImage || "/projects/university-library-cover.png"}
+              alt={secondaryA.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
-        </Panel>
-      )}
-    </div>
+
+          <div className="flex flex-1 flex-col pt-5 space-y-3">
+            <h4 className="font-display text-xl font-bold text-white transition-colors group-hover:text-cyan">
+              {secondaryA.title}
+            </h4>
+            <p className="text-xs leading-relaxed text-slate-400 line-clamp-3">
+              {secondaryA.description}
+            </p>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              {(secondaryA.techStack.length
+                ? secondaryA.techStack
+                : ["PHP", "MySQLi", "JavaScript", "Bootstrap", "XAMPP"]
+              ).map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-full border border-cyan/20 bg-cyan/5 px-2.5 py-0.5 font-mono text-[11px] text-cyan/90"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            {/* Footer action links */}
+            <div className="mt-auto pt-6 flex items-center justify-between border-t border-cyan/15 font-mono text-xs">
+              <a
+                href={secondaryA.githubUrl || "https://github.com/HajithMohamed/Library-Management-System"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-cyan transition-colors"
+              >
+                <Github size={14} />
+                <span>View on GitHub</span>
+              </a>
+
+              <Link
+                href={`/projects/${secondaryA.slug}`}
+                className="inline-flex items-center gap-1 text-cyan hover:text-white transition-colors"
+              >
+                <ExternalLink size={13} />
+                <span>Live Demo</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary Card 2: NEXTGEN Mobile Shop */}
+        <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-cyan/25 bg-[#070e1c]/80 p-5 backdrop-blur-md transition-all hover:border-cyan/50 hover:shadow-[0_12px_36px_rgba(92,208,255,0.12)]">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-cyan/20 bg-black/50">
+            <Image
+              src={secondaryB.coverImage || "/projects/nextgen-mobile-cover.png"}
+              alt={secondaryB.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          </div>
+
+          <div className="flex flex-1 flex-col pt-5 space-y-3">
+            <h4 className="font-display text-xl font-bold text-white transition-colors group-hover:text-cyan">
+              {secondaryB.title}
+            </h4>
+            <p className="text-xs leading-relaxed text-slate-400 line-clamp-3">
+              {secondaryB.description}
+            </p>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              {(secondaryB.techStack.length
+                ? secondaryB.techStack
+                : ["React", "Node.js", "Express.js", "MongoDB", "Tailwind CSS"]
+              ).map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-full border border-cyan/20 bg-cyan/5 px-2.5 py-0.5 font-mono text-[11px] text-cyan/90"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            {/* Footer action links */}
+            <div className="mt-auto pt-6 flex items-center justify-between border-t border-cyan/15 font-mono text-xs">
+              <a
+                href={secondaryB.githubUrl || "https://github.com/HajithMohamed/NEXTGEN---Sri-Lankan-Mobile-Shop-eCommerce-Website"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-cyan transition-colors"
+              >
+                <Github size={14} />
+                <span>View on GitHub</span>
+              </a>
+
+              <Link
+                href={`/projects/${secondaryB.slug}`}
+                className="inline-flex items-center gap-1 text-cyan hover:text-white transition-colors"
+              >
+                <ExternalLink size={13} />
+                <span>Live Demo</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EXPLORE MORE BANNER */}
+      <div className="relative overflow-hidden rounded-2xl border border-cyan/30 bg-[#070e1c]/90 p-6 sm:p-8 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-5">
+          {/* Glowing </> Icon box */}
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-cyan/40 bg-cyan/10 text-cyan shadow-[0_0_24px_var(--cyan-glow)]">
+            <Code2 size={24} className="stroke-[2.5]" />
+          </div>
+
+          <div className="space-y-1">
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+              — EXPLORE MORE
+            </div>
+            <h3 className="font-display text-2xl font-bold text-white">More Projects</h3>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+              Check out my other work and get a closer look at what I&apos;ve built with
+              different technologies and ideas.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/projects"
+          className="inline-flex items-center gap-2 shrink-0 rounded-xl border border-cyan/40 bg-cyan/10 px-6 py-3 font-mono text-xs font-semibold text-cyan hover:bg-cyan/20 hover:border-cyan hover:shadow-[0_0_20px_var(--cyan-glow)] transition-all"
+        >
+          <span>View All Projects</span>
+          <ArrowRight size={14} />
+        </Link>
+      </div>
+    </section>
   );
 }

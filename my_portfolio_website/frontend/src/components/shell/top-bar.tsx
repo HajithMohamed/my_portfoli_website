@@ -11,8 +11,9 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const NAV = [
   ["home", "/"],
-  ["projects", "/projects"],
   ["about", "/about"],
+  ["skills", "/#skills"],
+  ["projects", "/projects"],
   ["certificates", "/certificates"],
   ["comms", "/#comms"],
 ] as const;

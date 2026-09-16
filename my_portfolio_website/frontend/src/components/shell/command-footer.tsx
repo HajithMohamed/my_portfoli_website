@@ -4,12 +4,14 @@ import type { Profile } from "@/lib/types";
 import { ArrowUp, Github, Linkedin, Mail } from "lucide-react";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
-const VERSION = "v4.0.0";
+const VERSION = "v5.0.0";
 
-export function CommandFooter({ profile }: { profile: Profile }) {
+export function CommandFooter({ profile }: { profile?: Profile }) {
   const year = new Date().getFullYear();
-  const github = profile.socialLinks?.find((l) => l.url.includes("github.com"));
-  const linkedin = profile.socialLinks?.find((l) => l.url.includes("linkedin.com"));
+  const name = profile?.name || PERSONAL_IDENTITY.name;
+  const email = profile?.email || "hajith@hzlabs.studio";
+  const github = profile?.socialLinks?.find((l) => l.url.includes("github.com"));
+  const linkedin = profile?.socialLinks?.find((l) => l.url.includes("linkedin.com"));
   
   const githubHandle = github
     ? github.url.replace(/\/$/, "").split("/").pop()
@@ -56,8 +58,8 @@ export function CommandFooter({ profile }: { profile: Profile }) {
               <span className="h-[1px] w-4 bg-cyan/50" />
               Comms
             </div>
-            <a href={`mailto:${profile.email}`} className="text-foreground transition-colors hover:text-cyan font-semibold block">
-              {profile.email}
+            <a href={`mailto:${email}`} className="text-foreground transition-colors hover:text-cyan font-semibold block">
+              {email}
             </a>
             <div className="mt-2 text-muted-foreground">github.com/{githubHandle}</div>
           </div>
@@ -81,7 +83,7 @@ export function CommandFooter({ profile }: { profile: Profile }) {
         <div className="mt-16 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-cyan/15 pt-8 text-muted-foreground">
           <div className="flex items-center gap-4">
             <span className="text-[10px] uppercase tracking-widest text-foreground/50">
-              © {year} {profile.name}.
+              © {year} {name}.
             </span>
           </div>
           
@@ -97,7 +99,7 @@ export function CommandFooter({ profile }: { profile: Profile }) {
                 <Linkedin size={18} />
               </a>
             )}
-            <a href={`mailto:${profile.email}`} className="flex items-center justify-center text-muted-foreground transition-colors hover:text-cyan hover:text-glow touch-target" aria-label="Email">
+            <a href={`mailto:${email}`} className="flex items-center justify-center text-muted-foreground transition-colors hover:text-cyan hover:text-glow touch-target" aria-label="Email">
               <Mail size={18} />
             </a>
           </div>

@@ -6,6 +6,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { CertificatesModule } from './certificates/certificates.module';
+import { ClientProjectsModule } from './client-projects/client-projects.module';
 import { GithubModule } from './github/github.module';
 import { HealthController } from './health.controller';
 import { MediaModule } from './media/media.module';
@@ -13,7 +14,9 @@ import { MessagesModule } from './messages/messages.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { ProjectsModule } from './projects/projects.module';
+import { RequestsModule } from './requests/requests.module';
 import { ResumeModule } from './resume/resume.module';
+import { SettingsModule } from './settings/settings.module';
 import { SkillsModule } from './skills/skills.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { UploadsModule } from './uploads/uploads.module';
@@ -36,6 +39,9 @@ import { UploadsModule } from './uploads/uploads.module';
     TestimonialsModule,
     CertificatesModule,
     MediaModule,
+    SettingsModule,
+    RequestsModule,
+    ClientProjectsModule,
   ],
   providers: [
     {

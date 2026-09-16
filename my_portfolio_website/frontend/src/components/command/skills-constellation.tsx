@@ -1,376 +1,587 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Panel } from "@/components/hud/panel";
+import { useState } from "react";
+import Link from "next/link";
 import type { Project, Skill } from "@/lib/types";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { GitFork, Layers, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Cloud,
+  Code2,
+  Database,
+  Globe,
+  GraduationCap,
+  Layers,
+  Maximize2,
+  Monitor,
+  Palette,
+  Server,
+  Shield,
+  Terminal,
+  Wrench,
+  Zap,
+} from "lucide-react";
 
-type ConstellationNode = {
+type CategoryKey =
+  | "All"
+  | "Frontend"
+  | "Backend"
+  | "Database"
+  | "DevOps"
+  | "Tools"
+  | "Languages"
+  | "Other";
+
+type CategoryCardData = {
   id: string;
-  name: string;
-  category: string;
-  repoCount: number;
-  repoNames: string[];
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
+  category: CategoryKey;
+  title: string;
+  subtitle: string;
+  icon: typeof Monitor;
+  colorClass: {
+    bg: string;
+    border: string;
+    text: string;
+    glow: string;
+  };
+  skills: string[];
 };
 
-type ConstellationEdge = {
-  source: string;
-  target: string;
-  weight: number;
-};
+const CATEGORIES: CategoryCardData[] = [
+  {
+    id: "frontend",
+    category: "Frontend",
+    title: "Frontend Development",
+    subtitle: "Building responsive and modern user interfaces",
+    icon: Monitor,
+    colorClass: {
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/30",
+      text: "text-blue-400",
+      glow: "rgba(59,130,246,0.15)",
+    },
+    skills: [
+      "React.js",
+      "Next.js",
+      "JavaScript",
+      "TypeScript",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Styled Components",
+    ],
+  },
+  {
+    id: "backend",
+    category: "Backend",
+    title: "Backend Development",
+    subtitle: "Creating secure and scalable server-side applications",
+    icon: Server,
+    colorClass: {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/30",
+      text: "text-emerald-400",
+      glow: "rgba(16,185,129,0.15)",
+    },
+    skills: [
+      "Node.js",
+      "Express.js",
+      "NestJS",
+      "Java",
+      "Spring Boot",
+      "REST APIs",
+      "JWT Authentication",
+    ],
+  },
+  {
+    id: "database",
+    category: "Database",
+    title: "Database",
+    subtitle: "Managing and working with data",
+    icon: Database,
+    colorClass: {
+      bg: "bg-teal-500/10",
+      border: "border-teal-500/30",
+      text: "text-teal-400",
+      glow: "rgba(20,184,166,0.15)",
+    },
+    skills: ["MongoDB", "MySQL", "PostgreSQL"],
+  },
+  {
+    id: "devops",
+    category: "DevOps",
+    title: "DevOps & Deployment",
+    subtitle: "Building, deploying and managing applications",
+    icon: Cloud,
+    colorClass: {
+      bg: "bg-purple-500/10",
+      border: "border-purple-500/30",
+      text: "text-purple-400",
+      glow: "rgba(168,85,247,0.15)",
+    },
+    skills: ["Docker", "Git", "GitHub", "Vercel", "Netlify", "Railway"],
+  },
+  {
+    id: "languages",
+    category: "Languages",
+    title: "Programming Languages",
+    subtitle: "Writing clean and efficient code",
+    icon: Code2,
+    colorClass: {
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/30",
+      text: "text-amber-400",
+      glow: "rgba(245,158,11,0.15)",
+    },
+    skills: ["Java", "C", "C++", "JavaScript"],
+  },
+  {
+    id: "tools",
+    category: "Tools",
+    title: "Tools & Others",
+    subtitle: "Supporting development and productivity",
+    icon: Wrench,
+    colorClass: {
+      bg: "bg-sky-500/10",
+      border: "border-sky-500/30",
+      text: "text-sky-400",
+      glow: "rgba(14,165,233,0.15)",
+    },
+    skills: ["Postman", "VS Code", "Figma", "Linux"],
+  },
+];
 
-const CATEGORY_CONFIG: Record<
-  string,
-  { center: { x: number; y: number }; color: string; label: string }
-> = {
-  Frontend: { center: { x: 28, y: 32 }, color: "#5cd0ff", label: "Frontend" },
-  Backend: { center: { x: 72, y: 32 }, color: "#a78bfa", label: "Backend" },
-  Database: { center: { x: 30, y: 68 }, color: "#34d399", label: "Database" },
-  Tools: { center: { x: 70, y: 68 }, color: "#fbbf24", label: "Tools & DevOps" },
-};
-
-function normalizeCategory(cat?: string): string {
-  if (!cat) return "Tools";
-  const lower = cat.toLowerCase();
-  if (lower.includes("front") || lower.includes("ui") || lower.includes("client")) return "Frontend";
-  if (lower.includes("back") || lower.includes("api") || lower.includes("server")) return "Backend";
-  if (lower.includes("data") || lower.includes("sql") || lower.includes("mongo") || lower.includes("db"))
-    return "Database";
-  return "Tools";
-}
+const NETWORK_NODES = [
+  {
+    id: "frontend",
+    label: "Frontend",
+    sublabel: "React.js / Next.js",
+    x: 200,
+    y: 65,
+    color: "#38bdf8",
+    icon: Monitor,
+  },
+  {
+    id: "styling",
+    label: "Styling",
+    sublabel: "Tailwind CSS / Styled Components",
+    x: 320,
+    y: 110,
+    color: "#2dd4bf",
+    icon: Palette,
+  },
+  {
+    id: "database",
+    label: "Database",
+    sublabel: "MongoDB",
+    x: 345,
+    y: 200,
+    color: "#34d399",
+    icon: Database,
+  },
+  {
+    id: "tools",
+    label: "Tools",
+    sublabel: "Docker / Git / GitHub",
+    x: 310,
+    y: 295,
+    color: "#60a5fa",
+    icon: Wrench,
+  },
+  {
+    id: "cloud",
+    label: "Cloud & Deployment",
+    sublabel: "Vercel / Netlify / Railway",
+    x: 200,
+    y: 335,
+    color: "#c084fc",
+    icon: Cloud,
+  },
+  {
+    id: "backend",
+    label: "Backend",
+    sublabel: "Node.js / Express.js / NestJS",
+    x: 90,
+    y: 295,
+    color: "#a855f7",
+    icon: Server,
+  },
+  {
+    id: "languages",
+    label: "Languages",
+    sublabel: "Java / C / C++",
+    x: 55,
+    y: 200,
+    color: "#fb923c",
+    icon: Code2,
+  },
+  {
+    id: "apis",
+    label: "APIs & Auth",
+    sublabel: "REST APIs / JWT Authentication",
+    x: 80,
+    y: 110,
+    color: "#22d3ee",
+    icon: Shield,
+  },
+];
 
 export function SkillsConstellation({
   skills = [],
   projects = [],
 }: {
-  skills: Skill[];
+  skills?: Skill[];
   projects?: Project[];
 }) {
-  const prefersReduced = useReducedMotion();
-  const [selectedTech, setSelectedTech] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>("ALL");
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>("All");
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
-  // Build nodes and edges from honest repository technologies
-  const { nodes, edges, nodeMap } = useMemo(() => {
-    // 1. Collect frequencies and repo names for each technology
-    const techRepos = new Map<string, Set<string>>();
-    const techCategoryMap = new Map<string, string>();
+  const tabs: CategoryKey[] = [
+    "All",
+    "Frontend",
+    "Backend",
+    "Database",
+    "DevOps",
+    "Tools",
+    "Languages",
+    "Other",
+  ];
 
-    // Seed from skills
-    for (const s of skills) {
-      const norm = s.name;
-      if (!techRepos.has(norm)) techRepos.set(norm, new Set());
-      techCategoryMap.set(norm, normalizeCategory(s.category));
-    }
-
-    // Populate from real projects
-    for (const p of projects) {
-      for (const t of p.techStack) {
-        if (!techRepos.has(t)) techRepos.set(t, new Set());
-        techRepos.get(t)!.add(p.title);
-        if (!techCategoryMap.has(t)) {
-          // Infer category
-          const lower = t.toLowerCase();
-          if (["react", "next.js", "tailwind css", "html", "css", "javascript", "alpine.js", "bootstrap"].some(k => lower.includes(k))) {
-            techCategoryMap.set(t, "Frontend");
-          } else if (["node.js", "express", "nestjs", "php", "socket.io", "jwt"].some(k => lower.includes(k))) {
-            techCategoryMap.set(t, "Backend");
-          } else if (["mongodb", "postgresql", "mysql", "prisma", "mariadb", "redis"].some(k => lower.includes(k))) {
-            techCategoryMap.set(t, "Database");
-          } else {
-            techCategoryMap.set(t, "Tools");
-          }
-        }
-      }
-    }
-
-    // 2. Co-occurrence edges
-    const edgeCounts = new Map<string, number>();
-    for (const p of projects) {
-      const stack = p.techStack;
-      for (let i = 0; i < stack.length; i++) {
-        for (let j = i + 1; j < stack.length; j++) {
-          const a = stack[i];
-          const b = stack[j];
-          const key = a < b ? `${a}:::${b}` : `${b}:::${a}`;
-          edgeCounts.set(key, (edgeCounts.get(key) ?? 0) + 1);
-        }
-      }
-    }
-
-    // 3. Cluster placement layout
-    const categoryBuckets: Record<string, string[]> = {
-      Frontend: [],
-      Backend: [],
-      Database: [],
-      Tools: [],
-    };
-
-    for (const tech of techRepos.keys()) {
-      const cat = techCategoryMap.get(tech) ?? "Tools";
-      if (!categoryBuckets[cat]) categoryBuckets[cat] = [];
-      categoryBuckets[cat].push(tech);
-    }
-
-    const calculatedNodes: ConstellationNode[] = [];
-    const calculatedNodeMap = new Map<string, ConstellationNode>();
-
-    Object.entries(categoryBuckets).forEach(([cat, techs]) => {
-      const cfg = CATEGORY_CONFIG[cat] ?? CATEGORY_CONFIG.Tools;
-      const count = techs.length;
-      techs.forEach((name, i) => {
-        const repoSet = techRepos.get(name) ?? new Set();
-        const repoCount = Math.max(1, repoSet.size);
-        const radius = Math.min(4.5, 2.0 + repoCount * 0.6);
-
-        // Circular cluster offset with varied radius
-        const angle = (i / Math.max(1, count)) * 2 * Math.PI;
-        const dist = 7 + (i % 3) * 4;
-        const x = Math.max(8, Math.min(92, cfg.center.x + Math.cos(angle) * dist));
-        const y = Math.max(8, Math.min(92, cfg.center.y + Math.sin(angle) * dist));
-
-        const node: ConstellationNode = {
-          id: name.toLowerCase(),
-          name,
-          category: cat,
-          repoCount,
-          repoNames: Array.from(repoSet),
-          x,
-          y,
-          radius,
-          color: cfg.color,
-        };
-        calculatedNodes.push(node);
-        calculatedNodeMap.set(node.id, node);
-      });
-    });
-
-    // 4. Edges
-    const calculatedEdges: ConstellationEdge[] = [];
-    for (const [key, count] of edgeCounts) {
-      const [source, target] = key.split(":::");
-      if (calculatedNodeMap.has(source.toLowerCase()) && calculatedNodeMap.has(target.toLowerCase())) {
-        calculatedEdges.push({
-          source: source.toLowerCase(),
-          target: target.toLowerCase(),
-          weight: count,
-        });
-      }
-    }
-
-    return {
-      nodes: calculatedNodes,
-      edges: calculatedEdges,
-      nodeMap: calculatedNodeMap,
-    };
-  }, [skills, projects]);
-
-  const activeNode = selectedTech ? nodeMap.get(selectedTech) ?? null : null;
-
-  // Connected edges for the active node
-  const connectedTechs = useMemo(() => {
-    if (!selectedTech) return new Set<string>();
-    const set = new Set<string>();
-    edges.forEach((e) => {
-      if (e.source === selectedTech) set.add(e.target);
-      if (e.target === selectedTech) set.add(e.source);
-    });
-    return set;
-  }, [selectedTech, edges]);
-
-  const filteredNodes =
-    filterCategory === "ALL"
-      ? nodes
-      : nodes.filter((n) => n.category.toUpperCase() === filterCategory.toUpperCase());
+  const filteredCards =
+    activeCategory === "All"
+      ? CATEGORIES
+      : CATEGORIES.filter((c) => c.category === activeCategory);
 
   return (
-    <Panel
-      label="skill.constellation"
-      subtitle={`${nodes.length} technologies in active codebases`}
-      className="h-full"
-      actions={
-        <div className="flex items-center gap-1 font-mono text-[9px] uppercase">
-          {["ALL", "FRONTEND", "BACKEND", "DATABASE", "TOOLS"].map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setFilterCategory(cat)}
-              className={`px-2 py-0.5 rounded-sm transition-all ${
-                filterCategory === cat
-                  ? "bg-cyan/20 text-cyan border border-cyan/40"
-                  : "text-muted-foreground hover:text-cyan"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      }
-    >
-      <div className="flex flex-col h-full gap-4">
-        {/* Constellation SVG Diagram */}
-        <div className="relative w-full aspect-[16/10] md:aspect-[16/9] min-h-[300px] rounded-lg border border-cyan/15 bg-[#02050a] overflow-hidden">
-          {/* Subtle grid backdrop */}
-          <div className="absolute inset-0 bg-grid opacity-25 pointer-events-none" />
-
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full select-none"
-            role="img"
-            aria-label="Interactive skill technology constellation graph"
-          >
-            {/* Cluster zone watermark labels */}
-            {Object.entries(CATEGORY_CONFIG).map(([cat, cfg]) => (
-              <text
-                key={cat}
-                x={cfg.center.x}
-                y={cfg.center.y - 12}
-                textAnchor="middle"
-                fill={cfg.color}
-                opacity={filterCategory === "ALL" || filterCategory === cat.toUpperCase() ? 0.25 : 0.05}
-                fontFamily="monospace"
-                fontSize="2.4"
-                fontWeight="bold"
-                letterSpacing="0.1em"
-              >
-                {cfg.label.toUpperCase()}
-              </text>
-            ))}
-
-            {/* Edges */}
-            {edges.map((e, idx) => {
-              const src = nodeMap.get(e.source);
-              const tgt = nodeMap.get(e.target);
-              if (!src || !tgt) return null;
-
-              const isHighlighted =
-                selectedTech === e.source || selectedTech === e.target;
-              const isDimmed =
-                selectedTech && !isHighlighted;
-
-              return (
-                <line
-                  key={idx}
-                  x1={src.x}
-                  y1={src.y}
-                  x2={tgt.x}
-                  y2={tgt.y}
-                  stroke={isHighlighted ? "#5cd0ff" : "rgba(92, 208, 255, 0.12)"}
-                  strokeWidth={isHighlighted ? 0.4 : 0.15}
-                  strokeOpacity={isDimmed ? 0.04 : isHighlighted ? 0.9 : 0.4}
-                  strokeDasharray={isHighlighted ? "none" : "0.5 0.5"}
-                />
-              );
-            })}
-
-            {/* Nodes */}
-            {filteredNodes.map((n) => {
-              const isSelected = selectedTech === n.id;
-              const isConnected = connectedTechs.has(n.id);
-              const isDimmed = selectedTech && !isSelected && !isConnected;
-
-              return (
-                <g
-                  key={n.id}
-                  className="cursor-pointer transition-opacity duration-200"
-                  onClick={() => setSelectedTech(selectedTech === n.id ? null : n.id)}
-                  onMouseEnter={() => setSelectedTech(n.id)}
-                  opacity={isDimmed ? 0.25 : 1}
-                >
-                  {/* Halo on hover/selection */}
-                  {(isSelected || isConnected) && (
-                    <circle
-                      cx={n.x}
-                      cy={n.y}
-                      r={n.radius * 1.8}
-                      fill="none"
-                      stroke={n.color}
-                      strokeWidth="0.2"
-                      opacity="0.6"
-                      className={prefersReduced ? "" : "animate-ping"}
-                      style={{ transformOrigin: `${n.x}px ${n.y}px` }}
-                    />
-                  )}
-
-                  {/* Node disk */}
-                  <circle
-                    cx={n.x}
-                    cy={n.y}
-                    r={n.radius}
-                    fill={isSelected ? n.color : "#02050a"}
-                    stroke={n.color}
-                    strokeWidth={isSelected ? 0.6 : 0.3}
-                  />
-
-                  {/* Text label */}
-                  <text
-                    x={n.x}
-                    y={n.y + n.radius + 2.5}
-                    textAnchor="middle"
-                    fill={isSelected ? "#fff" : "rgba(226, 236, 255, 0.7)"}
-                    fontSize={isSelected ? "2.2" : "1.8"}
-                    fontFamily="monospace"
-                    fontWeight={isSelected ? "bold" : "normal"}
-                  >
-                    {n.name}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+    <section className="space-y-8">
+      {/* SECTION HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-cyan">
+            <span className="inline-block w-4 h-[1px] bg-cyan" />
+            <span>MY SKILLS</span>
+          </div>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-white">
+            Technologies{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan via-sky-400 to-blue-500">
+              I Work With
+            </span>
+          </h2>
+          <p className="max-w-2xl text-sm sm:text-base leading-relaxed text-slate-400">
+            A collection of tools and technologies I use to build modern web applications,
+            from frontend to backend and deployment.
+          </p>
         </div>
 
-        {/* Selected Technology Telemetry Footer */}
-        <div className="rounded-md border border-cyan/15 bg-surface-2/40 p-4 font-mono text-xs">
-          {activeNode ? (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="inline-block h-2 w-2 rounded-full"
-                    style={{ backgroundColor: activeNode.color }}
-                  />
-                  <span className="font-display font-bold text-foreground text-sm">
-                    {activeNode.name}
-                  </span>
-                  <span className="text-[10px] text-cyan/70 border border-cyan/20 px-2 py-0.5 rounded-sm">
-                    {activeNode.category}
-                  </span>
-                </div>
-                <div className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-2">
-                  <GitFork size={12} className="text-cyan/60" />
-                  <span>
-                    Indexed in {activeNode.repoCount}{" "}
-                    {activeNode.repoCount === 1 ? "repository" : "repositories"}:
-                  </span>
-                  <span className="text-foreground font-medium">
-                    {activeNode.repoNames.slice(0, 3).join(", ") || "Active system stack"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="text-[10px] text-cyan/70 shrink-0">
-                {connectedTechs.size} connected {connectedTechs.size === 1 ? "stack item" : "stack items"}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between text-muted-foreground text-[11px]">
-              <span className="flex items-center gap-2">
-                <Sparkles size={12} className="text-cyan" />
-                Tap or hover any constellation node to inspect real repository co-occurrences.
-              </span>
-              <span className="text-[10px] uppercase tracking-wider text-cyan/60">
-                Verified GitHub Source
-              </span>
-            </div>
-          )}
+        <div className="hidden sm:block font-mono text-xs uppercase tracking-[0.3em] text-slate-500">
+          BUILD / LEARN / IMPROVE
         </div>
       </div>
-    </Panel>
+
+      {/* MAIN TWO-COLUMN CONTAINER */}
+      <div className="grid lg:grid-cols-12 gap-6 items-stretch">
+        {/* LEFT COLUMN: SKILLS NETWORK CARD */}
+        <div className="lg:col-span-5 relative overflow-hidden rounded-2xl border border-cyan/30 bg-[#070e1c]/90 p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between">
+          {/* Subtle grid backdrop */}
+          <div className="absolute inset-0 bg-grid opacity-15 pointer-events-none" />
+
+          {/* Card Top Header */}
+          <div className="relative z-10 flex items-start justify-between pb-4 border-b border-cyan/15">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan/10 text-cyan border border-cyan/30">
+                  <Globe size={13} />
+                </div>
+                <h3 className="font-display font-bold text-white text-base">Skills Network</h3>
+              </div>
+              <p className="text-xs text-slate-400">
+                Core technologies and how they connect in my workflow
+              </p>
+            </div>
+            <button
+              type="button"
+              className="p-1.5 rounded-md text-slate-400 hover:text-cyan hover:bg-cyan/10 transition-colors"
+              aria-label="Maximize diagram"
+            >
+              <Maximize2 size={15} />
+            </button>
+          </div>
+
+          {/* Interactive Network Diagram */}
+          <div className="relative z-10 my-4 flex-1 flex items-center justify-center aspect-square max-h-[380px] w-full">
+            <svg
+              viewBox="0 0 400 400"
+              className="w-full h-full select-none"
+              role="img"
+              aria-label="Interactive skills constellation diagram"
+            >
+              <defs>
+                {/* Radial gradient for central glow */}
+                <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#818cf8" stopOpacity="0.45" />
+                  <stop offset="60%" stopColor="#38bdf8" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              {/* Background ambient center glow */}
+              <circle cx="200" cy="200" r="140" fill="url(#centerGlow)" />
+
+              {/* Outer mesh ring connector lines */}
+              {NETWORK_NODES.map((node, i) => {
+                const nextNode = NETWORK_NODES[(i + 1) % NETWORK_NODES.length];
+                const isConn =
+                  hoveredNode === node.id || hoveredNode === nextNode.id;
+                return (
+                  <line
+                    key={`mesh-${node.id}`}
+                    x1={node.x}
+                    y1={node.y}
+                    x2={nextNode.x}
+                    y2={nextNode.y}
+                    stroke={isConn ? "#38bdf8" : "rgba(92,208,255,0.12)"}
+                    strokeWidth={isConn ? 1.5 : 0.8}
+                    strokeDasharray={isConn ? "none" : "2 2"}
+                    className="transition-all duration-300"
+                  />
+                );
+              })}
+
+              {/* Spoke connector lines from satellites to center */}
+              {NETWORK_NODES.map((node) => {
+                const isConn = hoveredNode === node.id;
+                return (
+                  <g key={`spoke-${node.id}`}>
+                    <line
+                      x1={200}
+                      y1={200}
+                      x2={node.x}
+                      y2={node.y}
+                      stroke={isConn ? node.color : "rgba(92,208,255,0.2)"}
+                      strokeWidth={isConn ? 2 : 1}
+                      className="transition-all duration-300"
+                    />
+                    {isConn && (
+                      <circle cx={node.x} cy={node.y} r="6" fill={node.color} opacity="0.3">
+                        <animate
+                          attributeName="r"
+                          values="4;14;4"
+                          dur="1.5s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="opacity"
+                          values="0.6;0;0.6"
+                          dur="1.5s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* CENTER NODE: Full Stack Development */}
+              <g className="cursor-pointer" style={{ transformOrigin: "200px 200px" }}>
+                <circle
+                  cx="200"
+                  cy="200"
+                  r="30"
+                  fill="#070e1c"
+                  stroke="#38bdf8"
+                  strokeWidth="2"
+                  className="shadow-[0_0_20px_#38bdf8]"
+                />
+                <circle
+                  cx="200"
+                  cy="200"
+                  r="24"
+                  fill="none"
+                  stroke="#818cf8"
+                  strokeWidth="1"
+                  strokeDasharray="3 3"
+                />
+                <text
+                  x="200"
+                  y="205"
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize="16"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  &lt;/&gt;
+                </text>
+                <text
+                  x="200"
+                  y="244"
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize="9.5"
+                  fontFamily="sans-serif"
+                  fontWeight="bold"
+                >
+                  Full Stack
+                </text>
+                <text
+                  x="200"
+                  y="256"
+                  textAnchor="middle"
+                  fill="#94a3b8"
+                  fontSize="8"
+                  fontFamily="sans-serif"
+                >
+                  Development
+                </text>
+              </g>
+
+              {/* ORBITING SATELLITE NODES */}
+              {NETWORK_NODES.map((node) => {
+                const isHovered = hoveredNode === node.id;
+                return (
+                  <g
+                    key={node.id}
+                    className="cursor-pointer transition-transform duration-300"
+                    onMouseEnter={() => setHoveredNode(node.id)}
+                    onMouseLeave={() => setHoveredNode(null)}
+                    onClick={() => setHoveredNode(isHovered ? null : node.id)}
+                  >
+                    {/* Glowing outer disk */}
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={isHovered ? 18 : 14}
+                      fill="#070e1c"
+                      stroke={node.color}
+                      strokeWidth={isHovered ? 2 : 1.2}
+                      className="transition-all duration-300"
+                    />
+
+                    {/* Node Dot / Icon indicator */}
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={isHovered ? 6 : 4}
+                      fill={node.color}
+                      className="transition-all duration-300"
+                    />
+
+                    {/* Node Labels */}
+                    <text
+                      x={node.x}
+                      y={node.y > 200 ? node.y + 22 : node.y - 18}
+                      textAnchor="middle"
+                      fill={isHovered ? "#fff" : "#e2e8f0"}
+                      fontSize="9"
+                      fontWeight="bold"
+                      fontFamily="sans-serif"
+                    >
+                      {node.label}
+                    </text>
+                    <text
+                      x={node.x}
+                      y={node.y > 200 ? node.y + 32 : node.y - 8}
+                      textAnchor="middle"
+                      fill={isHovered ? node.color : "#94a3b8"}
+                      fontSize="7.5"
+                      fontFamily="sans-serif"
+                    >
+                      {node.sublabel.split("/")[0].trim()}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          <div className="relative z-10 pt-3 border-t border-cyan/15 text-center font-mono text-[11px] text-cyan/70">
+            Tap or hover any node to inspect connected stack relationships
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: CATEGORY TABS & 6 CARDS GRID */}
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
+          {/* Filter Pills Header */}
+          <div className="flex flex-wrap items-center gap-2">
+            {tabs.map((tab) => {
+              const isActive = activeCategory === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveCategory(tab)}
+                  className={`rounded-full px-4 py-1.5 font-mono text-xs transition-all ${
+                    isActive
+                      ? "bg-cyan text-black font-semibold shadow-[0_0_15px_var(--cyan-glow)]"
+                      : "border border-cyan/20 bg-surface/60 text-slate-400 hover:text-white hover:border-cyan/40"
+                  }`}
+                >
+                  {tab}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 6 Category Cards Grid */}
+          <div className="grid gap-4 sm:grid-cols-2 flex-1">
+            {filteredCards.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <div
+                  key={cat.id}
+                  className="group relative flex flex-col rounded-2xl border border-cyan/25 bg-[#070e1c]/80 p-5 backdrop-blur-md transition-all hover:border-cyan/50 hover:shadow-[0_8px_24px_rgba(92,208,255,0.1)]"
+                >
+                  <div className="flex items-start gap-3.5 mb-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${cat.colorClass.border} ${cat.colorClass.bg} ${cat.colorClass.text}`}
+                    >
+                      <Icon size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-display text-base font-bold text-white transition-colors group-hover:text-cyan">
+                        {cat.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 line-clamp-1">{cat.subtitle}</p>
+                    </div>
+                  </div>
+
+                  {/* Badges */}
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                    {cat.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-cyan/20 bg-cyan/5 px-2.5 py-1 font-mono text-[11px] text-cyan/90 transition-colors group-hover:border-cyan/40 group-hover:bg-cyan/10"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* CURRENTLY LEARNING BANNER */}
+          <div className="relative overflow-hidden rounded-xl border border-cyan/30 bg-[#070e1c]/90 p-4 sm:p-5 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan/30 bg-cyan/10 text-cyan">
+                <GraduationCap size={18} />
+              </div>
+              <div className="text-xs leading-relaxed text-slate-300">
+                <span className="font-semibold text-white">Currently Learning: </span>
+                Exploring advanced Java, Spring Boot, Cloud technologies and modern software architecture.
+              </div>
+            </div>
+
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-1.5 shrink-0 rounded-lg border border-cyan/40 bg-cyan/10 px-4 py-2 font-mono text-xs font-medium text-cyan hover:bg-cyan/20 hover:border-cyan transition-all"
+            >
+              <span>View My Journey</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

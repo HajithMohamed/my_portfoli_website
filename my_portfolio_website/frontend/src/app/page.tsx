@@ -124,12 +124,18 @@ export default async function Home() {
             <ProjectsShowcase projects={projects.filter((p) => HOMEPAGE_SLUGS.has(p.slug))} />
           </div>
 
+          <SectionDivider label="sys.skills" />
+
+          {/* Skills — Technologies I Work With */}
+          <div id="skills" className="scroll-mt-24">
+            <SkillsConstellation skills={skills} projects={projects} />
+          </div>
+
           <SectionDivider label="sys.infrastructure" />
 
-          {/* Architecture & Skills */}
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-stretch">
+          {/* Architecture Map */}
+          <div id="architecture" className="scroll-mt-24">
             <ArchitectureMap />
-            <SkillsConstellation skills={skills} projects={projects} />
           </div>
 
           <SectionDivider label="sys.intelligence" />
