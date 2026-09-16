@@ -18,7 +18,7 @@ const NAV = [
   ["comms", "/#comms"],
 ] as const;
 
-const VERSION = "v4.0.0";
+const VERSION = "v5.0.0";
 
 function useClock() {
   const [now, setNow] = useState<string>("");

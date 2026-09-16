@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Panel } from "@/components/hud/panel";
@@ -23,9 +24,18 @@ export function ProjectsShowcase({ projects }: { projects: Project[] }) {
 
   // Find Saga Elite or featured project
   const featured =
-    projects.find((p) => p.slug === "saga-elite" || p.title.toLowerCase().includes("saga")) ||
+    projects.find(
+      (p) =>
+        p.slug === "saga-elite" ||
+        p.slug === "saga-elite-web-project" ||
+        p.title.toLowerCase().includes("saga")
+    ) ||
     projects.find((p) => p.featured && p.coverImage) ||
     projects[0];
+
+  const [sagaImg, setSagaImg] = useState<string>(
+    featured.coverImage || "/projects/saga-elite-cover.png"
+  );
 
   // Specific secondary projects
   const libraryProject = projects.find(
@@ -81,13 +91,14 @@ export function ProjectsShowcase({ projects }: { projects: Project[] }) {
         bodyClassName="p-4 sm:p-5"
       >
         <div className="grid gap-5 lg:grid-cols-12 items-center">
-          {/* Left Column: Compact Visual Preview */}
-          <div className="lg:col-span-5 relative aspect-[16/10] max-h-[240px] w-full overflow-hidden rounded-md border border-cyan/20 bg-black/50 group">
+          {/* Left Column: Visual Preview */}
+          <div className="lg:col-span-5 relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[16/10] max-h-[260px] w-full overflow-hidden rounded-md border border-cyan/20 bg-black/50 group">
             <Image
-              src={featured.coverImage || "/projects/saga-elite-cover.png"}
+              src={sagaImg}
               alt={featured.coverImageAlt || featured.title}
               fill
               priority
+              onError={() => setSagaImg("/projects/saga-elite-cover.png")}
               sizes="(max-width: 1024px) 100vw, 40vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
@@ -144,8 +155,8 @@ export function ProjectsShowcase({ projects }: { projects: Project[] }) {
             </div>
 
             {/* Action Buttons & Metadata */}
-            <div className="pt-2 border-t border-cyan/15 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+            <div className="pt-3 border-t border-cyan/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <a
                   href={featured.githubUrl || "https://github.com/HajithMohamed/Saga-Elite-Web-project"}
                   target="_blank"
@@ -345,7 +356,7 @@ export function ProjectsShowcase({ projects }: { projects: Project[] }) {
         className="w-full"
         bodyClassName="p-4 sm:p-5"
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-cyan/30 bg-cyan/10 text-cyan">
               <Code2 size={18} />
@@ -362,7 +373,7 @@ export function ProjectsShowcase({ projects }: { projects: Project[] }) {
 
           <Link
             href="/projects"
-            className="inline-flex items-center gap-2 shrink-0 border border-cyan/40 bg-cyan/10 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-cyan hover:bg-cyan/20 hover:border-cyan transition-all rounded-sm"
+            className="inline-flex items-center justify-center gap-2 shrink-0 border border-cyan/40 bg-cyan/10 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-cyan hover:bg-cyan/20 hover:border-cyan transition-all rounded-sm w-full sm:w-auto"
           >
             <span>View All Projects</span>
             <ArrowRight size={12} />

@@ -16,6 +16,7 @@ import type { GithubSummary, Project } from "@/lib/types";
 /** Only these projects appear on the homepage — the full list lives at /projects. */
 const HOMEPAGE_SLUGS = new Set([
   "saga-elite",
+  "saga-elite-web-project",
   "tech-bridge",
   "shoe-bank",                          // Shoe Bank (CMS slug from SHOE_BANK_MERNSTACK)
   "footwear-business-management-system", // Shoe Bank (story repo slug)

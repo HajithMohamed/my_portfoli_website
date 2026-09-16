@@ -43,6 +43,7 @@ export default function RootLayout({
       lang="en"
       className="h-full antialiased"
       data-theme="jarvis"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
