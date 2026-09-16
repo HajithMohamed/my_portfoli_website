@@ -18,7 +18,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.48, delay: Math.min(index * 0.06, 0.42), ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduceMotion ? undefined : { y: -10, scale: 1.015 }}
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-cyan/25 bg-[#06111f]/90 shadow-[0_18px_55px_rgba(0,0,0,0.24)] transition-colors duration-300 hover:border-cyan/80 hover:shadow-[0_22px_70px_rgba(48,169,255,0.20)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-cyan/25 bg-surface/90 shadow-[0_18px_55px_rgba(0,0,0,0.24)] transition-colors duration-300 hover:border-cyan/80 hover:shadow-[0_22px_70px_var(--cyan-glow)]"
     >
       <Link href={`/projects/${project.slug}`} className="flex h-full flex-col p-4 focus-visible:outline-none">
         <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-cyan/20 bg-black/40">
@@ -33,8 +33,8 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
           ) : (
             <div className="absolute inset-0 bg-grid opacity-35" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#06111f]/35 to-transparent" />
-          {project.isCurrent ? <span className="absolute right-3 top-3 rounded-full border border-cyan/40 bg-[#06111f]/85 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan backdrop-blur">New</span> : null}
+          <div className="absolute inset-0 bg-gradient-to-t from-surface/35 to-transparent" />
+          {project.isCurrent ? <span className="absolute right-3 top-3 rounded-full border border-cyan/40 bg-surface/85 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan backdrop-blur">New</span> : null}
         </div>
 
         <div className="flex flex-1 flex-col px-1 pb-1 pt-5">

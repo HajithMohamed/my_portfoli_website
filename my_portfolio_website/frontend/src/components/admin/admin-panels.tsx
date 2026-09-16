@@ -103,15 +103,29 @@ export function DashboardPanel() {
   }, []);
 
   async function syncGithub() {
-    setStatus("Syncing GitHub");
-    await adminFetch("/admin/github/sync", { method: "POST", body: "{}" });
-    await load();
-    setStatus("GitHub sync complete");
+    setStatus("Syncing GitHub...");
+    try {
+      await adminFetch("/admin/github/sync", { method: "POST", body: "{}" });
+      await load();
+      setStatus("GitHub sync complete");
+    } catch (error) {
+      console.error("GitHub sync failed:", error);
+      setStatus(
+        `GitHub sync failed: ${error instanceof Error ? error.message : "Internal error"}`,
+      );
+    }
   }
 
   async function handleSuggestion(id: string, action: "approve" | "reject") {
-    await adminFetch(`/admin/suggestions/${id}/${action}`, { method: "POST", body: "{}" });
-    await load();
+    try {
+      await adminFetch(`/admin/suggestions/${id}/${action}`, { method: "POST", body: "{}" });
+      await load();
+    } catch (error) {
+      console.error(`Failed to ${action} suggestion:`, error);
+      setStatus(
+        `Failed to ${action} suggestion: ${error instanceof Error ? error.message : "Internal error"}`,
+      );
+    }
   }
 
   return (

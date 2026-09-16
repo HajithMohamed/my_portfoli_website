@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -109,11 +111,18 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   private syncing = false;
   private syncTimer?: NodeJS.Timeout;
   private enrichmentBudget = 0;
+  private tokenInvalid = false;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {}
+
+  private getGithubToken(): string | undefined {
+    if (this.tokenInvalid) return undefined;
+    const token = this.configService.get<string>('GITHUB_TOKEN')?.trim();
+    return token || undefined;
+  }
 
   // ---- scheduling ----------------------------------------------------------
 
@@ -147,9 +156,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async safeSync(trigger: string) {
-    if (!this.configService.get<string>('GITHUB_TOKEN')) {
+    if (!this.getGithubToken()) {
       this.logger.warn(
-        `GitHub sync (${trigger}) using public REST API only: GITHUB_TOKEN not set`,
+        `GitHub sync (${trigger}) using public REST API only: GITHUB_TOKEN not set or invalid`,
       );
     }
     try {
@@ -284,7 +293,24 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     try {
       const previous = await this.latestSummary();
       const username = this.githubUsername();
-      const repos = await this.fetchPublicRepositories(username);
+      let repos: GithubRepo[];
+      try {
+        repos = await this.fetchPublicRepositories(username);
+      } catch (error) {
+        this.logger.error(
+          `Failed to fetch public repos for ${username}: ${error instanceof Error ? error.message : 'unknown'}`,
+        );
+        if (previous) {
+          this.logger.warn(
+            'Returning previous GitHub snapshot due to repository fetch failure.',
+          );
+          return previous;
+        }
+        throw new HttpException(
+          `GitHub API request failed: ${error instanceof Error ? error.message : 'unknown'}`,
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
       const events = await this.fetchJson<GithubEvent[]>(
         `https://api.github.com/users/${username}/events/public?per_page=50`,
       ).catch(() => [] as GithubEvent[]);
@@ -338,7 +364,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
       // Public API has a small hourly allowance. Preserve complete repository
       // counts even when optional README/release enrichment is rate limited.
-      this.enrichmentBudget = this.configService.get<string>('GITHUB_TOKEN')
+      this.enrichmentBudget = this.getGithubToken()
         ? 1000
         : 36;
       const repositories: RepositoryInsight[] = [];
@@ -414,7 +440,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
   /** Real contribution calendar via the GitHub GraphQL API (requires a token). */
   private async fetchContributionCalendar(): Promise<ContributionCalendar | null> {
-    const token = this.configService.get<string>('GITHUB_TOKEN');
+    const token = this.getGithubToken();
     if (!token) {
       return null;
     }
@@ -432,19 +458,27 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
           }
         }
       }`;
-    const response = await fetch('https://api.github.com/graphql', {
-      method: 'POST',
-      signal: AbortSignal.timeout(12_000),
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'mohamed-hajith-portfolio',
-      },
-      body: JSON.stringify({ query, variables: { login: username } }),
-    });
-    if (!response.ok) {
-      throw new Error(`GitHub GraphQL failed: ${response.status}`);
-    }
+    try {
+      const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        signal: AbortSignal.timeout(12_000),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'mohamed-hajith-portfolio',
+        },
+        body: JSON.stringify({ query, variables: { login: username } }),
+      });
+      if (response.status === 401) {
+        this.logger.warn(
+          'Configured GITHUB_TOKEN returned 401 Unauthorized in GraphQL. Disabling token.',
+        );
+        this.tokenInvalid = true;
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`GitHub GraphQL failed: ${response.status}`);
+      }
     const json = (await response.json()) as {
       data?: {
         user?: {
@@ -489,6 +523,12 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         })),
       })),
     };
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch contribution calendar: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+      return null;
+    }
   }
 
   /** Normalize languages + repo topics into a de-duplicated technology list. */
@@ -874,7 +914,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async fetchJson<T>(url: string, allowNotFound = false): Promise<T> {
-    const token = this.configService.get<string>('GITHUB_TOKEN');
+    const token = this.getGithubToken();
     const response = await fetch(url, {
       signal: AbortSignal.timeout(12_000),
       headers: {
@@ -883,6 +923,13 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
+    if (response.status === 401 && token) {
+      this.logger.warn(
+        'Configured GITHUB_TOKEN returned 401 Unauthorized. Disabling token and retrying unauthenticated.',
+      );
+      this.tokenInvalid = true;
+      return this.fetchJson<T>(url, allowNotFound);
+    }
     if (response.status === 404 && allowNotFound) return null as T;
     if (!response.ok) {
       throw new Error(
@@ -893,7 +940,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async fetchReadme(fullName: string): Promise<string> {
-    const token = this.configService.get<string>('GITHUB_TOKEN');
+    const token = this.getGithubToken();
     const response = await fetch(
       `https://api.github.com/repos/${encodeRepoFullName(fullName)}/readme`,
       {
@@ -905,6 +952,13 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         },
       },
     );
+    if (response.status === 401 && token) {
+      this.logger.warn(
+        'Configured GITHUB_TOKEN returned 401 Unauthorized in fetchReadme. Disabling token and retrying.',
+      );
+      this.tokenInvalid = true;
+      return this.fetchReadme(fullName);
+    }
     if (!response.ok) {
       throw new Error(`README fetch failed: ${response.status}`);
     }

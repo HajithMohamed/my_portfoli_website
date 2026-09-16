@@ -1,5 +1,7 @@
 # dependencies
 node_modules/
+.pnpm-store/
+*.stackdump
 
 # build output
 .next/
