@@ -1,12 +1,14 @@
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { Panel } from "@/components/hud/panel";
-import { getHomeData } from "@/lib/api";
+import { getHomeData } from "@/lib/public-data";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
+import Link from "next/link";
 
 export const metadata = {
-  title: "Operator",
+  title: "About",
   description:
-    "Mohamed Hajith - full-stack software engineer and founder of Hertz Labs. Engineering philosophy, mission log, services, and resume.",
+    "About Mohamed Hajith, full stack developer. BICT (Hons), Faculty of Technology, University of Ruhuna. Based in Batticaloa, Sri Lanka.",
 };
 
 /** Services actually offered — the operator's real engagement catalog. */
@@ -54,7 +56,7 @@ export default async function AboutPage() {
                 {profile.name}
               </h1>
               <p className="mt-1 font-mono text-sm text-muted-foreground">
-                Software Engineer · Full Stack Developer · Founder of Hertz Labs
+                {PERSONAL_IDENTITY.title}
               </p>
             </div>
           </header>
@@ -69,10 +71,9 @@ export default async function AboutPage() {
             <div className="space-y-3 text-base leading-relaxed text-foreground/90">
               <p>{profile.bio}</p>
               <p>
-                BICT (Hons) undergraduate at the University of Ruhuna and founder of Hertz Labs —
-                building real-world business systems on the MERN stack, Next.js, and NestJS, with
-                a growing focus on scalable software, AI, and machine learning.
+                {PERSONAL_IDENTITY.education}
               </p>
+              <p>{PERSONAL_IDENTITY.location}</p>
             </div>
           </Panel>
 
@@ -116,7 +117,7 @@ export default async function AboutPage() {
                     education
                   </div>
                   <div className="mt-1 text-foreground">
-                    BICT (Hons) — University of Ruhuna
+                    {PERSONAL_IDENTITY.education}
                   </div>
                 </div>
                 <div>
@@ -133,7 +134,7 @@ export default async function AboutPage() {
                     open to
                   </div>
                   <div className="mt-1 flex flex-wrap gap-1.5">
-                    {["Internships", "Graduate roles", "Freelance", "Remote", "Hybrid"].map(
+                    {["Internships", "Development roles", "Freelance", "Remote", "Hybrid"].map(
                       (m) => (
                         <span
                           key={m}
@@ -181,12 +182,12 @@ export default async function AboutPage() {
                 >
                   {"> schedule interview"}
                 </a>
-                <a
+                <Link
                   href="/#comms"
                   className="border border-cyan/30 bg-surface/60 px-5 py-3 text-center text-foreground transition-colors hover:border-cyan/60 hover:text-cyan"
                 >
                   {"> open comms"}
-                </a>
+                </Link>
               </div>
             </div>
           </Panel>

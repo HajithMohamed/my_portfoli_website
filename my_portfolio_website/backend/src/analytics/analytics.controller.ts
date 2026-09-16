@@ -22,12 +22,18 @@ export class AnalyticsController {
 
   @Post('analytics/collect')
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
-  collect(@Body() dto: CollectDto, @Req() req: Request) {
-    return this.analyticsService.collect(
-      dto,
-      clientIp(req),
-      req.headers['user-agent'],
-    );
+  async collect(@Body() dto: CollectDto, @Req() req: Request) {
+    try {
+      return await this.analyticsService.collect(
+        dto,
+        clientIp(req),
+        req.headers['user-agent'],
+      );
+    } catch (error) {
+      // Telemetry is best-effort and must never create noisy 500s for visitors.
+      console.warn('[analytics] event skipped:', error instanceof Error ? error.message : String(error));
+      return { ok: false, stored: false };
+    }
   }
 
   @Get('admin/analytics/dashboard')

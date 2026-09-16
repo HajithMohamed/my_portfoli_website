@@ -36,6 +36,35 @@ export class CreateCertificateDto {
   imageUrl?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1024)
+  courseUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  instructor?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1024)
+  instructorUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1024)
+  studentUrl?: string;
+
+  @IsOptional()
+  @IsInt()
+  durationHours?: number;
+
+  @IsOptional()
   @IsInt()
   order?: number;
 }

@@ -50,7 +50,6 @@ export const TECH_REGISTRY: Record<string, TechMeta> = {
   Docker: { slug: "docker", color: "2496ED", category: "DevOps & Cloud" },
   Cloudinary: { slug: "cloudinary", color: "3448C5", category: "DevOps & Cloud" },
   Vercel: { slug: "vercel", color: "FFFFFF", category: "DevOps & Cloud" },
-  Netlify: { slug: "netlify", color: "00C7B7", category: "DevOps & Cloud" },
 
   // Tools
   Git: { slug: "git", color: "F05032", category: "Tools" },

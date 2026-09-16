@@ -5,6 +5,7 @@ import { Float, Line, Text, useTexture } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import type { Group } from "three";
 import { Color } from "three";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 /** Portrait aspect the screen geometry below is built around (w:h = 4:5). */
 const PORTRAIT_W = 400;
@@ -113,7 +114,7 @@ function Laptop({ portraitUrl }: { portraitUrl?: string }) {
           anchorY="middle"
           maxWidth={portraitUrl ? 1.1 : 2}
         >
-          {"> HERTZ LABS ~ $"}
+          {PERSONAL_IDENTITY.name}
         </Text>
       </group>
     </group>
@@ -165,7 +166,7 @@ function Tablet({ portraitUrl }: { portraitUrl?: string }) {
         anchorY="middle"
         maxWidth={1.4}
       >
-        {"HERTZ LABS"}
+        {PERSONAL_IDENTITY.name}
       </Text>
       <Text
         position={[0, portraitUrl ? -0.35 : 0.3, 0.05]}
@@ -251,7 +252,7 @@ function Phone({ portraitUrl }: { portraitUrl?: string }) {
         anchorY="middle"
         maxWidth={0.7}
       >
-        {"HERTZ LABS"}
+        {PERSONAL_IDENTITY.name}
       </Text>
       <Text
         position={[0, portraitUrl ? -0.27 : 0.25, 0.04]}
@@ -391,9 +392,9 @@ export default function WorkspaceScene({
 
   return (
     <Canvas
-      dpr={[1, device === "laptop" ? 1.5 : 1]}
+      dpr={1}
       camera={{ position: cameraPos, fov: device === "phone" ? 38 : 42 }}
-      gl={{ antialias: device === "laptop", alpha: true }}
+      gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
       style={{ background: "transparent" }}
     >
       <ambientLight intensity={0.35} />

@@ -3,30 +3,32 @@ import { Providers } from "@/components/providers";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { AdminAccess } from "@/components/admin/admin-access";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hzlabs.dev"),
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "Hertz Labs - Software Engineer Command Center",
-    template: "%s | Hertz Labs",
+    default: `${PERSONAL_IDENTITY.name} | ${PERSONAL_IDENTITY.title}`,
+    template: `%s | ${PERSONAL_IDENTITY.name}`,
   },
   description:
-    "Hertz Labs is the operations console of Mohamed Hajith, full-stack software engineer. Live systems, projects, and architecture in one command-center portfolio.",
-  authors: [{ name: "Mohamed Hajith" }],
+    "The portfolio of Mohamed Hajith, full stack developer. Explore GitHub projects, recent work, and project notes. BICT (Hons), Faculty of Technology, University of Ruhuna.",
+  authors: [{ name: PERSONAL_IDENTITY.name }],
   openGraph: {
-    title: "Hertz Labs - Software Engineer Command Center",
+    title: `${PERSONAL_IDENTITY.name} | ${PERSONAL_IDENTITY.title}`,
     description:
-      "The operations console of Mohamed Hajith, full-stack software engineer. Live systems, projects, and architecture.",
+      "Explore Mohamed Hajith's GitHub projects, recent work, and project notes.",
     url: "/",
-    siteName: "Hertz Labs",
+    siteName: PERSONAL_IDENTITY.name,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hertz Labs - Software Engineer Command Center",
+    title: `${PERSONAL_IDENTITY.name} | ${PERSONAL_IDENTITY.title}`,
     description:
-      "The operations console of Mohamed Hajith, full-stack software engineer.",
+      "Mohamed Hajith — Full Stack Developer. Projects, progress, and project notes.",
   },
 };
 
@@ -39,6 +41,7 @@ export default function RootLayout({
     <html
       lang="en"
       className="h-full antialiased"
+      data-scroll-behavior="smooth"
     >
       <body className="relative min-h-full bg-background text-foreground">
         {/* Global backdrop layers */}

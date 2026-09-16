@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "node:path";
 
 // The admin API is reached through a same-origin proxy so the session cookie is
 // first-party on the site's own domain (works whether the API is same-domain or
@@ -9,15 +8,9 @@ const backendOrigin = (
 ).replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
-  // This is an npm workspace: deps hoist to the monorepo root one level up.
-  // Pin Turbopack's root there so it resolves `next` and doesn't mis-infer from
-  // a stray lockfile elsewhere in the tree.
-  turbopack: {
-    root: path.join(__dirname, ".."),
-  },
   images: {
     remotePatterns: [
-      // GitHub-generated repo social cards used as project cover images.
+      // Optional remote images supplied by repository metadata or the CMS.
       { protocol: "https", hostname: "opengraph.githubassets.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "raw.githubusercontent.com" },
@@ -25,6 +18,18 @@ const nextConfig: NextConfig = {
       // Admin CMS uploads.
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
+  },
+  async redirects() {
+    // The protected control center moved away from an encoded leading-underscore
+    // segment because Next 16 generates incompatible route types for that form.
+    // Keep existing private bookmarks working without exposing a second route.
+    return [
+      {
+        source: "/_internal/:path*",
+        destination: "/admin/:path*",
+        permanent: false,
+      },
+    ];
   },
   async rewrites() {
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];

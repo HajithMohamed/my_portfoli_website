@@ -6,7 +6,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { absoluteApiUrl } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Internal",
+  title: "Admin",
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -29,7 +29,7 @@ async function isAuthenticated(): Promise<boolean> {
   }
 }
 
-export default async function InternalLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
   if (!(await isAuthenticated())) {
     notFound();
   }

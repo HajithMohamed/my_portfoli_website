@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { HertzLogo } from "@/components/brand/hertz-logo";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 const NAV = [
   ["home", "/"],
   ["projects", "/projects"],
   ["about", "/about"],
-  ["signal", "/blog"],
+  ["certificates", "/certificates"],
   ["comms", "/#comms"],
 ] as const;
 
@@ -36,7 +36,7 @@ function useClock() {
   return now;
 }
 
-export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
+export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: string }) {
   const pathname = usePathname();
   const clock = useClock();
   const [scrolled, setScrolled] = useState(false);
@@ -49,11 +49,6 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -95,7 +90,7 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-green opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-green"></span>
             </span>
-            <HertzLogo className="max-w-[180px]" />
+            <span className="font-display text-base font-semibold text-foreground sm:text-lg">{PERSONAL_IDENTITY.name}</span>
             <span className="text-[10px] text-cyan/60 hidden sm:inline-block">/ {VERSION}</span>
           </Link>
 
@@ -163,7 +158,7 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
 
           {/* Desktop Diagnostic */}
           <div className="hidden shrink-0 items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground lg:flex">
-            <span className="text-cyan/70">{location}</span>
+            <span className="text-cyan/70" title={location}>{PERSONAL_IDENTITY.shortLocation}</span>
             <span className="font-semibold tabular-nums text-foreground bg-surface-2 px-2 py-1 rounded border border-cyan/10">
               {clock ? `${clock} LK` : "--:--:-- LK"}
             </span>
@@ -233,7 +228,7 @@ export function TopBar({ location = "Colombo, LK" }: { location?: string }) {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-green opacity-75"></span>
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-green"></span>
                   </span>
-                  <HertzLogo className="max-w-[170px]" />
+                  <span className="font-display text-lg font-semibold text-foreground">{PERSONAL_IDENTITY.name}</span>
                   <span className="text-[10px] text-cyan/60">/ {VERSION}</span>
                 </div>
                 <button

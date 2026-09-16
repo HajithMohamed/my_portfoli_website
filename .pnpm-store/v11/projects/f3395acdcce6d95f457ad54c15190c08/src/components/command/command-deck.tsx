@@ -6,7 +6,7 @@ import { motion, Variants } from "framer-motion";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
 import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
 import { useMediaQuery } from "@/lib/use-media-query";
-import { HertzLogo } from "@/components/brand/hertz-logo";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
   ssr: false,
@@ -177,19 +177,19 @@ export function CommandDeck({
 
             <motion.h1 
               variants={itemVariants}
-              className="mt-8 max-w-[640px]"
-              aria-label="Hertz Labs"
+              className="mt-8 max-w-[640px] font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
             >
-              <HertzLogo variant="hero" />
+              {PERSONAL_IDENTITY.name}
             </motion.h1>
 
-            <motion.div variants={itemVariants} className="mt-6 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
-              <div className="font-display text-3xl font-semibold text-foreground">
-                {profile.name}
-              </div>
-              <div className="font-mono text-xs uppercase tracking-[0.25em] text-cyan flex items-center gap-2">
-                <span className="text-cyan/40">/</span> {profile.title}
-              </div>
+            <motion.div variants={itemVariants} className="mt-6 space-y-3">
+              <p className="font-mono text-sm uppercase tracking-[0.2em] text-cyan">
+                {PERSONAL_IDENTITY.title}
+              </p>
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+                {PERSONAL_IDENTITY.degree} · {PERSONAL_IDENTITY.faculty}<br />
+                {PERSONAL_IDENTITY.university}
+              </p>
             </motion.div>
 
             <motion.p variants={itemVariants} className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg border-l-2 border-cyan/30 pl-4 py-1">

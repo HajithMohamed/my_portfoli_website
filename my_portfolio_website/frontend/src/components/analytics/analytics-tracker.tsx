@@ -17,7 +17,7 @@ export function AnalyticsTracker() {
 
   // Page views + leave beacon per route.
   useEffect(() => {
-    if (!pathname || pathname.startsWith("/_internal") || analyticsDisabled()) {
+    if (!pathname || pathname.startsWith("/admin") || analyticsDisabled()) {
       return;
     }
     currentPath.current = pathname;

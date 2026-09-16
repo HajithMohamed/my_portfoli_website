@@ -7,6 +7,7 @@ import { track } from "@/lib/analytics";
 import type { Profile } from "@/lib/types";
 import { Send, CheckCircle2, AlertCircle, Mail, MapPin, Github, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
+import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 function TerminalField({
   label,
@@ -84,7 +85,8 @@ export function Comms({ profile }: { profile: Profile }) {
         {/* Contact Info Side */}
         <div className="space-y-6 font-mono text-xs">
           <div className="border-b border-cyan/10 pb-4">
-            <h3 className="font-display text-xl font-bold text-foreground">Initiate Contact</h3>
+            <h3 className="font-display text-xl font-bold text-foreground">Contact {PERSONAL_IDENTITY.name}</h3>
+            <p className="mt-2 text-[11px] text-cyan">{PERSONAL_IDENTITY.title}</p>
             <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
               Open to new opportunities, technical discussions, and collaborative projects. Use the secure channel to transmit a message directly to my primary inbox.
             </p>
@@ -109,7 +111,7 @@ export function Comms({ profile }: { profile: Profile }) {
               </div>
               <div>
                 <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">base sector</div>
-                <div className="text-foreground mt-1 inline-block">{profile.location}</div>
+                <div className="text-foreground mt-1 inline-block">{PERSONAL_IDENTITY.location}</div>
               </div>
             </div>
 

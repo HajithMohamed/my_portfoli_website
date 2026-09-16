@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ────────────────────────────────────────────────────────────
-   Hz LABS — JARVIS Console Design System v2.0
+   Mohamed Hajith — Portfolio Console Design System v2.0
    Premium command-center aesthetic with glassmorphism,
    gradient accents, and micro-animations.
    ──────────────────────────────────────────────────────────── */
@@ -496,4 +496,12 @@
   body {
     overflow-x: hidden;
   }
+}
+@keyframes project-card-in {
+  from { opacity: 0; transform: translateY(22px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="project-card-in"] { animation: none !important; }
 }

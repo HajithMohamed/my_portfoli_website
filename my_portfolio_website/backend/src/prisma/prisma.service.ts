@@ -1,4 +1,5 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 /**
@@ -33,16 +34,27 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  private readonly logger = new Logger(PrismaService.name);
+  private connected = false;
   constructor() {
     const url = buildDatabaseUrl();
     super(url ? { datasources: { db: { url } } } : undefined);
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+      this.connected = true;
+    } catch (error) {
+      // Authentication does not depend on the CMS database. Keep the API alive
+      // so admin login and health checks remain available during DB outages.
+      this.logger.error(
+        `Database unavailable; starting in degraded mode: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    if (this.connected) await this.$disconnect();
   }
 }

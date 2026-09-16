@@ -52,6 +52,16 @@ export type Project = {
   outcome?: string | null;
   caseStudy?: CaseStudySection[];
   updatedAt?: string;
+  createdAt?: string;
+  repositoryFullName?: string;
+  isCurrent?: boolean;
+  isHosted?: boolean;
+  isProductionReady?: boolean;
+  readinessChecked?: boolean;
+  readinessEvidence?: Array<{ kind: string; label: string; url: string }>;
+  sourceUrl?: string;
+  coverImageAlt?: string;
+  coverImageKind?: "concept";
 };
 
 export type BlogPost = {
@@ -63,6 +73,9 @@ export type BlogPost = {
   coverImage?: string | null;
   status: "DRAFT" | "PUBLISHED";
   publishedAt?: string | null;
+  sourceUrl?: string;
+  author?: string;
+  coverImageAlt?: string;
   tags?: Array<{ name: string; slug: string }>;
 };
 
@@ -114,9 +127,56 @@ export type ContributionData = {
   followers?: number;
   following?: number;
   currentRepo?: CurrentRepositoryStatus | null;
+  schemaVersion?: number;
+  repositories?: PortfolioRepository[];
+  stats?: PortfolioStats;
+  provenance?: {
+    sourceUrl: string;
+    syncedAt: string;
+    activityWindowDays: number;
+    hostedDefinition: string;
+    productionReadyDefinition: string;
+    readinessComplete: boolean;
+    languageRepositoriesSampled?: number;
+  };
+};
+
+export type PortfolioStats = {
+  publicRepositories: number;
+  createdRepositories: number;
+  activeRepositories: number;
+  newRepositories: number;
+  hostedProjects: number;
+  productionReadyProjects: number;
+};
+
+export type PortfolioRepository = {
+  name: string;
+  fullName: string;
+  url: string;
+  description?: string | null;
+  language?: string | null;
+  topics?: string[];
+  createdAt?: string;
+  pushedAt?: string;
+  updatedAt?: string;
+  homepage?: string | null;
+  liveUrl?: string | null;
+  stars?: number;
+  forks?: number;
+  defaultBranch?: string;
+  isArchived?: boolean;
+  isHosted?: boolean;
+  isProductionReady?: boolean;
+  readinessChecked?: boolean;
+  readinessEvidence?: Array<{ kind: string; label: string; url: string }>;
+  goal?: string | null;
+  goalSourceUrl?: string;
+  latestRelease?: { tag: string; url: string; publishedAt: string } | null;
 };
 
 export type GithubSummary = {
+  dataStatus?: "synced" | "cached" | "unavailable";
   username: string;
   repositoryCount: number;
   commitCount: number;
@@ -159,6 +219,12 @@ export type Certificate = {
   issueDate?: string | null;
   credentialUrl?: string | null;
   imageUrl?: string | null;
+  description?: string | null;
+  courseUrl?: string | null;
+  instructor?: string | null;
+  instructorUrl?: string | null;
+  studentUrl?: string | null;
+  durationHours?: number | null;
   order?: number;
 };
 

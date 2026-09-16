@@ -232,7 +232,7 @@ export function ProfilePanel() {
 
   return (
     <>
-      <SectionHeader title="Profile Management" description="Edit Hertz Labs positioning, contact details, philosophy, social links, and currently exploring list." />
+      <SectionHeader title="Profile Management" description="Edit Mohamed Hajith's profile, contact details, philosophy, social links, and currently exploring list." />
       <Card>
         <div className="mb-5 flex items-center gap-4">
           {profile?.profileImageUrl ? (
@@ -339,6 +339,14 @@ export function SkillsPanel() {
 export function ProjectsPanel() {
   const { data: projects, error, load } = useAdminResource<Project[]>("/admin/projects", []);
 
+  async function setVisibility(project: Project, visible: boolean) {
+    await adminFetch(`/admin/projects/${project.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: visible ? "ACTIVE" : "DRAFT" }),
+    });
+    await load();
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -409,6 +417,10 @@ export function ProjectsPanel() {
                   <div>
                     <h3 className="font-semibold">{project.title}</h3>
                     <p className="mt-1 text-sm text-slate-400">{project.description}</p>
+                    <label className="mt-3 flex items-center gap-2 text-xs text-slate-300">
+                      <input checked={project.status === "ACTIVE"} onChange={(event) => void setVisibility(project, event.target.checked)} type="checkbox" />
+                      Show on projects page
+                    </label>
                   </div>
                   <Button onClick={() => remove(project.id)} size="sm" type="button" variant="secondary">
                     <Trash2 className="h-4 w-4" />

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
-import { getBlogPost, getHomeData } from "@/lib/api";
+import { getBlogPost, getHomeData } from "@/lib/public-data";
 import { formatDate } from "@/lib/utils";
 
 type PageProps = {
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps) {
   const post = await getBlogPost(slug);
   return {
     title: post?.title ?? "Signal Log",
-    description: post?.excerpt ?? "Hertz Labs engineering article.",
+    description: post?.excerpt ?? "Mohamed Hajith project note.",
   };
 }
 
@@ -57,6 +57,19 @@ export default async function BlogPostPage({ params }: PageProps) {
               {post.title}
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{post.excerpt}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em]">
+              {post.author ? <span className="text-cyan/70">by {post.author}</span> : null}
+              {post.sourceUrl ? (
+                <a
+                  href={post.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border border-cyan/25 bg-cyan/5 px-2 py-1 text-cyan transition-colors hover:border-cyan/60 hover:bg-cyan/10"
+                >
+                  source README ↗
+                </a>
+              ) : null}
+            </div>
           </header>
 
           <div className="mt-6 hud-panel p-8">
