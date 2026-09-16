@@ -5,7 +5,6 @@ import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
 import { NowDeploying } from "@/components/command/now-deploying";
 import { ProjectsShowcase } from "@/components/command/projects-showcase";
-import { ArchitectureMap } from "@/components/command/architecture-map";
 import { SkillsConstellation } from "@/components/command/skills-constellation";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
@@ -129,13 +128,6 @@ export default async function Home() {
           {/* Skills — Technologies I Work With */}
           <div id="skills" className="scroll-mt-24">
             <SkillsConstellation skills={skills} projects={projects} />
-          </div>
-
-          <SectionDivider label="sys.infrastructure" />
-
-          {/* Architecture Map */}
-          <div id="architecture" className="scroll-mt-24">
-            <ArchitectureMap />
           </div>
 
           <SectionDivider label="sys.intelligence" />
