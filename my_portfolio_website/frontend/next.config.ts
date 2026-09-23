@@ -8,15 +8,19 @@ import type { NextConfig } from "next";
 // hostname therefore produces a deployed site where every /bff request is a
 // 404 (often accompanied by DNS_HOSTNAME_RESOLVED_PRIVATE). Fail the production
 // build early instead of publishing that broken configuration.
-function getBackendOrigin() {
+function getBackendOrigin(): string | null {
   const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
   const isVercel = process.env.VERCEL === "1";
 
   if (!configuredUrl) {
     if (isVercel) {
-      throw new Error(
-        "NEXT_PUBLIC_API_URL must be configured in Vercel Project Settings to the public HTTPS URL of the backend (e.g. https://your-api.onrender.com)."
+      console.warn(
+        "\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL is not set in Vercel environment variables.\n" +
+        "   The /bff proxy to the backend is disabled. To connect your live backend,\n" +
+        "   go to Vercel Project Settings > Environment Variables, add NEXT_PUBLIC_API_URL=https://your-api.onrender.com,\n" +
+        "   and redeploy.\n"
       );
+      return null;
     }
     return "http://localhost:4000";
   }
@@ -25,10 +29,8 @@ function getBackendOrigin() {
   try {
     url = new URL(configuredUrl);
   } catch {
-    if (isVercel) {
-      throw new Error("NEXT_PUBLIC_API_URL must be a complete URL, including https://.");
-    }
-    return "http://localhost:4000";
+    console.warn(`\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL "${configuredUrl}" is invalid. Expected a full URL with https://.\n`);
+    return isVercel ? null : "http://localhost:4000";
   }
 
   const privateHost =
@@ -41,9 +43,11 @@ function getBackendOrigin() {
     /^172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}$/.test(url.hostname);
 
   if (isVercel && (url.protocol !== "https:" || privateHost || (url.pathname !== "/" && url.pathname !== ""))) {
-    throw new Error(
-      "NEXT_PUBLIC_API_URL must be a public HTTPS origin without a path. Do not use localhost, a *.internal hostname, or a private IP on Vercel."
+    console.warn(
+      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${configuredUrl}") points to a private or localhost origin.\n` +
+      "   Vercel cannot proxy to private origins. Disabling /bff proxy until a public HTTPS URL is set.\n"
     );
+    return null;
   }
 
   return url.origin;
@@ -76,6 +80,9 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    if (!backendOrigin) {
+      return [];
+    }
     return [{ source: "/bff/:path*", destination: `${backendOrigin}/:path*` }];
   },
 };
