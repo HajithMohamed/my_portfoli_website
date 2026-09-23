@@ -51,19 +51,21 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       id: `github:${repo.fullName}`,
       slug,
       dedupeKey,
-      title: story?.title ?? repo.name.replace(/[-_]+/g, ' '),
-      description: story?.summary ?? repo.goal ?? repo.description ?? 'Public repository by Mohamed Hajith. View the source for project details.',
-      techStack: story?.technologies ?? cms?.techStack ?? (repo.language ? [repo.language] : []),
-      category: story ? 'Project case study' : 'GitHub repository',
-      status: repo.isArchived ? 'ARCHIVED' : 'ACTIVE',
-      featured: Boolean(story || repo.fullName.toLowerCase() === current),
+      title: cms?.title ?? story?.title ?? repo.name.replace(/[-_]+/g, ' '),
+      description: cms?.description ?? story?.summary ?? repo.goal ?? repo.description ?? 'Public repository by Mohamed Hajith. View the source for project details.',
+      techStack: cms?.techStack?.length ? cms.techStack : (story?.technologies ?? (repo.language ? [repo.language] : [])),
+      category: cms?.category ?? (story ? 'Project case study' : 'GitHub repository'),
+      status: cms?.status ?? (repo.isArchived ? 'ARCHIVED' : 'ACTIVE'),
+      // A CMS record is an explicit editorial decision. Its featured flag must
+      // override the automatic story/current-repository default.
+      featured: cms ? cms.featured : Boolean(story || repo.fullName.toLowerCase() === current),
       githubUrl: repo.url,
-      liveUrl: publicWebsite(repo.liveUrl ?? repo.homepage),
+      liveUrl: cms?.liveUrl ?? publicWebsite(repo.liveUrl ?? repo.homepage),
       coverImage: cms?.coverImage ?? story?.coverImage ?? (repo.fullName.toLowerCase() === "hajithmohamed/tech_bridge" ? "/projects/tech-bridge-cover.png" : null),
       coverImageKind: cms?.coverImage ? undefined : (story?.coverImage ? 'concept' : undefined),
       coverImageAlt: cms?.coverImage ? `Cover image for ${cms.title || story?.title || repo.name}` : (story?.coverImage ? `Concept illustration of ${story.title}: ${story.goal}` : undefined),
-      caseStudy: story?.sections ?? (repo.goal ? [{ heading: 'Project goal', body: repo.goal }] : []),
-      outcome: undefined,
+      caseStudy: cms?.caseStudy?.length ? cms.caseStudy : (story?.sections ?? (repo.goal ? [{ heading: 'Project goal', body: repo.goal }] : [])),
+      outcome: cms?.outcome,
       updatedAt: repo.pushedAt ?? repo.updatedAt,
       createdAt: repo.createdAt,
       repositoryFullName: repo.fullName,
@@ -79,9 +81,17 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
     return !override || override.status === 'ACTIVE';
   });
 
+  // CMS-only projects do not have a GitHub repository to enrich, but they are
+  // still portfolio work and must appear on both the catalogue and homepage.
+  const repoUrls = new Set(available.map((repo) => repo.url.replace(/\/$/, '').toLowerCase()));
+  const standaloneCmsProjects = cmsProjects
+    .filter((project) => project.status === 'ACTIVE')
+    .filter((project) => !project.githubUrl || !repoUrls.has(project.githubUrl.replace(/\/$/, '').toLowerCase()))
+    .map((project) => ({ ...project, id: `cms:${project.id}`, dedupeKey: project.slug }));
+
   // Presentation grouping by dedupeKey to combine related repositories (e.g., Shoe Bank MERN + PHP versions)
   const grouped = new Map<string, Project[]>();
-  for (const p of mappedProjects) {
+  for (const p of [...mappedProjects, ...standaloneCmsProjects]) {
     const key = p.dedupeKey || p.slug;
     const existing = grouped.get(key) ?? [];
     existing.push(p);

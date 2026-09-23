@@ -15,6 +15,7 @@ const NAV = [
   ["skills", "/#skills"],
   ["projects", "/projects"],
   ["certificates", "/certificates"],
+  ["request project", "/start-project"],
   ["comms", "/#comms"],
 ] as const;
 

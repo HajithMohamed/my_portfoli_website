@@ -71,7 +71,7 @@ export function AdminAccess() {
       });
       excludeSelfFromAnalytics();
       setOpen(false);
-      router.push("/admin/dashboard");
+      router.push("/admin/projects");
       router.refresh();
     } catch (err) {
       setError(loginErrorMessage(err));
