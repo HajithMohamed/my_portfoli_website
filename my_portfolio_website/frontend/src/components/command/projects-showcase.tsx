@@ -22,39 +22,16 @@ import {
 export function ProjectsShowcase({ projects }: { projects: Project[] }) {
   if (!projects.length) return null;
 
-  // Find Saga Elite or featured project
-  const featured =
-    projects.find(
-      (p) =>
-        p.slug === "saga-elite" ||
-        p.slug === "saga-elite-web-project" ||
-        p.title.toLowerCase().includes("saga")
-    ) ||
-    projects.find((p) => p.featured && p.coverImage) ||
-    projects[0];
+  // The server has already supplied the featured projects in editorial order.
+  // Do not hard-code a project here: the Projects admin page owns the homepage.
+  const featured = projects[0];
 
   const [sagaImg, setSagaImg] = useState<string>(
     featured.coverImage || "/projects/saga-elite-cover.png"
   );
 
-  // Specific secondary projects
-  const libraryProject = projects.find(
-    (p) =>
-      p.slug === "library-management-system" ||
-      p.title.toLowerCase().includes("library")
-  );
-
-  const nextgenProject = projects.find(
-    (p) =>
-      p.slug === "nextgen-mobile-shop" ||
-      p.title.toLowerCase().includes("nextgen") ||
-      p.title.toLowerCase().includes("mobile")
-  );
-
-  const otherProjects = projects.filter((p) => p.slug !== featured.slug);
-  const secondaryA = libraryProject || otherProjects[0] || featured;
-  const secondaryB =
-    nextgenProject || otherProjects.find((p) => p.slug !== secondaryA.slug) || otherProjects[1] || featured;
+  const secondaryA = projects[1] ?? featured;
+  const secondaryB = projects[2] ?? projects[1] ?? featured;
 
   return (
     <section className="space-y-6">

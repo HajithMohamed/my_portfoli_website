@@ -1,3 +1,4 @@
+import { ArrowRight, BriefcaseBusiness } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { CommandDeck } from "@/components/command/command-deck";
@@ -12,17 +13,6 @@ import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client
 import { getHomeData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import type { GithubSummary, Project } from "@/lib/types";
-
-/** Only these projects appear on the homepage — the full list lives at /projects. */
-const HOMEPAGE_SLUGS = new Set([
-  "saga-elite",
-  "saga-elite-web-project",
-  "tech-bridge",
-  "shoe-bank",                          // Shoe Bank (CMS slug from SHOE_BANK_MERNSTACK)
-  "footwear-business-management-system", // Shoe Bank (story repo slug)
-  "nextgen-mobile-shop",                // NEXTGEN Mobile Shop
-  "library-management-system",          // University Library Management System
-]);
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -71,6 +61,12 @@ export default async function Home() {
     projectFromCurrentRepo(github) ??
     projects.find((p) => p.featured) ??
     (projects.length ? projects[0] : null);
+  // The Projects admin page controls this selection through its Featured flag.
+  // If nothing is featured yet, retain a sensible public fallback.
+  const homepageProjects = (projects.filter((project) => project.featured).length
+    ? projects.filter((project) => project.featured)
+    : projects
+  ).slice(0, 3);
 
   const personSchema = {
     "@context": "https://schema.org",
@@ -119,9 +115,9 @@ export default async function Home() {
 
           <SectionDivider label="sys.portfolio" />
 
-          {/* Projects — curated highlights only; full list at /projects */}
+          {/* Featured projects are curated in the Projects admin page; the full list lives at /projects. */}
           <div id="projects" className="scroll-mt-24">
-            <ProjectsShowcase projects={projects.filter((p) => HOMEPAGE_SLUGS.has(p.slug))} />
+            <ProjectsShowcase projects={homepageProjects} />
           </div>
 
           <SectionDivider label="sys.skills" />
@@ -136,6 +132,36 @@ export default async function Home() {
           {/* Credentials & testimonials */}
           <div className="space-y-6">
             <IntelDossier testimonials={testimonials} certificates={certificates} />
+          </div>
+
+          <SectionDivider label="sys.intake" />
+
+          {/* Request a Project Showcase Banner */}
+          <div className="relative overflow-hidden rounded-2xl border border-cyan/30 bg-surface/80 p-6 sm:p-8 backdrop-blur-xl transition-all hover:border-cyan/60 hover:shadow-[0_0_35px_rgba(6,182,212,0.15)]">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-cyan/10 blur-3xl" />
+            <div className="relative z-10 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+              <div className="max-w-2xl space-y-2">
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+                  <span className="inline-block h-2 w-2 rounded-full bg-cyan animate-pulse" />
+                  <span>sys.intake // client projects & web systems</span>
+                </div>
+                <h3 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+                  Have a Project in Mind? Let&apos;s Build It.
+                </h3>
+                <p className="font-mono text-xs leading-relaxed text-muted-foreground">
+                  Looking for a full-stack engineer to build a production web application, MVP, or API? Submit your project goals, scope, and timeline for an intake review.
+                </p>
+              </div>
+              <a
+                href="/start-project"
+                data-track="home_project_request_cta"
+                className="group flex items-center justify-center gap-2.5 shrink-0 rounded-lg border border-cyan/60 bg-cyan px-7 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-slate-950 transition-all hover:bg-cyan-soft hover:shadow-[0_0_20px_var(--cyan-glow)] w-full sm:w-auto"
+              >
+                <BriefcaseBusiness size={16} />
+                <span>Request a Project</span>
+                <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+              </a>
+            </div>
           </div>
 
           <SectionDivider label="sys.communication" />

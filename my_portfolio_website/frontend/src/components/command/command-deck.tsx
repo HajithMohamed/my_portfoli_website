@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { CvAsset, GithubSummary, Profile } from "@/lib/types";
-import { FileText, Github, Terminal, ArrowRight } from "lucide-react";
+import { BriefcaseBusiness, FileText, Github, Terminal, ArrowRight } from "lucide-react";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
@@ -355,6 +355,15 @@ export function CommandDeck({
               >
                 <Terminal size={16} className="opacity-70" />
                 <span>view systems</span>
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </a>
+              <a
+                href="/start-project"
+                data-track="project_request_start"
+                className="group flex items-center justify-center sm:justify-start gap-3 border border-cyan/60 bg-cyan px-6 py-4 text-slate-950 font-semibold transition-all hover:bg-cyan-soft hover:shadow-[0_0_20px_var(--cyan-glow)] touch-target-lg w-full sm:w-auto"
+              >
+                <BriefcaseBusiness size={16} />
+                <span>request a project</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a

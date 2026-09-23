@@ -39,7 +39,7 @@ function useList<T>(path: string) {
   return { data, error, load };
 }
 
-async function uploadImage(file: File, folder: string): Promise<{ url: string; publicId: string }> {
+export async function uploadImage(file: File, folder: string): Promise<{ url: string; publicId: string }> {
   const form = new FormData();
   form.set("file", file);
   const response = await fetch(bffUrl(`/admin/uploads?folder=${folder}`), {
@@ -316,13 +316,36 @@ export function CertificatesPanel() {
             {items.length ? (
               items.map((item) => (
                 <div className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.03] p-4" key={item.id}>
-                  <div>
-                    <div className="text-sm font-semibold text-white">{item.title}</div>
-                    <p className="text-xs text-slate-500">
-                      {item.issuer} · <span className="capitalize">{item.type}</span>
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {item.imageUrl ? (
+                      <div className="h-12 w-16 shrink-0 overflow-hidden rounded border border-white/10 bg-slate-900">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded border border-white/10 bg-white/5 font-mono text-[9px] text-slate-500">
+                        No Image
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-white">{item.title}</div>
+                      <p className="text-xs text-slate-400">
+                        {item.issuer} · <span className="capitalize">{item.type}</span>
+                        {item.issueDate && ` · ${new Date(item.issueDate).getFullYear()}`}
+                      </p>
+                      {item.credentialUrl && (
+                        <a
+                          href={item.credentialUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-block font-mono text-[10px] text-cyan hover:underline"
+                        >
+                          Verify link ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <Button onClick={() => remove(item.id)} size="sm" type="button" variant="secondary">
+                  <Button onClick={() => remove(item.id)} size="sm" type="button" variant="secondary" className="shrink-0">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

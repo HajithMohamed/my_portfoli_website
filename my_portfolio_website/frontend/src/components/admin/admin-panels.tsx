@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { AnalyticsOverview } from "@/components/admin/admin-analytics";
+import { uploadImage } from "@/components/admin/admin-content-panels";
 import { adminFetch, bffUrl } from "@/lib/api";
 import type { BlogPost, CvAsset, GithubSummary, Profile, Project, Skill } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -354,6 +355,7 @@ export function ProjectsPanel() {
   const { data: projects, error, load } = useAdminResource<Project[]>("/admin/projects", []);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
   async function setVisibility(project: Project, visible: boolean) {
@@ -368,6 +370,17 @@ export function ProjectsPanel() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const title = String(form.get("title") ?? "");
+    let coverImage = String(form.get("coverImage") ?? "").trim() || undefined;
+    const file = form.get("coverImageFile");
+    if (file instanceof File && file.size > 0) {
+      setUploadingImage(true);
+      try {
+        coverImage = (await uploadImage(file, "hz-labs/projects")).url;
+      } finally {
+        setUploadingImage(false);
+      }
+    }
+
     const caseStudy = ["Problem", "Solution", "Architecture", "Outcome"].map((heading) => ({
       heading,
       body: String(form.get(heading.toLowerCase()) ?? ""),
@@ -381,6 +394,7 @@ export function ProjectsPanel() {
         techStack: splitList(form.get("techStack")),
         githubUrl: form.get("githubUrl") || undefined,
         liveUrl: form.get("liveUrl") || undefined,
+        coverImage,
         category: form.get("category"),
         status: form.get("status"),
         featured: form.get("featured") === "on",
@@ -398,6 +412,18 @@ export function ProjectsPanel() {
     setEditError(null);
 
     const form = new FormData(event.currentTarget);
+    let coverImage = form.get("coverImage") ? String(form.get("coverImage")).trim() || undefined : undefined;
+    const file = form.get("coverImageFile");
+    if (file instanceof File && file.size > 0) {
+      try {
+        coverImage = (await uploadImage(file, "hz-labs/projects")).url;
+      } catch (err) {
+        setEditError(err instanceof Error ? err.message : "Failed to upload image");
+        setSavingEdit(false);
+        return;
+      }
+    }
+
     const updatedPayload = {
       title: String(form.get("title")),
       slug: String(form.get("slug")),
@@ -406,7 +432,7 @@ export function ProjectsPanel() {
       techStack: splitList(form.get("techStack")),
       githubUrl: form.get("githubUrl") ? String(form.get("githubUrl")) : undefined,
       liveUrl: form.get("liveUrl") ? String(form.get("liveUrl")) : undefined,
-      coverImage: form.get("coverImage") ? String(form.get("coverImage")) : undefined,
+      coverImage,
       status: String(form.get("status")),
       featured: form.get("featured") === "on",
       outcome: form.get("outcome") ? String(form.get("outcome")) : undefined,
@@ -435,7 +461,7 @@ export function ProjectsPanel() {
 
   return (
     <>
-      <SectionHeader title="Projects Management" description="Create and edit CMS-backed projects with tech stacks, cover images, links, and featured flags." />
+      <SectionHeader title="Projects Management" description="Manage the projects shown in the public catalogue. Mark a project as Featured to include it in the homepage showcase." />
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <Card>
           <div className="mb-4 font-mono text-xs uppercase tracking-wider text-cyan font-bold">
@@ -447,6 +473,13 @@ export function ProjectsPanel() {
             <Textarea name="description" placeholder="Description" required />
             <Input name="category" placeholder="Category" required />
             <Input name="techStack" placeholder="Tech stack comma separated" required />
+            <div className="space-y-1 rounded border border-white/10 bg-surface-2/40 p-3">
+              <label className="text-[11px] font-mono text-cyan uppercase tracking-wider block">
+                Cover Image (Upload or URL)
+              </label>
+              <Input accept="image/*" name="coverImageFile" type="file" />
+              <Input name="coverImage" placeholder="Or paste image URL (Cloudinary / Unsplash)" />
+            </div>
             <Input name="githubUrl" placeholder="GitHub URL" />
             <Input name="liveUrl" placeholder="Live URL" />
             <select className="min-h-11 rounded-md border border-white/10 bg-slate-950 px-3 text-sm text-foreground" defaultValue="ACTIVE" name="status">
@@ -460,9 +493,11 @@ export function ProjectsPanel() {
             <Textarea name="outcome" placeholder="Outcome" />
             <label className="flex items-center gap-2 text-sm text-slate-300">
               <input name="featured" type="checkbox" />
-              Featured
+              Featured on Homepage Showcase
             </label>
-            <Button type="submit">Create Project</Button>
+            <Button disabled={uploadingImage} type="submit">
+              {uploadingImage ? "Uploading Image..." : "Create Project"}
+            </Button>
           </form>
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
         </Card>
@@ -478,25 +513,37 @@ export function ProjectsPanel() {
                 key={project.id}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">{project.title}</h3>
-                      {project.featured && (
-                        <span className="flex items-center gap-0.5 text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">
-                          <Star size={10} /> Featured
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    {project.coverImage ? (
+                      <div className="h-16 w-24 shrink-0 overflow-hidden rounded border border-white/10 bg-slate-900">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={project.coverImage} alt={project.title} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded border border-white/10 bg-white/5 font-mono text-[9px] text-slate-500">
+                        No Cover
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-foreground truncate">{project.title}</h3>
+                        {project.featured && (
+                          <span className="flex items-center gap-0.5 text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                            <Star size={10} /> Featured
+                          </span>
+                        )}
+                        <span className="text-[10px] font-mono text-muted-foreground bg-surface-2 px-1.5 py-0.5 rounded">
+                          {project.category}
                         </span>
-                      )}
-                      <span className="text-[10px] font-mono text-muted-foreground bg-surface-2 px-1.5 py-0.5 rounded">
-                        {project.category}
-                      </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-400 line-clamp-2">{project.description}</p>
+                      <label className="mt-3 flex items-center gap-2 text-xs text-slate-300">
+                        <input checked={project.status === "ACTIVE"} onChange={(event) => void setVisibility(project, event.target.checked)} type="checkbox" />
+                        Show on projects page
+                      </label>
                     </div>
-                    <p className="mt-1 text-sm text-slate-400 line-clamp-2">{project.description}</p>
-                    <label className="mt-3 flex items-center gap-2 text-xs text-slate-300">
-                      <input checked={project.status === "ACTIVE"} onChange={(event) => void setVisibility(project, event.target.checked)} type="checkbox" />
-                      Show on projects page
-                    </label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Button
                       onClick={() => setEditingProject(project)}
                       size="sm"
@@ -583,9 +630,10 @@ export function ProjectsPanel() {
                   <Input name="techStack" defaultValue={editingProject.techStack?.join(", ")} required />
                 </div>
 
-                <div>
-                  <label className="block text-muted-foreground mb-1">Cover Image URL (Cloudinary / Unsplash)</label>
-                  <Input name="coverImage" defaultValue={editingProject.coverImage || ""} placeholder="https://..." />
+                <div className="space-y-1 rounded border border-white/10 bg-surface-2/40 p-3">
+                  <label className="block text-cyan text-[11px] font-mono uppercase tracking-wider mb-1">Cover Image (Upload or URL)</label>
+                  <Input accept="image/*" name="coverImageFile" type="file" className="mb-2" />
+                  <Input name="coverImage" defaultValue={editingProject.coverImage || ""} placeholder="https://res.cloudinary.com/..." />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
