@@ -62,13 +62,15 @@ export default function RootLayout({
               "radial-gradient(ellipse at 15% 5%, var(--radial-orb-1, rgba(92, 208, 255, 0.12)), transparent 50%), radial-gradient(ellipse at 85% 12%, var(--radial-orb-2, rgba(245, 158, 11, 0.08)), transparent 45%), radial-gradient(ellipse at 5% 55%, var(--radial-orb-3, rgba(168, 85, 247, 0.07)), transparent 45%), radial-gradient(ellipse at 95% 90%, var(--radial-orb-4, rgba(16, 185, 129, 0.05)), transparent 50%)",
           }}
         />
-        {/* Global 3D Constellation Mesh & Theme-Reactive Glowing Orbs across all pages */}
-        <GlobalHudBackdrop />
         <SmoothScrollProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            {/* Global 3D Constellation Mesh & Theme-Reactive Glowing Orbs across all pages */}
+            <GlobalHudBackdrop />
+            {children}
+            <AdminAccess />
+            <AnalyticsTracker />
+          </Providers>
         </SmoothScrollProvider>
-        <AdminAccess />
-        <AnalyticsTracker />
       </body>
     </html>
   );

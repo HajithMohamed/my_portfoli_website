@@ -36,14 +36,14 @@
   --grid:           rgba(92, 208, 255, 0.04);
   --hud:            rgba(10, 22, 40, 0.75);
 
-  /* Background lighting & orb tokens — Jarvis */
-  --radial-orb-1:   rgba(92, 208, 255, 0.12);
-  --radial-orb-2:   rgba(245, 158, 11, 0.08);
-  --radial-orb-3:   rgba(168, 85, 247, 0.07);
-  --radial-orb-4:   rgba(16, 185, 129, 0.05);
-  --orb-1:          rgba(92, 208, 255, 0.15);
-  --orb-2:          rgba(167, 139, 250, 0.12);
-  --orb-3:          rgba(245, 158, 11, 0.09);
+  /* Background lighting & orb tokens — Jarvis (Deep Dark Aesthetic) */
+  --radial-orb-1:   rgba(92, 208, 255, 0.08);
+  --radial-orb-2:   rgba(245, 158, 11, 0.05);
+  --radial-orb-3:   rgba(168, 85, 247, 0.04);
+  --radial-orb-4:   rgba(16, 185, 129, 0.03);
+  --orb-1:          rgba(92, 208, 255, 0.07);
+  --orb-2:          rgba(167, 139, 250, 0.05);
+  --orb-3:          rgba(245, 158, 11, 0.04);
 
   /* Semantic mappings to theme tokens */
   --background: var(--bg-base);
@@ -106,14 +106,14 @@
   --grid:           rgba(249, 115, 22, 0.04);
   --hud:            rgba(20, 20, 24, 0.75);
 
-  /* Background lighting & orb tokens — Ember */
-  --radial-orb-1:   rgba(249, 115, 22, 0.16);
-  --radial-orb-2:   rgba(234, 179, 8, 0.10);
-  --radial-orb-3:   rgba(139, 92, 246, 0.08);
-  --radial-orb-4:   rgba(239, 68, 68, 0.06);
-  --orb-1:          rgba(249, 115, 22, 0.18);
-  --orb-2:          rgba(139, 92, 246, 0.12);
-  --orb-3:          rgba(234, 179, 8, 0.10);
+  /* Background lighting & orb tokens — Ember (Deep Dark Aesthetic) */
+  --radial-orb-1:   rgba(249, 115, 22, 0.09);
+  --radial-orb-2:   rgba(234, 179, 8, 0.06);
+  --radial-orb-3:   rgba(139, 92, 246, 0.05);
+  --radial-orb-4:   rgba(239, 68, 68, 0.04);
+  --orb-1:          rgba(249, 115, 22, 0.08);
+  --orb-2:          rgba(139, 92, 246, 0.06);
+  --orb-3:          rgba(234, 179, 8, 0.05);
 
   /* Semantic mappings for ember */
   --background: var(--bg-base);
