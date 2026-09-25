@@ -51,10 +51,10 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className="relative min-h-full bg-[#040710] text-foreground">
-        {/* ONE continuous, fixed, futuristic HUD background across the entire website */}
-        <GlobalSystemBackground />
         <SmoothScrollProvider>
           <Providers>
+            {/* ONE continuous, fixed, futuristic HUD background across the entire website */}
+            <GlobalSystemBackground />
             {children}
             <AdminAccess />
             <AnalyticsTracker />

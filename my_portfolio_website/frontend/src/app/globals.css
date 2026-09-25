@@ -695,3 +695,381 @@
 @media (prefers-reduced-motion: reduce) {
   [style*="project-card-in"] { animation: none !important; }
 }
+
+/* ─── Persistent device background ──────────────────────────────────────── */
+/* This is intentionally free of language/skill watermarks. */
+.persistent-device-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.device-aura {
+  position: absolute;
+  top: 12%;
+  right: -8%;
+  width: min(62vw, 900px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(92, 208, 255, 0.18) 0%, rgba(92, 208, 255, 0.045) 31%, transparent 68%);
+  filter: blur(18px);
+  animation: device-aura-breathe 13s ease-in-out infinite;
+}
+
+.device-laptop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(24rem, 39vw, 40rem);
+  aspect-ratio: 1.5;
+  transform-style: preserve-3d;
+  opacity: 0.7;
+  filter: drop-shadow(0 34px 28px rgba(0, 0, 0, 0.68)) drop-shadow(0 0 34px rgba(92, 208, 255, 0.2));
+  animation: laptop-drift 17s ease-in-out infinite;
+  will-change: transform;
+}
+
+.device-laptop-screen {
+  position: absolute;
+  inset: 0 7% 31% 7%;
+  overflow: hidden;
+  border: clamp(0.32rem, 0.6vw, 0.5rem) solid #0a1825;
+  border-radius: 0.8rem 0.8rem 0.28rem 0.28rem;
+  background: linear-gradient(145deg, #21465e, #050b14 25%, #0d2536);
+  box-shadow: inset 0 0 0 1px rgba(147, 225, 255, 0.47), inset 0 0 36px rgba(92, 208, 255, 0.16), 0 1px 1px rgba(183, 237, 255, 0.3);
+  transform: perspective(1200px) rotateY(-7deg) rotateX(3deg) rotateZ(-1.5deg);
+  transform-origin: center bottom;
+}
+
+.device-laptop-screen::after {
+  position: absolute;
+  top: 0.14rem;
+  left: 50%;
+  z-index: 4;
+  width: 0.32rem;
+  height: 0.32rem;
+  border: 1px solid rgba(130, 219, 255, 0.28);
+  border-radius: 999px;
+  background: #02060c;
+  box-shadow: 0 0 0.3rem rgba(92, 208, 255, 0.24);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.device-laptop-base {
+  position: absolute;
+  top: 60%;
+  left: 1.5%;
+  width: 97%;
+  height: 30%;
+  border: 1px solid rgba(141, 222, 255, 0.5);
+  border-radius: 0.28rem 0.28rem 1.25rem 1.25rem;
+  background: linear-gradient(130deg, #2a5269, #07121d 48%, #102c3d);
+  box-shadow: inset 0 1px rgba(214, 246, 255, 0.38), inset 0 -2px rgba(0, 0, 0, 0.38), 0 18px 22px rgba(0, 0, 0, 0.58);
+  transform: perspective(1200px) rotateX(61deg) rotateZ(-1.5deg);
+  transform-origin: top center;
+}
+
+.device-laptop-base::before {
+  position: absolute;
+  top: 12%;
+  right: 11%;
+  left: 11%;
+  height: 39%;
+  border: 1px solid rgba(136, 222, 255, 0.22);
+  border-radius: 0.18rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(160, 229, 255, 0.26) 0 7%, transparent 7% 9%),
+    repeating-linear-gradient(0deg, rgba(160, 229, 255, 0.24) 0 24%, transparent 24% 33%),
+    rgba(1, 8, 15, 0.68);
+  content: "";
+}
+
+.device-laptop-base::after {
+  position: absolute;
+  top: 60%;
+  left: 36%;
+  width: 28%;
+  height: 30%;
+  border: 1px solid rgba(151, 231, 255, 0.28);
+  border-radius: 0.22rem;
+  background: rgba(4, 16, 27, 0.32);
+  content: "";
+}
+
+.device-laptop-base span {
+  position: absolute;
+  top: -3%;
+  width: 7%;
+  height: 9%;
+  border: 1px solid rgba(139, 224, 255, 0.42);
+  border-radius: 99px;
+  background: #0b1e2b;
+  box-shadow: 0 0 0.45rem rgba(92, 208, 255, 0.15);
+}
+
+.device-laptop-base span:nth-child(1) { left: 18%; }
+.device-laptop-base span:nth-child(2) { left: 46.5%; }
+.device-laptop-base span:nth-child(3) { right: 18%; }
+
+.device-laptop-base span:nth-child(2) {
+  width: 10%;
+  background: #102f43;
+}
+
+.device-screen-content {
+  position: absolute;
+  inset: 4%;
+  overflow: hidden;
+  border: 1px solid rgba(160, 228, 255, 0.14);
+  border-radius: 0.23rem;
+  background:
+    linear-gradient(90deg, rgba(92, 208, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(92, 208, 255, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 72% 15%, rgba(92, 208, 255, 0.18), transparent 44%),
+    #06101c;
+  background-size: 14px 14px, 14px 14px, auto, auto;
+}
+
+.device-screen-scan {
+  position: absolute;
+  inset: -80% 0 auto;
+  height: 36%;
+  background: linear-gradient(180deg, transparent, rgba(145, 224, 255, 0.15), transparent);
+  animation: device-screen-scan 5.5s linear infinite;
+}
+
+.device-screen-photo {
+  position: absolute;
+  top: 16%;
+  bottom: 17%;
+  left: 7%;
+  width: 28%;
+  overflow: hidden;
+  border: 1px solid rgba(117, 216, 255, 0.55);
+  background: #092033;
+  box-shadow: 0 0 18px rgba(92, 208, 255, 0.2);
+}
+
+.device-screen-photo img,
+.device-screen-photo-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.device-screen-photo img {
+  object-fit: cover;
+  object-position: center top;
+  filter: saturate(0.78) contrast(1.08);
+}
+
+.device-screen-photo-fallback {
+  display: grid;
+  place-items: center;
+  color: #cceeff;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 1.8vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: radial-gradient(circle at 50% 32%, rgba(139, 224, 255, 0.46) 0 15%, transparent 16%), radial-gradient(ellipse at 50% 90%, rgba(92, 208, 255, 0.35) 0 39%, transparent 40%), #071827;
+}
+
+.device-screen-copy {
+  position: absolute;
+  top: 18%;
+  right: 7%;
+  left: 41%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #d9efff;
+  font-family: var(--font-mono);
+}
+
+.device-screen-route,
+.device-screen-detail,
+.device-screen-status,
+.device-screen-signals span {
+  font-size: clamp(0.34rem, 0.72vw, 0.63rem);
+  letter-spacing: 0.12em;
+}
+
+.device-screen-route {
+  color: #78d8ff;
+}
+
+.device-screen-copy strong {
+  color: #edf7ff;
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 1.65vw, 1.45rem);
+  line-height: 1;
+}
+
+.device-screen-detail {
+  color: #8fb8d0;
+  line-height: 1.4;
+}
+
+.device-screen-signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.18rem;
+  margin-top: 0.45rem;
+}
+
+.device-screen-signals span {
+  padding: 0.24rem 0.1rem;
+  overflow: hidden;
+  border: 1px solid rgba(119, 216, 255, 0.23);
+  color: #cceeff;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.device-screen-status {
+  position: absolute;
+  right: 7%;
+  bottom: 8%;
+  color: #78f0bd;
+  animation: device-status-pulse 2.4s ease-in-out infinite;
+}
+
+.device-phone {
+  display: none;
+}
+
+@keyframes laptop-drift {
+  0%, 100% { transform: translate3d(-50%, -50%, 0) rotate(0deg); }
+  35% { transform: translate3d(calc(-50% - 1.5%), calc(-50% - 2%), 0) rotate(1deg); }
+  70% { transform: translate3d(calc(-50% + 1.2%), calc(-50% + 1.5%), 0) rotate(-0.75deg); }
+}
+
+@keyframes device-aura-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50% { opacity: 0.95; transform: scale(1.08); }
+}
+
+@keyframes device-screen-scan {
+  from { transform: translateY(0); }
+  to { transform: translateY(560%); }
+}
+
+@keyframes device-status-pulse {
+  0%, 100% { opacity: 0.65; text-shadow: none; }
+  50% { opacity: 1; text-shadow: 0 0 10px rgba(120, 240, 189, 0.8); }
+}
+
+@media (max-width: 767px) {
+  .device-aura {
+    top: 8%;
+    right: -44%;
+    width: 120vw;
+    opacity: 0.8;
+  }
+
+  .device-laptop {
+    display: none;
+  }
+
+  .device-phone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    width: min(59vw, 20rem);
+    aspect-ratio: 0.52;
+    overflow: hidden;
+    border: 1px solid rgba(137, 222, 255, 0.67);
+    border-radius: 1.6rem;
+    background: linear-gradient(145deg, #17384c, #040b15 60%, #0c2434);
+    box-shadow: inset 0 0 0 0.25rem #07111d, 0 20px 36px rgba(0, 0, 0, 0.65), 0 0 32px rgba(92, 208, 255, 0.25);
+    opacity: 0.62;
+    animation: phone-drift 10s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .device-phone .device-screen-content {
+    inset: 0.4rem;
+    border-radius: 1.22rem;
+  }
+
+  .device-phone-notch {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    z-index: 3;
+    width: 32%;
+    height: 0.72rem;
+    border-radius: 0 0 0.6rem 0.6rem;
+    background: #030711;
+    transform: translateX(-50%);
+  }
+
+  .device-screen-content-compact .device-screen-photo {
+    top: 11%;
+    right: 16%;
+    bottom: auto;
+    left: 16%;
+    width: auto;
+    height: 35%;
+  }
+
+  .device-screen-content-compact .device-screen-copy {
+    top: 52%;
+    right: 12%;
+    left: 12%;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+  }
+
+  .device-screen-content-compact .device-screen-route,
+  .device-screen-content-compact .device-screen-detail,
+  .device-screen-content-compact .device-screen-status,
+  .device-screen-content-compact .device-screen-signals span {
+    font-size: clamp(0.3rem, 1.9vw, 0.49rem);
+  }
+
+  .device-screen-content-compact .device-screen-copy strong {
+    font-size: clamp(0.67rem, 4vw, 1rem);
+  }
+
+  .device-screen-content-compact .device-screen-signals {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+
+  .device-screen-content-compact .device-screen-status {
+    right: 50%;
+    bottom: 6%;
+    transform: translateX(50%);
+  }
+
+  .device-phone-home {
+    position: absolute;
+    bottom: 0.72rem;
+    left: 50%;
+    z-index: 3;
+    width: 27%;
+    height: 0.14rem;
+    border-radius: 99px;
+    background: rgba(211, 244, 255, 0.72);
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes phone-drift {
+  0%, 100% { transform: translate3d(-50%, -50%, 0) perspective(1100px) rotateY(-18deg) rotateZ(-4deg); }
+  50% { transform: translate3d(calc(-50% - 0.8rem), calc(-50% - 0.9rem), 0) perspective(1100px) rotateY(-12deg) rotateZ(-1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .device-aura,
+  .device-laptop,
+  .device-phone,
+  .device-screen-scan,
+  .device-screen-status {
+    animation: none !important;
+  }
+}
