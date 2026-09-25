@@ -6,7 +6,7 @@ import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { getSiteUrl } from "@/lib/site-url";
-import { GlobalBackground } from "@/components/shell/global-background";
+import { GlobalSystemBackground } from "@/components/shell/global-system-background";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,7 +52,7 @@ export default function RootLayout({
       </head>
       <body className="relative min-h-full bg-[#040710] text-foreground">
         {/* ONE continuous, fixed, futuristic HUD background across the entire website */}
-        <GlobalBackground />
+        <GlobalSystemBackground />
         <SmoothScrollProvider>
           <Providers>
             {children}
