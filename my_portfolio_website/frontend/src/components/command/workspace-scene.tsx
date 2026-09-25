@@ -3,28 +3,18 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Line, Text, useTexture } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
+import { usePathname } from "next/navigation";
 import type { Group } from "three";
 import { Color } from "three";
-import { PERSONAL_IDENTITY } from "@/lib/identity";
-import { useTheme } from "@/components/theme/theme-provider";
 
-export const THEME_PALETTES = {
-  jarvis: {
-    accent: "#5cd0ff",
-    accentDim: "#3a8fb8",
-    surface: "#0a1628",
-    border: "#1a3050",
-    base: "#030711",
-    text: "#d6ecff",
-  },
-  ember: {
-    accent: "#F97316",
-    accentDim: "#FB923C",
-    surface: "#141418",
-    border: "#24242B",
-    base: "#0B0B0E",
-    text: "#FAFAFA",
-  },
+/** The ambient scene deliberately stays in the blue-black JARVIS treatment. */
+export const DARK_SCENE_PALETTE = {
+  accent: "#5cd0ff",
+  accentDim: "#3a8fb8",
+  surface: "#0a1628",
+  border: "#1a3050",
+  base: "#030711",
+  text: "#d6ecff",
 } as const;
 
 interface Palette {
@@ -34,6 +24,84 @@ interface Palette {
   readonly border: string;
   readonly base: string;
   readonly text: string;
+}
+
+interface ScreenState {
+  id: string;
+  route: string;
+  headline: string;
+  detail: string;
+  metrics: readonly [string, string, string];
+}
+
+const HOME_SCREEN: ScreenState = {
+  id: "home",
+  route: "HOME // COMMAND DECK",
+  headline: "Operator online",
+  detail: "portfolio.system / ready",
+  metrics: ["GITHUB", "SYSTEMS", "COMMS"],
+};
+
+function screenForPathname(pathname: string): ScreenState {
+  if (pathname === "/") return HOME_SCREEN;
+
+  if (pathname.startsWith("/about")) {
+    return {
+      id: "about",
+      route: "ABOUT // OPERATOR",
+      headline: "Engineering profile",
+      detail: "background / focus / availability",
+      metrics: ["BIO", "MISSION", "TIMELINE"],
+    };
+  }
+
+  if (pathname.startsWith("/projects")) {
+    return {
+      id: "projects",
+      route: "PROJECTS // ARCHIVE",
+      headline: "Shipping systems",
+      detail: "repositories / case studies / builds",
+      metrics: ["REPOS", "STACK", "STATUS"],
+    };
+  }
+
+  if (pathname.startsWith("/certificates")) {
+    return {
+      id: "certificates",
+      route: "CREDENTIALS // VAULT",
+      headline: "Learning record",
+      detail: "verified courses / milestones",
+      metrics: ["CERTS", "HOURS", "GROWTH"],
+    };
+  }
+
+  if (pathname.startsWith("/blog")) {
+    return {
+      id: "blog",
+      route: "NOTES // FIELD LOG",
+      headline: "Build in public",
+      detail: "decisions / progress / lessons",
+      metrics: ["LOGS", "IDEAS", "SIGNALS"],
+    };
+  }
+
+  if (pathname.startsWith("/start-project")) {
+    return {
+      id: "intake",
+      route: "INTAKE // NEW PROJECT",
+      headline: "Start a build",
+      detail: "scope / goals / collaboration",
+      metrics: ["BRIEF", "SCOPE", "LAUNCH"],
+    };
+  }
+
+  return {
+    id: "system",
+    route: "HZ LABS // SYSTEM",
+    headline: "Workspace active",
+    detail: "engineering console / online",
+    metrics: ["STATUS", "FOCUS", "UPTIME"],
+  };
 }
 
 /** Portrait aspect the screen geometry below is built around (w:h = 4:5). */
@@ -83,33 +151,212 @@ function OperatorPortrait({
   );
 }
 
+/** A deliberate empty state until a profile photo is uploaded in Admin > Profile. */
+function PortraitPending({
+  width,
+  accentColor,
+}: {
+  width: number;
+  accentColor: string;
+}) {
+  return (
+    <group>
+      <mesh position={[0, width * 0.08, 0]}>
+        <circleGeometry args={[width * 0.27, 24]} />
+        <meshBasicMaterial color={accentColor} transparent opacity={0.16} />
+      </mesh>
+      <mesh position={[0, -width * 0.18, 0]}>
+        <circleGeometry args={[width * 0.42, 24, 0, Math.PI]} />
+        <meshBasicMaterial color={accentColor} transparent opacity={0.1} />
+      </mesh>
+      <Text
+        position={[0, -width * 0.48, 0.002]}
+        fontSize={Math.min(width * 0.09, 0.06)}
+        color={accentColor}
+        anchorX="center"
+        anchorY="middle"
+      >
+        PROFILE READY
+      </Text>
+    </group>
+  );
+}
+
+/**
+ * Route-aware content that sits inside every device. The scene stays mounted;
+ * only this information panel changes when the visitor navigates to a new page.
+ */
+function DeviceScreen({
+  width,
+  height,
+  portraitUrl,
+  palette,
+  screen,
+}: {
+  width: number;
+  height: number;
+  portraitUrl?: string;
+  palette: Palette;
+  screen: ScreenState;
+}) {
+  const ref = useRef<Group>(null);
+  const portraitWidth = width * (height > width ? 0.55 : 0.31);
+  const portraitX = -width / 2 + portraitWidth / 2 + width * 0.08;
+  const contentLeft = -width / 2 + portraitWidth + width * 0.13;
+  const contentWidth = width / 2 - contentLeft - width * 0.09;
+  const compact = height > width * 1.2;
+  const titleSize = Math.min(width * 0.095, compact ? 0.08 : 0.105);
+  const bodySize = Math.min(width * 0.06, compact ? 0.045 : 0.06);
+  const routeSize = Math.min(width * 0.045, 0.043);
+  const barY = compact ? -height * 0.17 : -height * 0.18;
+
+  useFrame((state) => {
+    if (!ref.current) return;
+    const t = state.clock.getElapsedTime();
+    ref.current.position.y = Math.sin(t * 1.1) * 0.008;
+    ref.current.rotation.z = Math.sin(t * 0.8) * 0.002;
+  });
+
+  return (
+    <group ref={ref} position={[0, 0, 0.052]}>
+      <mesh position={[0, 0, -0.002]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial color={palette.base} transparent opacity={0.92} />
+      </mesh>
+
+      <mesh position={[0, height * 0.34, 0]}>
+        <planeGeometry args={[width * 0.9, 0.012]} />
+        <meshBasicMaterial color={palette.accent} transparent opacity={0.36} />
+      </mesh>
+
+      <group position={[portraitX, compact ? height * 0.16 : 0.02, 0.001]}>
+        {portraitUrl ? (
+          <OperatorPortrait
+            url={portraitUrl}
+            width={portraitWidth}
+            position={[0, 0, 0.001]}
+            accentColor={palette.accent}
+          />
+        ) : (
+          <PortraitPending width={portraitWidth} accentColor={palette.accent} />
+        )}
+      </group>
+
+      <group key={screen.id}>
+        <Text
+          position={[contentLeft, height * 0.28, 0.002]}
+          fontSize={routeSize}
+          color={palette.accent}
+          anchorX="left"
+          anchorY="middle"
+          maxWidth={contentWidth}
+        >
+          {screen.route}
+        </Text>
+        <Text
+          position={[contentLeft, height * 0.11, 0.002]}
+          fontSize={titleSize}
+          color={palette.text}
+          anchorX="left"
+          anchorY="middle"
+          maxWidth={contentWidth}
+        >
+          {screen.headline}
+        </Text>
+        <Text
+          position={[contentLeft, -height * 0.035, 0.002]}
+          fontSize={bodySize}
+          color={palette.accentDim}
+          anchorX="left"
+          anchorY="middle"
+          maxWidth={contentWidth}
+        >
+          {screen.detail}
+        </Text>
+
+        {screen.metrics.map((metric, index) => {
+          const metricWidth = contentWidth / screen.metrics.length - width * 0.018;
+          const x = contentLeft + index * (metricWidth + width * 0.018);
+          return (
+            <group key={metric} position={[x + metricWidth / 2, barY, 0.002]}>
+              <mesh>
+                <planeGeometry args={[metricWidth, Math.max(height * 0.12, 0.04)]} />
+                <meshBasicMaterial color={palette.accent} transparent opacity={0.12 + index * 0.04} />
+              </mesh>
+              <Text
+                position={[0, 0, 0.002]}
+                fontSize={Math.min(metricWidth * 0.18, bodySize * 0.85)}
+                color={palette.text}
+                anchorX="center"
+                anchorY="middle"
+                maxWidth={metricWidth * 0.86}
+              >
+                {metric}
+              </Text>
+            </group>
+          );
+        })}
+      </group>
+
+      <Text
+        position={[width * 0.39, -height * 0.38, 0.002]}
+        fontSize={routeSize * 0.86}
+        color={palette.accent}
+        anchorX="right"
+        anchorY="middle"
+      >
+        LIVE • 24/7
+      </Text>
+    </group>
+  );
+}
+
 /** Floating tech nodes — the operator's actual day-to-day stack. */
 const NODES_DESKTOP = [
-  { label: "React", pos: [2.3, 0.7, 0.4] as const },
-  { label: "NestJS", pos: [-2.4, 0.5, -0.4] as const },
-  { label: "Postgres", pos: [2.1, -1.0, -0.5] as const },
-  { label: "Docker", pos: [-2.1, -1.1, 0.3] as const },
-  { label: "Next.js", pos: [0.2, 0.85, -0.7] as const },
-  { label: "GitHub", pos: [0.1, -1.7, 0.4] as const },
+  { label: "React", pos: [-2.7, 1.4, 0.2] as const },
+  { label: "Next.js", pos: [2.7, 1.5, 0.1] as const },
+  { label: "Node.js", pos: [3.3, 0.9, -0.2] as const },
+  { label: "TypeScript", pos: [-3.1, 0.5, 0.1] as const },
+  { label: "Spring Boot", pos: [2.8, 0.2, 0.3] as const },
+  { label: "MongoDB", pos: [3.7, -0.3, -0.3] as const },
+  { label: "AWS", pos: [3.0, -0.7, 0.2] as const },
+  { label: "Java", pos: [3.6, -1.2, -0.2] as const },
+  { label: "MySQL", pos: [2.7, -1.5, 0.2] as const },
+  { label: "GitHub", pos: [-2.0, -1.6, 0.3] as const },
+  { label: "Docker", pos: [-3.3, -1.5, -0.1] as const },
+  { label: "Flutter", pos: [0.2, -1.8, 0.4] as const },
 ];
 
 const NODES_TABLET = [
-  { label: "React", pos: [1.9, 0.6, 0.4] as const },
-  { label: "NestJS", pos: [-1.9, 0.4, -0.3] as const },
-  { label: "Postgres", pos: [1.7, -0.8, -0.5] as const },
-  { label: "Next.js", pos: [-1.6, -0.9, 0.2] as const },
-  { label: "GitHub", pos: [0.1, -1.4, 0.4] as const },
+  { label: "React", pos: [1.9, 0.9, 0.3] as const },
+  { label: "Next.js", pos: [-1.9, 0.8, -0.3] as const },
+  { label: "Node.js", pos: [2.2, 0.2, -0.4] as const },
+  { label: "TypeScript", pos: [-2.2, 0.0, 0.2] as const },
+  { label: "MongoDB", pos: [1.7, -0.8, -0.3] as const },
+  { label: "Docker", pos: [-1.8, -0.9, 0.2] as const },
+  { label: "GitHub", pos: [0.1, -1.4, 0.3] as const },
+  { label: "Java", pos: [-0.3, 1.2, -0.2] as const },
 ];
 
 const NODES_MOBILE = [
   { label: "React", pos: [1.4, 0.9, 0.3] as const },
-  { label: "NestJS", pos: [-1.4, 0.5, -0.2] as const },
-  { label: "Next.js", pos: [1.2, -0.8, -0.3] as const },
-  { label: "GitHub", pos: [-1.2, -0.9, 0.2] as const },
+  { label: "Next.js", pos: [-1.4, 0.7, -0.2] as const },
+  { label: "Node.js", pos: [1.3, -0.5, -0.3] as const },
+  { label: "TypeScript", pos: [-1.3, -0.6, 0.2] as const },
+  { label: "GitHub", pos: [0.0, -1.3, 0.2] as const },
+  { label: "Docker", pos: [-0.2, 1.2, -0.1] as const },
 ];
 
 /* ── Device: Laptop (desktop) ── */
-function Laptop({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
+function Laptop({
+  portraitUrl,
+  palette,
+  screen,
+}: {
+  portraitUrl?: string;
+  palette: Palette;
+  screen: ScreenState;
+}) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -136,31 +383,28 @@ function Laptop({ portraitUrl, palette }: { portraitUrl?: string; palette: Palet
           <planeGeometry args={[2.25, 1.35]} />
           <meshBasicMaterial color={new Color(palette.accent).multiplyScalar(0.35)} />
         </mesh>
-        {portraitUrl ? (
-          <OperatorPortrait
-            url={portraitUrl}
-            width={0.72}
-            position={[-0.62, 0, 0.05]}
-            accentColor={palette.accent}
-          />
-        ) : null}
-        <Text
-          position={portraitUrl ? [0.45, 0, 0.05] : [0, 0, 0.05]}
-          fontSize={0.11}
-          color={palette.text}
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={portraitUrl ? 1.1 : 2}
-        >
-          {PERSONAL_IDENTITY.name}
-        </Text>
+        <DeviceScreen
+          width={2.13}
+          height={1.23}
+          portraitUrl={portraitUrl}
+          palette={palette}
+          screen={screen}
+        />
       </group>
     </group>
   );
 }
 
 /* ── Device: Tablet (tablet viewports) ── */
-function Tablet({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
+function Tablet({
+  portraitUrl,
+  palette,
+  screen,
+}: {
+  portraitUrl?: string;
+  palette: Palette;
+  screen: ScreenState;
+}) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -194,61 +438,27 @@ function Tablet({ portraitUrl, palette }: { portraitUrl?: string; palette: Palet
         <planeGeometry args={[1.6, 2.15]} />
         <meshBasicMaterial color={new Color(palette.accent).multiplyScalar(0.3)} />
       </mesh>
-      {/* Screen content */}
-      {portraitUrl ? (
-        <OperatorPortrait
-          url={portraitUrl}
-          width={0.8}
-          position={[0, 0.5, 0.05]}
-          accentColor={palette.accent}
-        />
-      ) : null}
-      <Text
-        position={[0, portraitUrl ? -0.15 : 0.6, 0.05]}
-        fontSize={0.1}
-        color={palette.text}
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={1.4}
-      >
-        {PERSONAL_IDENTITY.name}
-      </Text>
-      <Text
-        position={[0, portraitUrl ? -0.35 : 0.3, 0.05]}
-        fontSize={0.06}
-        color={palette.accent}
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={1.4}
-      >
-        {"> mission_control"}
-      </Text>
-      {/* Simulated UI lines on screen */}
-      {(portraitUrl ? [-0.55, -0.7, -0.85] : [-0.1, -0.3, -0.5, -0.7]).map((y, i) => (
-        <mesh key={i} position={[-0.2 + i * 0.05, y, 0.048]}>
-          <planeGeometry args={[0.9 - i * 0.1, 0.025]} />
-          <meshBasicMaterial
-            color={new Color(palette.accent).multiplyScalar(0.15 + i * 0.05)}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      ))}
-      {/* Home indicator */}
-      <mesh position={[0, -1.1, 0.045]}>
-        <planeGeometry args={[0.35, 0.03]} />
-        <meshBasicMaterial
-          color={new Color(palette.accent).multiplyScalar(0.5)}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
+      <DeviceScreen
+        width={1.5}
+        height={2.03}
+        portraitUrl={portraitUrl}
+        palette={palette}
+        screen={screen}
+      />
     </group>
   );
 }
 
 /* ── Device: Phone (mobile viewports) ── */
-function Phone({ portraitUrl, palette }: { portraitUrl?: string; palette: Palette }) {
+function Phone({
+  portraitUrl,
+  palette,
+  screen,
+}: {
+  portraitUrl?: string;
+  palette: Palette;
+  screen: ScreenState;
+}) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -287,53 +497,56 @@ function Phone({ portraitUrl, palette }: { portraitUrl?: string; palette: Palett
         <planeGeometry args={[0.28, 0.06]} />
         <meshBasicMaterial color={palette.base} />
       </mesh>
-      {/* Screen content */}
-      {portraitUrl ? (
-        <OperatorPortrait
-          url={portraitUrl}
-          width={0.46}
-          position={[0, 0.36, 0.04]}
-          accentColor={palette.accent}
-        />
-      ) : null}
-      <Text
-        position={[0, portraitUrl ? -0.12 : 0.45, 0.04]}
-        fontSize={0.07}
-        color={palette.text}
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={0.7}
-      >
-        {PERSONAL_IDENTITY.name}
-      </Text>
-      <Text
-        position={[0, portraitUrl ? -0.27 : 0.25, 0.04]}
-        fontSize={0.04}
-        color={palette.accent}
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={0.7}
-      >
-        {"> sys.online"}
-      </Text>
-      {/* Simulated UI elements */}
-      {(portraitUrl ? [-0.42, -0.54, -0.66] : [-0.0, -0.15, -0.3, -0.45, -0.6]).map((y, i) => (
-        <mesh key={i} position={[0, y, 0.038]}>
-          <planeGeometry args={[0.55 - i * 0.04, 0.02]} />
-          <meshBasicMaterial
-            color={new Color(palette.accent).multiplyScalar(0.12 + i * 0.04)}
-            transparent
-            opacity={0.5}
-          />
-        </mesh>
-      ))}
-      {/* Home indicator */}
-      <mesh position={[0, -0.78, 0.037]}>
-        <planeGeometry args={[0.2, 0.02]} />
+      <DeviceScreen
+        width={0.72}
+        height={1.56}
+        portraitUrl={portraitUrl}
+        palette={palette}
+        screen={screen}
+      />
+    </group>
+  );
+}
+
+/** Rotating wireframe geodesic polyhedrons — the HUD atmosphere elements. */
+function WireframePolyhedron({
+  position,
+  scale = 1,
+  speed = 0.15,
+  accentColor,
+}: {
+  position: [number, number, number];
+  scale?: number;
+  speed?: number;
+  accentColor: string;
+}) {
+  const ref = useRef<Group>(null);
+  useFrame((state) => {
+    if (!ref.current) return;
+    const t = state.clock.getElapsedTime();
+    ref.current.rotation.x = t * speed;
+    ref.current.rotation.y = t * speed * 0.7;
+    ref.current.rotation.z = t * speed * 0.3;
+  });
+
+  return (
+    <group ref={ref} position={position} scale={scale}>
+      <mesh>
+        <icosahedronGeometry args={[0.8, 1]} />
         <meshBasicMaterial
-          color={new Color(palette.accent).multiplyScalar(0.4)}
+          color={accentColor}
+          wireframe
           transparent
-          opacity={0.5}
+          opacity={0.12}
+        />
+      </mesh>
+      <mesh>
+        <icosahedronGeometry args={[0.55, 0]} />
+        <meshBasicMaterial
+          color={accentColor}
+          wireframe
+          transparent
+          opacity={0.08}
         />
       </mesh>
     </group>
@@ -446,8 +659,9 @@ export default function WorkspaceScene({
   showNodes = true,
   showParticles = true,
 }: WorkspaceSceneProps) {
-  const { theme } = useTheme();
-  const palette = THEME_PALETTES[theme] ?? THEME_PALETTES.jarvis;
+  const pathname = usePathname();
+  const palette = DARK_SCENE_PALETTE;
+  const screen = screenForPathname(pathname);
 
   const nodes =
     device === "phone"
@@ -476,9 +690,9 @@ export default function WorkspaceScene({
 
       {/* The portrait texture loads async; the device renders without it until then. */}
       <Suspense fallback={null}>
-        {device === "laptop" && <Laptop portraitUrl={portraitUrl} palette={palette} />}
-        {device === "tablet" && <Tablet portraitUrl={portraitUrl} palette={palette} />}
-        {device === "phone" && <Phone portraitUrl={portraitUrl} palette={palette} />}
+        {device === "laptop" && <Laptop portraitUrl={portraitUrl} palette={palette} screen={screen} />}
+        {device === "tablet" && <Tablet portraitUrl={portraitUrl} palette={palette} screen={screen} />}
+        {device === "phone" && <Phone portraitUrl={portraitUrl} palette={palette} screen={screen} />}
       </Suspense>
 
       {showNodes && (
@@ -490,6 +704,11 @@ export default function WorkspaceScene({
         </>
       )}
       {showParticles && <Particles count={particleCount} accentColor={palette.accent} />}
+
+      {/* Wireframe geodesic polyhedrons — atmospheric HUD depth */}
+      <WireframePolyhedron position={[-3.2, -1.0, -1.5]} scale={1.2} speed={0.1} accentColor={palette.accent} />
+      <WireframePolyhedron position={[3.8, 0.5, -2.0]} scale={0.9} speed={0.18} accentColor={palette.accentDim} />
+      <WireframePolyhedron position={[0, 2.2, -3.0]} scale={1.5} speed={0.08} accentColor={palette.accent} />
     </Canvas>
   );
 }
