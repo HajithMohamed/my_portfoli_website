@@ -2,8 +2,14 @@
 
 import { useState, useRef, ChangeEvent } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useMediaQuery } from "@/lib/use-media-query";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
+
+const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
+  ssr: false,
+});
 import { bffUrl } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
@@ -395,6 +401,11 @@ const STEPS = [
 ];
 
 export default function StartProjectPage() {
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const device = isDesktop ? "laptop" : isTablet ? "tablet" : "phone";
+  const particleCount = isDesktop ? 60 : isTablet ? 30 : 15;
+
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [direction, setDirection] = useState<number>(1);
 
@@ -564,7 +575,15 @@ export default function StartProjectPage() {
   const selectedBuildInfo = BUILD_TYPES.find((b) => b.id === buildType) || BUILD_TYPES[0];
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground selection:bg-cyan selection:text-slate-950">
+    <div className="relative min-h-screen bg-background text-foreground selection:bg-cyan selection:text-slate-950 overflow-hidden">
+      {/* 3D WebGL Constellation Canvas matching the Command Deck */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.25] md:opacity-[0.32] overflow-hidden"
+        aria-hidden
+      >
+        <WorkspaceScene device={device} particleCount={particleCount} />
+      </div>
+
       <TopBar />
 
       <main className="relative z-10 pt-20 pb-28">

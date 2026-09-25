@@ -61,6 +61,14 @@ export default function RootLayout({
               "radial-gradient(ellipse at 15% 5%, rgba(0, 240, 255, 0.09), transparent 50%), radial-gradient(ellipse at 85% 12%, rgba(245, 158, 11, 0.06), transparent 45%), radial-gradient(ellipse at 5% 55%, rgba(168, 85, 247, 0.05), transparent 45%), radial-gradient(ellipse at 95% 90%, rgba(16, 185, 129, 0.05), transparent 50%)",
           }}
         />
+        {/* Global floating glowing orbs for spatial depth across all pages */}
+        <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+          <div className="absolute left-1/4 top-1/6 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[130px] mix-blend-screen animate-orb pointer-events-none md:w-[40vw] md:h-[40vw]" />
+          <div
+            className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[110px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]"
+            style={{ animationDelay: "-10s" }}
+          />
+        </div>
         <SmoothScrollProvider>
           <Providers>{children}</Providers>
         </SmoothScrollProvider>
