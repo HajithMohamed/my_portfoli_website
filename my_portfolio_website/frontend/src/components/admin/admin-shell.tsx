@@ -6,6 +6,7 @@ import { type ReactNode } from "react";
 import {
   ExternalLink,
   FolderGit2,
+  Github,
   Inbox,
   LineChart,
   LogOut,
@@ -20,6 +21,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const primaryNav = [
   { label: "Projects", href: "/admin/projects", icon: FolderGit2 },
+  { label: "GitHub Telemetry", href: "/admin/github", icon: Github },
   { label: "Certificates", href: "/admin/credentials", icon: ShieldCheck },
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Project Requests", href: "/admin/requests", icon: Inbox },
@@ -28,6 +30,7 @@ const primaryNav = [
 
 const mobileBottomNav = [
   { label: "Projects", href: "/admin/projects", icon: FolderGit2 },
+  { label: "GitHub", href: "/admin/github", icon: Github },
   { label: "Certs", href: "/admin/credentials", icon: ShieldCheck },
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Requests", href: "/admin/requests", icon: Inbox },

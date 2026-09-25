@@ -336,9 +336,41 @@
   box-shadow: 0 0 20px var(--violet-glow), 0 0 60px var(--violet-glow);
 }
 
+@utility glow-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35), 0 0 60px rgba(245, 158, 11, 0.15);
+}
+
+@utility glow-emerald {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35), 0 0 60px rgba(16, 185, 129, 0.15);
+}
+
+@utility glow-rose {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.35), 0 0 60px rgba(244, 63, 94, 0.15);
+}
+
 @utility border-glow {
   border: 1px solid color-mix(in oklab, var(--cyan) 35%, transparent);
   box-shadow: 0 0 15px var(--cyan-glow), inset 0 0 15px color-mix(in oklab, var(--cyan) 10%, transparent);
+}
+
+@utility border-glow-amber {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.25), inset 0 0 15px rgba(245, 158, 11, 0.08);
+}
+
+@utility border-glow-emerald {
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.08);
+}
+
+@utility border-glow-violet {
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.25), inset 0 0 15px rgba(168, 85, 247, 0.08);
+}
+
+@utility border-glow-rose {
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.25), inset 0 0 15px rgba(244, 63, 94, 0.08);
 }
 
 /* ─── Gradient borders ─── */

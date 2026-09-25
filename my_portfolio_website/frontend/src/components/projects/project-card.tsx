@@ -10,6 +10,26 @@ import { useMediaQuery } from "@/lib/use-media-query";
 
 const MAX_TECH = 5;
 
+function getTechBadgeStyle(tech: string) {
+  const lower = tech.toLowerCase();
+  if (lower.includes("react") || lower.includes("next") || lower.includes("ts") || lower.includes("typescript")) {
+    return "border-cyan/30 bg-cyan/10 text-cyan";
+  }
+  if (lower.includes("node") || lower.includes("python") || lower.includes("java") || lower.includes("spring") || lower.includes("php")) {
+    return "border-amber-400/30 bg-amber-400/10 text-amber-400";
+  }
+  if (lower.includes("sql") || lower.includes("mongo") || lower.includes("database") || lower.includes("postgres") || lower.includes("redis")) {
+    return "border-purple-400/30 bg-purple-400/10 text-purple-400";
+  }
+  if (lower.includes("docker") || lower.includes("aws") || lower.includes("ci") || lower.includes("git")) {
+    return "border-emerald-400/30 bg-emerald-400/10 text-emerald-400";
+  }
+  if (lower.includes("tailwind") || lower.includes("css") || lower.includes("ui") || lower.includes("html") || lower.includes("three")) {
+    return "border-teal-400/30 bg-teal-400/10 text-teal-400";
+  }
+  return "border-sky-400/30 bg-sky-400/10 text-sky-400";
+}
+
 export function ProjectCard({
   project,
   index = 0,
@@ -144,7 +164,7 @@ export function ProjectCard({
               style={{
                 transitionDelay: `${i * 40}ms`,
               }}
-              className="rounded-sm border border-cyan/20 bg-cyan/5 px-2 py-0.5 font-mono text-[10px] text-cyan/90 transition-colors group-hover:border-cyan/40 group-hover:bg-cyan/10"
+              className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] font-medium transition-all ${getTechBadgeStyle(tech)}`}
             >
               {tech}
             </span>

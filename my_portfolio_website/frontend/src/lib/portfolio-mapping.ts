@@ -61,7 +61,20 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       featured: cms ? cms.featured : Boolean(story || repo.fullName.toLowerCase() === current),
       githubUrl: repo.url,
       liveUrl: cms?.liveUrl ?? publicWebsite(repo.liveUrl ?? repo.homepage),
-      coverImage: cms?.coverImage ?? story?.coverImage ?? (repo.fullName.toLowerCase() === "hajithmohamed/tech_bridge" ? "/projects/tech-bridge-cover.png" : null),
+      coverImage:
+        cms?.coverImage ??
+        story?.coverImage ??
+        (repo.fullName.toLowerCase() === "hajithmohamed/tech_bridge"
+          ? "/projects/tech-bridge-cover.png"
+          : repo.fullName.toLowerCase().includes("nano-_zillas") || repo.fullName.toLowerCase().includes("nano-zillas")
+          ? "/projects/nano-zillas-cover.jpg"
+          : repo.fullName.toLowerCase().includes("spring_boot") || repo.fullName.toLowerCase().includes("spring-boot")
+          ? "/projects/spring-boot-cover.jpg"
+          : repo.fullName.toLowerCase().includes("todo_app") || repo.fullName.toLowerCase().includes("todo-app")
+          ? "/projects/todo-app-cover.jpg"
+          : repo.fullName.toLowerCase().includes("my_portfoli") || repo.fullName.toLowerCase().includes("my-portfolio")
+          ? "/brand/project-blueprint.jpg"
+          : null),
       coverImageKind: cms?.coverImage ? undefined : (story?.coverImage ? 'concept' : undefined),
       coverImageAlt: cms?.coverImage ? `Cover image for ${cms.title || story?.title || repo.name}` : (story?.coverImage ? `Concept illustration of ${story.title}: ${story.goal}` : undefined),
       caseStudy: cms?.caseStudy?.length ? cms.caseStudy : (story?.sections ?? (repo.goal ? [{ heading: 'Project goal', body: repo.goal }] : [])),
