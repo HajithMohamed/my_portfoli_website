@@ -9,10 +9,6 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import gsap from "gsap";
 
-const WorkspaceScene = dynamic(() => import("@/components/command/workspace-scene"), {
-  ssr: false,
-});
-
 function BootStatusRow({
   label,
   value,
@@ -80,11 +76,7 @@ export function CommandDeck({
   const gridRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
 
-  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-
-  const device = isDesktop ? "laptop" : isTablet ? "tablet" : "phone";
-  const particleCount = isDesktop ? 60 : isTablet ? 30 : 15;
   const currentRepo = github.currentRepo ?? github.contributionData?.currentRepo ?? null;
 
   const githubLink =
@@ -272,28 +264,11 @@ export function CommandDeck({
       ref={containerRef}
       className="relative min-h-[90vh] flex items-center border-b border-cyan/15 overflow-hidden"
     >
-      {/* Background Effects with pointer parallax on grid only */}
+      {/* Background grid with pointer parallax */}
       <div
         ref={gridRef}
         className="absolute inset-0 bg-grid opacity-30 pointer-events-none will-change-transform"
       />
-      <div className="absolute left-1/4 top-1/4 w-[50vw] h-[50vw] bg-cyan/10 rounded-full blur-[120px] mix-blend-screen animate-orb pointer-events-none md:w-[40vw] md:h-[40vw]" />
-      <div
-        className="absolute right-1/4 bottom-1/4 w-[40vw] h-[40vw] bg-violet/10 rounded-full blur-[100px] mix-blend-screen animate-orb pointer-events-none md:w-[30vw] md:h-[30vw]"
-        style={{ animationDelay: "-10s" }}
-      />
-
-      {/* 3D backdrop */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[42vh] opacity-[0.25] md:inset-0 md:h-auto md:opacity-[0.3] lg:opacity-[0.35]"
-        aria-hidden
-      >
-        <WorkspaceScene
-          device={device}
-          particleCount={particleCount}
-          portraitUrl={profile.profileImageUrl ?? undefined}
-        />
-      </div>
 
       <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 pt-32 pb-16 md:pt-40 lg:pt-32">
         <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 items-center">
