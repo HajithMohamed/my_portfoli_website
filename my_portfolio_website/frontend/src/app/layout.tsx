@@ -6,7 +6,7 @@ import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { getSiteUrl } from "@/lib/site-url";
-import { GlobalHudBackdrop } from "@/components/shell/global-hud-backdrop";
+import { GlobalBackground } from "@/components/shell/global-background";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -50,22 +50,11 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className="relative min-h-full bg-background text-foreground">
-        {/* Global backdrop layers */}
-        <div className="pointer-events-none fixed inset-0 bg-grid opacity-70" aria-hidden />
-        <div className="pointer-events-none fixed inset-0 bg-scanlines" aria-hidden />
-        <div
-          className="pointer-events-none fixed inset-0 transition-all duration-700"
-          aria-hidden
-          style={{
-            background:
-              "radial-gradient(ellipse at 15% 5%, var(--radial-orb-1, rgba(92, 208, 255, 0.12)), transparent 50%), radial-gradient(ellipse at 85% 12%, var(--radial-orb-2, rgba(245, 158, 11, 0.08)), transparent 45%), radial-gradient(ellipse at 5% 55%, var(--radial-orb-3, rgba(168, 85, 247, 0.07)), transparent 45%), radial-gradient(ellipse at 95% 90%, var(--radial-orb-4, rgba(16, 185, 129, 0.05)), transparent 50%)",
-          }}
-        />
+      <body className="relative min-h-full bg-[#040710] text-foreground">
+        {/* ONE continuous, fixed, futuristic HUD background across the entire website */}
+        <GlobalBackground />
         <SmoothScrollProvider>
           <Providers>
-            {/* Global 3D Constellation Mesh & Theme-Reactive Glowing Orbs across all pages */}
-            <GlobalHudBackdrop />
             {children}
             <AdminAccess />
             <AnalyticsTracker />

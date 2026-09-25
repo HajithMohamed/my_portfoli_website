@@ -435,12 +435,16 @@ interface WorkspaceSceneProps {
   particleCount?: number;
   /** Operator portrait shown on the device screen. */
   portraitUrl?: string;
+  showNodes?: boolean;
+  showParticles?: boolean;
 }
 
 export default function WorkspaceScene({
   device = "laptop",
   particleCount = 60,
   portraitUrl,
+  showNodes = true,
+  showParticles = true,
 }: WorkspaceSceneProps) {
   const { theme } = useTheme();
   const palette = THEME_PALETTES[theme] ?? THEME_PALETTES.jarvis;
@@ -477,11 +481,15 @@ export default function WorkspaceScene({
         {device === "phone" && <Phone portraitUrl={portraitUrl} palette={palette} />}
       </Suspense>
 
-      <Connections nodes={nodes} accentColor={palette.accent} />
-      {nodes.map((n) => (
-        <Node key={n.label} label={n.label} pos={n.pos} palette={palette} />
-      ))}
-      <Particles count={particleCount} accentColor={palette.accent} />
+      {showNodes && (
+        <>
+          <Connections nodes={nodes} accentColor={palette.accent} />
+          {nodes.map((n) => (
+            <Node key={n.label} label={n.label} pos={n.pos} palette={palette} />
+          ))}
+        </>
+      )}
+      {showParticles && <Particles count={particleCount} accentColor={palette.accent} />}
     </Canvas>
   );
 }

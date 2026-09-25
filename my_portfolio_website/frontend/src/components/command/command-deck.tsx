@@ -284,7 +284,8 @@ export function CommandDeck({
       >
         <WorkspaceScene
           device={device}
-          particleCount={particleCount}
+          showNodes={false}
+          showParticles={false}
           portraitUrl={profile.profileImageUrl ?? undefined}
         />
       </div>

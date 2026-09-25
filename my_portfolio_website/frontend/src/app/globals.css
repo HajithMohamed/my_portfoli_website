@@ -13,37 +13,37 @@
   --font-space-grotesk: "Space Grotesk", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-jetbrains: "JetBrains Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
 
-  /* Theme Tokens — JARVIS (Default) */
-  --bg-base:        #030711;
-  --bg-surface:     #0a1628;
-  --bg-elevated:    #0f2038;
-  --bg-highest:     #142a48;
-  --border-subtle:  #1a3050;
-  --border-strong:  #2a4870;
-  --accent:         #5cd0ff;
-  --accent-hover:   #3a8fb8;
-  --accent-muted:   rgba(92, 208, 255, 0.14);
-  --accent-glow:    rgba(92, 208, 255, 0.28);
-  --text-primary:   #e2ecff;
-  --text-secondary: #7b9bc0;
-  --text-muted:     #4a6b8c;
-  --status-ok:      #34d399;
-  --status-warn:    #fbbf24;
-  --status-error:   #f87171;
-  --chart-1:        #5cd0ff;
-  --chart-2:        #a78bfa;
-  --chart-3:        #34d399;
-  --grid:           rgba(92, 208, 255, 0.04);
-  --hud:            rgba(10, 22, 40, 0.75);
+  /* Theme Tokens — JARVIS HUD Console */
+  --bg-base:        #040710;
+  --bg-surface:     #07101F;
+  --bg-elevated:    #0B1728;
+  --bg-highest:     #10243A;
+  --border-subtle:  #142840;
+  --border-strong:  #1E3D60;
+  --accent:         #5DBBFF;
+  --accent-hover:   #72D8FF;
+  --accent-muted:   rgba(93, 187, 255, 0.12);
+  --accent-glow:    rgba(93, 187, 255, 0.25);
+  --text-primary:   #E6F1FE;
+  --text-secondary: #7A9ABF;
+  --text-muted:     #4A6B8C;
+  --status-ok:      #34D399;
+  --status-warn:    #FBBF24;
+  --status-error:   #F87171;
+  --chart-1:        #5DBBFF;
+  --chart-2:        #72D8FF;
+  --chart-3:        #38BDF8;
+  --grid:           rgba(93, 187, 255, 0.03);
+  --hud:            rgba(7, 16, 31, 0.85);
 
-  /* Background lighting & orb tokens — Jarvis (Deep Dark Aesthetic) */
-  --radial-orb-1:   rgba(92, 208, 255, 0.08);
-  --radial-orb-2:   rgba(245, 158, 11, 0.05);
-  --radial-orb-3:   rgba(168, 85, 247, 0.04);
-  --radial-orb-4:   rgba(16, 185, 129, 0.03);
-  --orb-1:          rgba(92, 208, 255, 0.07);
-  --orb-2:          rgba(167, 139, 250, 0.05);
-  --orb-3:          rgba(245, 158, 11, 0.04);
+  /* Background lighting & orb tokens — Strictly restricted to #040710, #07101F, #10243A, #5DBBFF */
+  --radial-orb-1:   rgba(16, 36, 58, 0.40);
+  --radial-orb-2:   rgba(7, 16, 31, 0.60);
+  --radial-orb-3:   rgba(16, 36, 58, 0.35);
+  --radial-orb-4:   rgba(93, 187, 255, 0.035);
+  --orb-1:          rgba(93, 187, 255, 0.05);
+  --orb-2:          rgba(114, 216, 255, 0.04);
+  --orb-3:          rgba(16, 36, 58, 0.04);
 
   /* Semantic mappings to theme tokens */
   --background: var(--bg-base);
@@ -482,6 +482,31 @@
   66% { transform: translate(-20px, 20px) scale(0.95); }
 }
 
+@keyframes hud-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hud-spin-reverse-slow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes word-drift-slow-1 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(12px, -14px, 0); }
+}
+
+@keyframes word-drift-slow-2 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-10px, 12px, 0); }
+}
+
+@keyframes word-drift-slow-3 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(8px, 10px, 0); }
+}
+
 /* ─── Animation utilities ─── */
 @utility animate-pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
@@ -518,6 +543,26 @@
 
 @utility animate-orb {
   animation: orb-float 20s ease-in-out infinite;
+}
+
+@utility animate-hud-spin {
+  animation: hud-spin-slow 50s linear infinite;
+}
+
+@utility animate-hud-spin-reverse {
+  animation: hud-spin-reverse-slow 60s linear infinite;
+}
+
+@utility animate-word-drift-1 {
+  animation: word-drift-slow-1 42s ease-in-out infinite;
+}
+
+@utility animate-word-drift-2 {
+  animation: word-drift-slow-2 48s ease-in-out infinite;
+}
+
+@utility animate-word-drift-3 {
+  animation: word-drift-slow-3 36s ease-in-out infinite;
 }
 
 /* ─── Section divider ─── */
