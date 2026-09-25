@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -15,7 +15,6 @@ const NAV = [
   ["skills", "/#skills"],
   ["projects", "/projects"],
   ["certificates", "/certificates"],
-  ["request project", "/start-project"],
   ["comms", "/#comms"],
 ] as const;
 
@@ -83,18 +82,22 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-300",
           scrolled
-            ? "border-b border-cyan/15 bg-background/60 backdrop-blur-xl shadow-lg shadow-black/20"
-            : "bg-transparent border-transparent pt-2"
+            ? "border-b border-cyan/25 bg-background/90 backdrop-blur-2xl shadow-xl shadow-black/40 py-0"
+            : "border-b border-cyan/15 bg-background/80 backdrop-blur-xl shadow-md shadow-black/20 pt-1"
         )}
       >
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-4 font-mono">
+        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 font-mono">
           <Link href="/" className="group flex shrink-0 items-center gap-2 text-sm transition-transform hover:scale-105 active:scale-95">
             <span className="relative flex h-2 w-2 items-center justify-center">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-green opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-green"></span>
             </span>
             <span className="font-display text-base font-semibold text-foreground sm:text-lg">{PERSONAL_IDENTITY.name}</span>
-            <span className="text-[10px] text-cyan/60 hidden sm:inline-block">/ {VERSION}</span>
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-cyan/35 bg-cyan/10 px-2 py-0.5 text-[9px] uppercase tracking-widest text-cyan">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+              JARVIS HUD
+            </span>
+            <span className="text-[10px] text-cyan/60 hidden xl:inline-block">/ {VERSION}</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -110,13 +113,13 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
                 <Link
                   key={href}
                   href={href}
-                  className="relative px-4 py-2 text-muted-foreground transition-colors hover:text-cyan group"
+                  className="relative px-3 py-2 text-muted-foreground transition-colors hover:text-cyan group"
                 >
                   <span className="relative z-10">{label}</span>
                   {active && (
                     <motion.div
                       layoutId="activeNav"
-                      className="absolute inset-0 rounded-md bg-cyan/10 border border-cyan/20"
+                      className="absolute inset-0 rounded-md bg-cyan/10 border border-cyan/25"
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
                   )}
@@ -142,7 +145,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
                   key={href}
                   href={href}
                   className={cn(
-                    "relative px-2.5 py-2 transition-colors",
+                    "relative px-2 py-1.5 transition-colors",
                     active ? "text-cyan" : "text-muted-foreground hover:text-cyan"
                   )}
                 >
@@ -159,10 +162,22 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
             })}
           </nav>
 
-          {/* Desktop Diagnostic & Controls */}
-          <div className="hidden shrink-0 items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:flex">
+          {/* Request Project CTA & Controls */}
+          <div className="hidden shrink-0 items-center gap-2.5 text-[10px] uppercase tracking-[0.2em] md:flex">
+            <Link
+              href="/start-project"
+              className={cn(
+                "relative group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-wider font-semibold font-mono transition-all",
+                pathname === "/start-project"
+                  ? "bg-gradient-to-r from-cyan via-amber-400 to-signal-green text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] border border-amber-400"
+                  : "border border-amber-400/40 bg-gradient-to-r from-cyan/15 via-amber-400/10 to-purple-500/15 text-foreground hover:border-amber-400 hover:text-cyan hover:shadow-[0_0_16px_rgba(251,191,36,0.3)] active:scale-95"
+              )}
+            >
+              <Sparkles size={11} className={cn("transition-transform group-hover:rotate-12", pathname === "/start-project" ? "text-slate-950" : "text-amber-400 group-hover:text-cyan")} />
+              <span>Request Project</span>
+            </Link>
             <ThemeToggle />
-            <span className="hidden text-cyan/70 lg:inline-block" title={location}>{PERSONAL_IDENTITY.shortLocation}</span>
+            <span className="hidden text-cyan/70 xl:inline-block" title={location}>{PERSONAL_IDENTITY.shortLocation}</span>
             <span className="font-semibold tabular-nums text-foreground bg-surface-2 px-2 py-1 rounded border border-cyan/10">
               {clock ? `${clock} LK` : "--:--:-- LK"}
             </span>
@@ -284,6 +299,23 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
                     </motion.div>
                   );
                 })}
+
+                {/* Request Project CTA button in mobile menu */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.3 }}
+                  className="pt-4 mt-2 border-t border-cyan/15"
+                >
+                  <Link
+                    href="/start-project"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan via-amber-400 to-signal-green text-slate-950 font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(0,240,255,0.4)] active:scale-95 transition-all"
+                  >
+                    <Sparkles size={14} className="text-slate-950" />
+                    <span>Request Project</span>
+                  </Link>
+                </motion.div>
               </nav>
 
               {/* Drawer Footer */}

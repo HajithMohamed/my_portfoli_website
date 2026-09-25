@@ -58,7 +58,7 @@ export default function RootLayout({
           aria-hidden
           style={{
             background:
-              "radial-gradient(ellipse at 20% 0%, var(--accent-muted), transparent 55%), radial-gradient(ellipse at 100% 100%, color-mix(in oklab, var(--surface-2) 40%, transparent), transparent 60%)",
+              "radial-gradient(ellipse at 15% 5%, rgba(0, 240, 255, 0.09), transparent 50%), radial-gradient(ellipse at 85% 12%, rgba(245, 158, 11, 0.06), transparent 45%), radial-gradient(ellipse at 5% 55%, rgba(168, 85, 247, 0.05), transparent 45%), radial-gradient(ellipse at 95% 90%, rgba(16, 185, 129, 0.05), transparent 50%)",
           }}
         />
         <SmoothScrollProvider>

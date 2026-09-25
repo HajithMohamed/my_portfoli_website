@@ -85,20 +85,20 @@ function OperatorPortrait({
 
 /** Floating tech nodes — the operator's actual day-to-day stack. */
 const NODES_DESKTOP = [
-  { label: "React", pos: [2.4, 1.2, 0.5] as const },
-  { label: "NestJS", pos: [-2.6, 0.8, -0.4] as const },
-  { label: "Postgres", pos: [2.2, -1.1, -0.6] as const },
-  { label: "Docker", pos: [-2.2, -1.3, 0.3] as const },
-  { label: "Next.js", pos: [0.2, 1.9, -0.8] as const },
-  { label: "GitHub", pos: [0.1, -1.9, 0.5] as const },
+  { label: "React", pos: [2.3, 0.7, 0.4] as const },
+  { label: "NestJS", pos: [-2.4, 0.5, -0.4] as const },
+  { label: "Postgres", pos: [2.1, -1.0, -0.5] as const },
+  { label: "Docker", pos: [-2.1, -1.1, 0.3] as const },
+  { label: "Next.js", pos: [0.2, 0.85, -0.7] as const },
+  { label: "GitHub", pos: [0.1, -1.7, 0.4] as const },
 ];
 
 const NODES_TABLET = [
-  { label: "React", pos: [2.0, 1.0, 0.4] as const },
-  { label: "NestJS", pos: [-2.0, 0.6, -0.3] as const },
-  { label: "Postgres", pos: [1.8, -0.9, -0.5] as const },
-  { label: "Next.js", pos: [-1.8, -1.0, 0.2] as const },
-  { label: "GitHub", pos: [0.1, -1.5, 0.4] as const },
+  { label: "React", pos: [1.9, 0.6, 0.4] as const },
+  { label: "NestJS", pos: [-1.9, 0.4, -0.3] as const },
+  { label: "Postgres", pos: [1.7, -0.8, -0.5] as const },
+  { label: "Next.js", pos: [-1.6, -0.9, 0.2] as const },
+  { label: "GitHub", pos: [0.1, -1.4, 0.4] as const },
 ];
 
 const NODES_MOBILE = [
