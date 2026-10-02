@@ -34,8 +34,32 @@ type Release = {
   tag_name: string;
 };
 
+function getGithubAuthToken(): string | undefined {
+  const envToken = process.env.GITHUB_TOKEN?.trim();
+  if (envToken) return envToken;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { execSync } = require('node:child_process');
+    const output = execSync('git credential fill', {
+      input: 'protocol=https\nhost=github.com\n',
+      encoding: 'utf-8',
+      timeout: 2000,
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    const match = output.match(/password=([^\r\n]+)/);
+    if (match && match[1]) {
+      const token = match[1].trim();
+      process.env.GITHUB_TOKEN = token;
+      return token;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
 async function githubFetch<T>(path: string): Promise<T | null> {
-  const token = process.env.GITHUB_TOKEN?.trim();
+  const token = getGithubAuthToken();
   const response = await fetch(`https://api.github.com${path}`, {
     headers: {
       Accept: 'application/vnd.github+json',
@@ -52,7 +76,7 @@ async function githubFetch<T>(path: string): Promise<T | null> {
 
 async function loadPublicGithub(): Promise<GithubSummary> {
   const all: Repo[] = [];
-  const token = process.env.GITHUB_TOKEN?.trim();
+  const token = getGithubAuthToken();
 
   // If token is present, fetch owner + collaborator + private repos
   if (token) {

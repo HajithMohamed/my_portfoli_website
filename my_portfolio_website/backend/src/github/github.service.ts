@@ -123,8 +123,27 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
   private getGithubToken(): string | undefined {
     if (this.tokenInvalid) return undefined;
-    const token = this.configService.get<string>('GITHUB_TOKEN')?.trim();
-    return token || undefined;
+    const token =
+      this.configService.get<string>('GITHUB_TOKEN')?.trim() ||
+      process.env.GITHUB_TOKEN?.trim();
+    if (token) return token;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { execSync } = require('node:child_process');
+      const output = execSync('git credential fill', {
+        input: 'protocol=https\nhost=github.com\n',
+        encoding: 'utf-8',
+        timeout: 2000,
+        stdio: ['pipe', 'pipe', 'ignore'],
+      });
+      const match = output.match(/password=([^\r\n]+)/);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    } catch {
+      // ignore
+    }
+    return undefined;
   }
 
   // ---- scheduling ----------------------------------------------------------

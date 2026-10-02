@@ -1,12 +1,23 @@
 import { spawn } from "node:child_process";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const websiteRoot = resolve(__dirname, "..");
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const children = ["backend", "frontend"].map((workspace) =>
-  spawn(npm, ["run", "dev", "--workspace", workspace], {
+
+const children = [
+  spawn(npm, ["run", "start:dev"], {
+    cwd: resolve(websiteRoot, "backend"),
     stdio: "inherit",
     shell: process.platform === "win32",
   }),
-);
+  spawn(npm, ["run", "dev"], {
+    cwd: resolve(websiteRoot, "frontend"),
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  }),
+];
 
 let shuttingDown = false;
 function shutdown(signal = "SIGTERM") {

@@ -61,7 +61,16 @@ function usableGithub(summary: GithubSummary): boolean {
 
 function inferCategory(techName: string): string {
   const lower = techName.toLowerCase();
-  if (['javascript', 'typescript', 'java', 'php', 'python', 'html', 'css', 'sql', 'c', 'c++', 'go', 'rust', 'shell', 'bash'].includes(lower)) {
+  if (['flutter', 'dart', 'react native', 'android', 'ios', 'swift', 'kotlin'].includes(lower)) {
+    return 'Mobile';
+  }
+  if (['machine learning', 'deep learning', 'ai', 'ml', 'pytorch', 'tensorflow', 'nlp', 'llm', 'langchain', 'computer vision', 'openai', 'scikit-learn', 'artificial intelligence'].includes(lower)) {
+    return 'AI/ML';
+  }
+  if (['data science', 'pandas', 'numpy', 'matplotlib', 'seaborn', 'data analysis', 'statistics', 'analytics', 'big data'].includes(lower)) {
+    return 'Data Science';
+  }
+  if (['javascript', 'typescript', 'java', 'php', 'python', 'html', 'css', 'sql', 'c', 'c++', 'c#', 'go', 'rust', 'shell', 'bash'].includes(lower)) {
     return 'Languages';
   }
   if (['react', 'next.js', 'nextjs', 'redux', 'redux toolkit', 'vue', 'angular', 'tailwind css', 'tailwindcss', 'bootstrap', 'alpine.js', 'jquery', 'html5', 'css3'].includes(lower)) {
@@ -70,7 +79,7 @@ function inferCategory(techName: string): string {
   if (['node.js', 'nodejs', 'express', 'nestjs', 'spring boot', 'spring', 'django', 'fastapi', 'rest api', 'graphql', 'socket.io', 'microservices'].includes(lower)) {
     return 'Backend';
   }
-  if (['mongodb', 'mysql', 'postgresql', 'postgres', 'redis', 'prisma', 'docker', 'kubernetes', 'aws', 'supabase', 'firebase'].includes(lower)) {
+  if (['mongodb', 'mysql', 'postgresql', 'postgres', 'redis', 'prisma', 'supabase', 'firebase'].includes(lower)) {
     return 'Database';
   }
   return 'Tools';

@@ -4,25 +4,32 @@ import { projectsFromGithub, reviewedBlogPosts } from './portfolio-mapping';
 
 export const fallbackProfile: Profile = {
   name: PERSONAL_IDENTITY.name, title: PERSONAL_IDENTITY.title,
-  tagline: 'Web applications, practical systems, and the work behind them',
+  tagline: 'Full Stack Web Platforms • Flutter Mobile Apps • AI/ML Systems • Data Science',
   availabilityStatus: 'Available for internships and software engineering opportunities',
   bio: PERSONAL_IDENTITY.bio,
-  philosophy: 'I build tools for real workflows and document my goals, decisions, and progress through my projects.',
+  philosophy: 'I build high-performance web platforms, cross-platform mobile apps, and intelligent data systems, documenting every breakthrough on GitHub.',
   location: PERSONAL_IDENTITY.location, email: '',
-  currentlyExploring: ['Full Stack Development', 'System Design', 'Docker'],
+  currentlyExploring: ['Web Development', 'Mobile App Dev (Flutter)', 'AI / Machine Learning', 'Data Science & Analytics', 'System Design'],
   timeline: [{label:'Education',value:PERSONAL_IDENTITY.education}],
   socialLinks: [{label:'GitHub',url:PERSONAL_IDENTITY.githubUrl,icon:'github'}],
 };
 
 export const fallbackSkills: Skill[] = [
-  'React|Frontend|92', 'Next.js|Frontend|90', 'TypeScript|Frontend|88',
-  'Redux Toolkit|Frontend|82', 'Tailwind CSS|Frontend|90', 'Node.js|Backend|88',
-  'Express|Backend|84', 'NestJS|Backend|82', 'PHP|Backend|74', 'MongoDB|Database|82',
-  'PostgreSQL|Database|84', 'MySQL|Database|78', 'Git|Tools|88', 'GitHub|Tools|88',
-  'Docker|Tools|72', 'Postman|Tools|86', 'Figma|Tools|74',
+  // Web Development
+  'React|Frontend|94', 'Next.js|Frontend|92', 'TypeScript|Frontend|90',
+  'Tailwind CSS|Frontend|92', 'Redux Toolkit|Frontend|84',
+  'Node.js|Backend|88', 'NestJS|Backend|84', 'Express|Backend|86',
+  // Mobile App Development
+  'Flutter|Mobile|90', 'Dart|Mobile|88', 'React Native|Mobile|82',
+  // AI & Machine Learning
+  'Python|AI/ML|92', 'Machine Learning|AI/ML|84', 'PyTorch|AI/ML|80', 'AI Integration|AI/ML|86',
+  // Data Science
+  'Data Science|Data Science|86', 'Pandas & NumPy|Data Science|85', 'PostgreSQL|Database|86', 'MongoDB|Database|84',
+  // Tools & Cloud
+  'Docker|Tools|80', 'Git|Tools|90', 'GitHub|Tools|92', 'Postman|Tools|88', 'Figma|Tools|78',
 ].map((item,index) => {
   const [name,category,proficiency] = item.split('|');
-  return {id:category+'-'+name,name,category,proficiency:Number(proficiency),featured:index<8,order:index};
+  return {id:category+'-'+name,name,category,proficiency:Number(proficiency),featured:index<10,order:index};
 });
 
 // The UI renders unavailable statistics as a dash, rather than pretending zero is live data.
