@@ -89,6 +89,9 @@ export type CurrentRepoStatus = {
   openIssues: number;
   visibility: string;
   isArchived: boolean;
+  isPrivate?: boolean;
+  isCollaborator?: boolean;
+  ownerLogin?: string;
   latestCommit: {
     sha: string;
     url: string;
@@ -218,19 +221,30 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     const repos = Array.isArray(recentRepos)
       ? recentRepos.filter(isRecord)
       : [];
-    const selected = repos
-      .filter(
-        (repo) =>
-          !repo.isArchived &&
-          !repo.fork &&
-          repo.private !== true &&
-          (!repo.visibility || repo.visibility === 'public'),
-      )
-      .sort(
-        (a, b) =>
-          timestamp(stringValue(b.pushedAt) ?? stringValue(b.updatedAt)) -
-          timestamp(stringValue(a.pushedAt) ?? stringValue(a.updatedAt)),
-      )[0];
+    const username = this.githubUsername();
+    // Prioritize non-archived code projects over the profile README stub HajithMohamed/HajithMohamed
+    const selected =
+      repos
+        .filter(
+          (repo) =>
+            !repo.isArchived &&
+            !repo.fork &&
+            stringValue(repo.name)?.toLowerCase() !== username.toLowerCase() &&
+            stringValue(repo.fullName)?.toLowerCase() !==
+              `${username}/${username}`.toLowerCase(),
+        )
+        .sort(
+          (a, b) =>
+            timestamp(stringValue(b.pushedAt) ?? stringValue(b.updatedAt)) -
+            timestamp(stringValue(a.pushedAt) ?? stringValue(a.updatedAt)),
+        )[0] ??
+      repos
+        .filter((repo) => !repo.isArchived && !repo.fork)
+        .sort(
+          (a, b) =>
+            timestamp(stringValue(b.pushedAt) ?? stringValue(b.updatedAt)) -
+            timestamp(stringValue(a.pushedAt) ?? stringValue(a.updatedAt)),
+        )[0];
 
     if (!selected) {
       return null;
@@ -238,10 +252,14 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
     const name = stringValue(selected.name) ?? 'repository';
     const fullName =
-      stringValue(selected.fullName) ?? `${this.githubUsername()}/${name}`;
+      stringValue(selected.fullName) ?? `${username}/${name}`;
     const activity = this.repoActivity(
       stringValue(selected.pushedAt) ?? stringValue(selected.updatedAt),
     );
+    const owner = fullName.split('/')[0] || username;
+    const isOwner = owner.toLowerCase() === username.toLowerCase();
+    const isPrivate = Boolean(selected.isPrivate ?? selected.private);
+    const isCollaborator = Boolean(selected.isCollaborator) || !isOwner;
 
     return {
       name,
@@ -267,8 +285,11 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       stars: numberValue(selected.stars),
       forks: numberValue(selected.forks),
       openIssues: 0,
-      visibility: 'public',
+      visibility: isPrivate ? 'private' : 'public',
       isArchived: false,
+      isPrivate,
+      isCollaborator,
+      ownerLogin: owner,
       latestCommit: null,
       activityStatus: activity.activityStatus,
       statusLabel: activity.statusLabel,
@@ -295,10 +316,10 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       const username = this.githubUsername();
       let repos: GithubRepo[];
       try {
-        repos = await this.fetchPublicRepositories(username);
+        repos = await this.fetchRepositories(username);
       } catch (error) {
         this.logger.error(
-          `Failed to fetch public repos for ${username}: ${error instanceof Error ? error.message : 'unknown'}`,
+          `Failed to fetch repos for ${username}: ${error instanceof Error ? error.message : 'unknown'}`,
         );
         if (previous) {
           this.logger.warn(
@@ -361,6 +382,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       }>(`https://api.github.com/users/${username}`).catch(() => null);
 
       const technologies = this.detectTechnologies(languages, sourceRepos);
+      await this.syncSkillsFromGithub(languages, sourceRepos);
 
       // Public API has a small hourly allowance. Preserve complete repository
       // counts even when optional README/release enrichment is rate limited.
@@ -552,7 +574,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   private async resolveCurrentRepoStatus(
     sourceRepos: GithubRepo[],
   ): Promise<CurrentRepoStatus | null> {
-    const repo = mostRecentlyPushed(sourceRepos);
+    const repo = mostRecentlyPushed(sourceRepos, this.githubUsername());
     if (!repo) {
       return null;
     }
@@ -564,6 +586,12 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     repo: GithubRepo,
   ): Promise<CurrentRepoStatus> {
     const defaultBranch = repo.default_branch ?? 'main';
+    const username = this.githubUsername();
+    const owner = repo.full_name.split('/')[0] || username;
+    const isOwner = owner.toLowerCase() === username.toLowerCase();
+    const isPrivate = Boolean(repo.private);
+    const isCollaborator = Boolean(repo.isCollaborator || !isOwner);
+
     const [languageBytes, latestCommit] = await Promise.all([
       this.fetchJson<Record<string, number>>(
         `https://api.github.com/repos/${repo.full_name}/languages`,
@@ -587,8 +615,11 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       stars: repo.stargazers_count ?? 0,
       forks: repo.forks_count ?? 0,
       openIssues: repo.open_issues_count ?? 0,
-      visibility: 'public',
+      visibility: isPrivate ? 'private' : 'public',
       isArchived: Boolean(repo.archived),
+      isPrivate,
+      isCollaborator,
+      ownerLogin: owner,
       latestCommit,
       activityStatus: activity.activityStatus,
       statusLabel: activity.statusLabel,
@@ -816,10 +847,15 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
           : undefined,
       ),
     );
+    const currentUsername = this.githubUsername().toLowerCase();
     const newRepos = recentRepos
       .filter(
         (repo) =>
-          typeof repo.name === 'string' && !previousNames.has(repo.name),
+          typeof repo.name === 'string' &&
+          repo.name.toLowerCase() !== currentUsername &&
+          repo.fullName.toLowerCase() !==
+            `${currentUsername}/${currentUsername}` &&
+          !previousNames.has(repo.name),
       )
       .filter((repo) => !existingNames.has(repo.fullName.toLowerCase()));
     if (!newRepos.length) {
@@ -851,19 +887,140 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     });
   }
 
+  /** Auto-sync detected languages and technologies into Prisma Skill database. */
+  private async syncSkillsFromGithub(
+    languages: Record<string, number>,
+    repos: GithubRepo[],
+  ) {
+    try {
+      const existingSkills = await this.prisma.skill.findMany();
+      const existingMap = new Map(
+        existingSkills.map((s) => [s.name.toLowerCase(), s]),
+      );
+
+      const categoryMap: Record<string, string> = {
+        typescript: 'Languages',
+        javascript: 'Languages',
+        python: 'Languages',
+        php: 'Languages',
+        go: 'Languages',
+        rust: 'Languages',
+        java: 'Languages',
+        c: 'Languages',
+        'c++': 'Languages',
+        'c#': 'Languages',
+        html: 'Frontend',
+        css: 'Frontend',
+        scss: 'Frontend',
+        react: 'Frontend',
+        'next.js': 'Frontend',
+        nextjs: 'Frontend',
+        vue: 'Frontend',
+        angular: 'Frontend',
+        'tailwind css': 'Frontend',
+        tailwindcss: 'Frontend',
+        'node.js': 'Backend',
+        nodejs: 'Backend',
+        express: 'Backend',
+        nestjs: 'Backend',
+        mongodb: 'Database',
+        postgresql: 'Database',
+        mysql: 'Database',
+        redis: 'Database',
+        docker: 'Tools',
+        git: 'Tools',
+        github: 'Tools',
+        postman: 'Tools',
+        figma: 'Tools',
+      };
+
+      const totalBytes = Object.values(languages).reduce((sum, b) => sum + b, 0);
+
+      for (const [langName, bytes] of Object.entries(languages)) {
+        const lower = langName.toLowerCase();
+        const category = categoryMap[lower] || 'Languages';
+        const ratio = totalBytes > 0 ? bytes / totalBytes : 0.1;
+        const calculatedProficiency = Math.min(
+          95,
+          Math.max(72, Math.round(70 + ratio * 40)),
+        );
+
+        const existing = existingMap.get(lower);
+        if (existing) {
+          if (existing.proficiency < calculatedProficiency) {
+            await this.prisma.skill.update({
+              where: { id: existing.id },
+              data: { proficiency: calculatedProficiency },
+            });
+          }
+        } else {
+          await this.prisma.skill.create({
+            data: {
+              name: langName,
+              category,
+              proficiency: calculatedProficiency,
+              featured: ratio > 0.08,
+              order: existingSkills.length + 1,
+            },
+          });
+        }
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Failed to auto-sync skills from GitHub: ${err instanceof Error ? err.message : 'unknown'}`,
+      );
+    }
+  }
+
   // ---- http helpers --------------------------------------------------------
 
-  private async fetchPublicRepositories(
-    username: string,
-  ): Promise<GithubRepo[]> {
+  private async fetchRepositories(username: string): Promise<GithubRepo[]> {
+    const token = this.getGithubToken();
     const repos: GithubRepo[] = [];
-    for (let page = 1; ; page += 1) {
-      const batch = await this.fetchJson<GithubRepo[]>(
-        `https://api.github.com/users/${encodeURIComponent(username)}/repos?type=owner&sort=pushed&per_page=100&page=${page}`,
-      );
-      repos.push(...publicOwnerRepos(batch, username));
-      if (batch.length < 100) break;
+
+    if (token) {
+      try {
+        for (let page = 1; ; page += 1) {
+          const batch = await this.fetchJson<GithubRepo[]>(
+            `https://api.github.com/user/repos?affiliation=owner,collaborator,organization_member&visibility=all&sort=pushed&per_page=100&page=${page}`,
+          );
+          if (!Array.isArray(batch)) break;
+          for (const r of batch) {
+            const owner = r.full_name.split('/')[0]?.toLowerCase() || '';
+            const isOwner = owner === username.toLowerCase();
+            if (!isOwner) {
+              r.isCollaborator = true;
+              r.ownerLogin = r.full_name.split('/')[0];
+            }
+            repos.push(r);
+          }
+          if (batch.length < 100) break;
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Failed authenticated user repos fetch: ${err instanceof Error ? err.message : 'unknown'}`,
+        );
+      }
     }
+
+    if (repos.length === 0) {
+      for (let page = 1; ; page += 1) {
+        const batch = await this.fetchJson<GithubRepo[]>(
+          `https://api.github.com/users/${encodeURIComponent(username)}/repos?type=all&sort=pushed&per_page=100&page=${page}`,
+        );
+        if (!Array.isArray(batch)) break;
+        for (const r of batch) {
+          const owner = r.full_name.split('/')[0]?.toLowerCase() || '';
+          if (owner !== username.toLowerCase()) {
+            r.isCollaborator = true;
+            r.ownerLogin = r.full_name.split('/')[0];
+          }
+          repos.push(r);
+        }
+        if (batch.length < 100) break;
+      }
+    }
+
     return [
       ...new Map(
         repos.map((repo) => [repo.full_name.toLowerCase(), repo]),

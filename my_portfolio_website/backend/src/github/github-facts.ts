@@ -17,6 +17,8 @@ export type GithubRepo = {
   visibility?: string;
   archived?: boolean;
   private?: boolean;
+  isCollaborator?: boolean;
+  ownerLogin?: string;
 };
 
 export type GithubRelease = {
@@ -42,6 +44,9 @@ export type RepositoryInsight = {
   stars: number;
   forks: number;
   isArchived: boolean;
+  isPrivate?: boolean;
+  isCollaborator?: boolean;
+  ownerLogin?: string;
   isHosted: boolean;
   isProductionReady: boolean;
   readinessChecked: boolean;
@@ -68,24 +73,34 @@ export function publicOwnerRepos(
 ): GithubRepo[] {
   return repos.filter(
     (repo) =>
-      repo.private !== true &&
       !repo.fork &&
-      (!repo.visibility || repo.visibility === 'public') &&
       repo.full_name.split('/')[0]?.toLowerCase() === username.toLowerCase(),
   );
 }
 
-export function mostRecentlyPushed(repos: GithubRepo[]): GithubRepo | null {
+export function mostRecentlyPushed(
+  repos: GithubRepo[],
+  username = 'HajithMohamed',
+): GithubRepo | null {
+  // First attempt: prioritize active software code projects (skip profile README like HajithMohamed/HajithMohamed)
+  const candidate = repos
+    .filter(
+      (repo) =>
+        !repo.fork &&
+        !repo.archived &&
+        repo.name.toLowerCase() !== username.toLowerCase() &&
+        repo.full_name.toLowerCase() !== `${username}/${username}`.toLowerCase(),
+    )
+    .sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at))[0];
+
+  if (candidate) return candidate;
+
+  // Fallback to any non-fork non-archived repo, then any repo
   return (
     repos
-      .filter(
-        (repo) =>
-          !repo.fork &&
-          !repo.archived &&
-          repo.private !== true &&
-          (!repo.visibility || repo.visibility === 'public'),
-      )
+      .filter((repo) => !repo.fork && !repo.archived)
       .sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at))[0] ??
+    repos.sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at))[0] ??
     null
   );
 }
@@ -170,6 +185,9 @@ export function repositoryInsight(
     stars: repo.stargazers_count ?? 0,
     forks: repo.forks_count ?? 0,
     isArchived: Boolean(repo.archived),
+    isPrivate: Boolean(repo.private),
+    isCollaborator: Boolean(repo.isCollaborator),
+    ownerLogin: repo.ownerLogin ?? repo.full_name.split('/')[0],
     isHosted: Boolean(homepage),
     isProductionReady: !repo.archived && readinessEvidence.length > 0,
     readinessChecked: readinessChecked || explicitReady,
@@ -189,8 +207,13 @@ export function repositoryStats(
     const time = timestamp(value);
     return time > 0 && time <= now && now - time <= 30 * 86_400_000;
   };
+  const privateCount = repos.filter((r) => r.isPrivate).length;
+  const collabCount = repos.filter((r) => r.isCollaborator).length;
   return {
-    publicRepositories: publicCount,
+    publicRepositories: repos.filter((r) => !r.isPrivate).length,
+    privateRepositories: privateCount,
+    collaborationRepositories: collabCount,
+    totalCollaborations: collabCount,
     createdRepositories: repos.length,
     activeRepositories: repos.filter(
       (repo) => !repo.isArchived && recent(repo.pushedAt),

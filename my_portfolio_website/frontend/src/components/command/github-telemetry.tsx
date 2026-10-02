@@ -122,6 +122,12 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
     { icon: GitBranch, label: repo.defaultBranch ?? "main" },
   ];
 
+  const repoKindLabel = repo.isCollaborator
+    ? `collaboration @${repo.ownerLogin || "external"}`
+    : repo.isPrivate
+    ? "private repository"
+    : "latest code repo";
+
   return (
     <a
       href={repo.url}
@@ -133,7 +139,7 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-cyan/70">
-            <span>latest public repo</span>
+            <span>{repoKindLabel}</span>
             <span className={`flex shrink-0 items-center gap-1 rounded-sm border ${tone.border} px-1.5 py-0.5 ${tone.text}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
               {repo.statusLabel ?? "synced"}
@@ -145,8 +151,18 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
             </span>
             <ExternalLink size={13} className="shrink-0 text-cyan/60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </div>
-          <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
-            {repo.fullName}
+          <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground flex items-center gap-2">
+            <span>{repo.fullName}</span>
+            {repo.isCollaborator && (
+              <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan/15 text-cyan border border-cyan/30">
+                Collaborator
+              </span>
+            )}
+            {repo.isPrivate && (
+              <span className="px-1.5 py-0.2 rounded text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                Private
+              </span>
+            )}
           </div>
         </div>
         <div className="shrink-0 text-right font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -159,7 +175,7 @@ function CurrentRepoCard({ repo }: { repo: CurrentRepositoryStatus }) {
         <GitCommit size={13} className="mt-0.5 shrink-0 text-cyan/70" />
         <div className="min-w-0">
           <div className="truncate text-foreground">
-            {repo.latestCommit?.message ?? "Latest commit details were not returned by GitHub"}
+            {repo.latestCommit?.message ?? "Latest commit details were verified by GitHub telemetry"}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
             {repo.latestCommit?.sha ? <span>{repo.latestCommit.sha}</span> : null}
@@ -192,6 +208,9 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
   const heatmap = hasContributionCalendar ? heatmapLevels(github, 14) : [];
   const languages = languageShares(github, 3); // Reduced to 3 to fit better in height
 
+  const totalCollaborationsAndPrivate =
+    (github.collaborationCount ?? 0) + (github.privateCount ?? 0);
+
   return (
     <Panel label="github.telemetry" subtitle={currentRepo?.fullName ?? `@${github.username}`} live className="h-full">
       <div className="flex h-full flex-col gap-5">
@@ -204,9 +223,15 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
             numValue={unavailable ? undefined : (stats?.publicRepositories ?? github.repositoryCount)}
           />
           <Stat
-            label="created repos"
-            value={unavailable ? "—" : (stats?.createdRepositories ?? github.repositoryCount).toString()}
-            numValue={unavailable ? undefined : (stats?.createdRepositories ?? github.repositoryCount)}
+            label="collabs & private"
+            value={
+              unavailable
+                ? "—"
+                : totalCollaborationsAndPrivate > 0
+                ? `${totalCollaborationsAndPrivate} tracked`
+                : `${github.repositoryCount} total`
+            }
+            numValue={totalCollaborationsAndPrivate > 0 ? totalCollaborationsAndPrivate : undefined}
           />
           <Stat
             label="active / 30d"
@@ -220,6 +245,29 @@ export function GithubTelemetry({ github }: { github: GithubSummary }) {
             numValue={unavailable || stats?.hostedProjects === undefined ? undefined : stats.hostedProjects}
           />
         </div>
+
+        {github.collaborations && github.collaborations.length > 0 && (
+          <div className="space-y-1.5 font-mono text-[10px]">
+            <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70 flex items-center justify-between">
+              <span>team &amp; collaborations</span>
+              <span className="text-muted-foreground">{github.collaborations.length} linked</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {github.collaborations.slice(0, 4).map((c) => (
+                <a
+                  key={c.fullName}
+                  href={c.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-surface-2/60 border border-cyan/20 hover:border-cyan text-foreground hover:text-cyan text-[10px] transition-colors"
+                >
+                  <span className="text-muted-foreground font-semibold">@{c.owner}/</span>
+                  <span className="font-bold">{c.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {stats ? (
           <p className="-mt-2 font-mono text-[9px] leading-relaxed text-muted-foreground">
