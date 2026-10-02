@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { PersistentDeviceScene } from "@/components/shell/persistent-device-scene";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
@@ -50,6 +51,16 @@ function useProfilePortrait() {
  * root layout, so page scrolling and App Router navigation never restart it.
  */
 export function GlobalSystemBackground() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
+  return <PublicSystemBackground />;
+}
+
+function PublicSystemBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const prefersReducedMotion = useReducedMotion();

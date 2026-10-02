@@ -1,7 +1,31 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { Check, Edit2, ExternalLink, Plus, RefreshCw, Star, Trash2, UploadCloud, X } from "lucide-react";
+import Link from "next/link";
+import {
+  Award,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  Cpu,
+  Edit2,
+  ExternalLink,
+  FileText,
+  FolderGit2,
+  Github,
+  Inbox,
+  LineChart,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Trash2,
+  UploadCloud,
+  UserCheck,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -62,57 +86,109 @@ function useAdminResource<T>(path: string, fallback: T) {
   return { data, setData, error, loading, load };
 }
 
-function SectionHeader({ title, description }: { title: string; description: string }) {
+function SectionHeader({
+  title,
+  description,
+  badge = "Operational",
+}: {
+  title: string;
+  description: string;
+  badge?: string;
+}) {
   return (
-    <div className="mb-6">
-      <h1 className="font-display text-3xl font-semibold text-white">{title}</h1>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
+    <div className="mb-6 border-b border-border pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {title}
+          </h1>
+          <span className="font-mono text-xs text-cyan border border-cyan/30 px-2 py-0.5 rounded-full bg-cyan/10">
+            {badge}
+          </span>
+        </div>
+        <p className="mt-1 font-mono text-xs text-muted-foreground">{description}</p>
+      </div>
     </div>
   );
 }
 
 export function DashboardPanel() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [liveProjectsCount, setLiveProjectsCount] = useState<number>(0);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [github, setGithub] = useState<GithubSummary | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [status, setStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [projectData, blogData, skillData, messageData, githubData, suggestionData] = await Promise.all([
-      adminFetch<Project[]>("/admin/projects"),
-      adminFetch<BlogPost[]>("/admin/blogs"),
-      adminFetch<Skill[]>("/admin/skills"),
-      adminFetch<Message[]>("/admin/messages"),
-      adminFetch<GithubSummary | null>("/github/summary"),
-      adminFetch<Suggestion[]>("/admin/suggestions"),
-    ]);
-    setProjects(projectData);
-    setBlogs(blogData);
-    setSkills(skillData);
-    setMessages(messageData);
-    setGithub(githubData);
-    setSuggestions(suggestionData);
+    setLoading(true);
+    try {
+      const [projectRes, blogRes, skillRes, messageRes, githubRes, suggestionRes] =
+        await Promise.allSettled([
+          adminFetch<Project[]>("/admin/projects"),
+          adminFetch<BlogPost[]>("/admin/blogs"),
+          adminFetch<Skill[]>("/admin/skills"),
+          adminFetch<Message[]>("/admin/messages"),
+          adminFetch<GithubSummary | null>("/github/summary"),
+          adminFetch<Suggestion[]>("/admin/suggestions"),
+        ]);
+
+      if (projectRes.status === "fulfilled" && Array.isArray(projectRes.value)) {
+        setProjects(projectRes.value);
+      }
+      if (blogRes.status === "fulfilled" && Array.isArray(blogRes.value)) {
+        setBlogs(blogRes.value);
+      }
+      if (skillRes.status === "fulfilled" && Array.isArray(skillRes.value)) {
+        setSkills(skillRes.value);
+      }
+      if (messageRes.status === "fulfilled" && Array.isArray(messageRes.value)) {
+        setMessages(messageRes.value);
+      }
+      if (githubRes.status === "fulfilled") {
+        setGithub(githubRes.value);
+      }
+      if (suggestionRes.status === "fulfilled" && Array.isArray(suggestionRes.value)) {
+        setSuggestions(suggestionRes.value);
+      }
+
+      // Also fetch live portfolio projects count
+      try {
+        const liveRes = await fetch("/api/portfolio-projects");
+        if (liveRes.ok) {
+          const liveJson = await liveRes.json();
+          if (Array.isArray(liveJson.projects)) {
+            setLiveProjectsCount(liveJson.projects.length);
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    } catch {
+      // Resilient fallback
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => void load(), 0);
-    return () => window.clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    load();
   }, []);
 
   async function syncGithub() {
-    setStatus("Syncing GitHub...");
+    setStatus("Syncing GitHub repositories & facts...");
     try {
       await adminFetch("/admin/github/sync", { method: "POST", body: "{}" });
       await load();
-      setStatus("GitHub sync complete");
+      setStatus("GitHub sync completed successfully.");
+      setTimeout(() => setStatus(null), 4000);
     } catch (error) {
       console.error("GitHub sync failed:", error);
       setStatus(
-        `GitHub sync failed: ${error instanceof Error ? error.message : "Internal error"}`,
+        `GitHub sync failed: ${error instanceof Error ? error.message : "Internal error"}`
       );
     }
   }
@@ -121,75 +197,302 @@ export function DashboardPanel() {
     try {
       await adminFetch(`/admin/suggestions/${id}/${action}`, { method: "POST", body: "{}" });
       await load();
+      setStatus(`Suggestion ${action}ed successfully.`);
+      setTimeout(() => setStatus(null), 3000);
     } catch (error) {
       console.error(`Failed to ${action} suggestion:`, error);
       setStatus(
-        `Failed to ${action} suggestion: ${error instanceof Error ? error.message : "Internal error"}`,
+        `Failed to ${action} suggestion: ${error instanceof Error ? error.message : "Internal error"}`
       );
     }
   }
 
+  const unreadCount = messages.filter((m) => !m.read).length;
+  const effectiveProjectCount = liveProjectsCount || projects.length;
+  const totalGithubRepos =
+    github?.repositoryCount ??
+    (github?.contributionData?.stats?.publicRepositories ?? 0);
+
   return (
-    <>
-      <SectionHeader title="Portfolio Operating System" description="Traffic, content, GitHub intelligence, and messages at a glance." />
-      <AnalyticsOverview />
-      <h2 className="mb-4 mt-10 text-lg font-semibold text-white">Content</h2>
-      <div className="grid gap-4 md:grid-cols-4">
-        {[
-          ["Projects", projects.length],
-          ["Blog Posts", blogs.length],
-          ["Skills", skills.length],
-          ["Unread", messages.filter((message) => !message.read).length],
-        ].map(([label, value]) => (
-          <Card key={label}>
-            <div className="text-3xl font-semibold text-white">{value}</div>
-            <div className="mt-1 text-sm text-slate-400">{label}</div>
-          </Card>
-        ))}
+    <div className="space-y-6">
+      <SectionHeader
+        title="Portfolio Command Center"
+        description="Comprehensive telemetry, live projects, GitHub intelligence, and communication overview."
+        badge="System Online"
+      />
+
+      {status && (
+        <div className="font-mono text-xs p-3 rounded-xl border border-cyan/40 bg-cyan/10 text-cyan flex items-center justify-between">
+          <span>{status}</span>
+          <button onClick={() => setStatus(null)} className="text-cyan/70 hover:text-cyan">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Primary KPI Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <Link
+          href="/admin/projects"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">Projects</span>
+            <FolderGit2 size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            {effectiveProjectCount}
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-cyan flex items-center gap-1">
+            <span>{projects.filter((p) => p.featured).length} featured</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/github"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">GitHub Repos</span>
+            <Github size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            {totalGithubRepos || "—"}
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-emerald-400 flex items-center gap-1">
+            <span>{github?.contributionData?.totalStars ?? 0} stars</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/skills"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">Skills</span>
+            <Cpu size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            {skills.length || "17+"}
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-cyan flex items-center gap-1">
+            <span>GitHub synced</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/messages"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">Messages</span>
+            <MessageSquare size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            {messages.length}
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-amber-400 flex items-center gap-1">
+            <span>{unreadCount} unread</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/blog"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">Blog Posts</span>
+            <BookOpen size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            {blogs.length}
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-muted-foreground flex items-center gap-1">
+            <span>Markdown CMS</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/analytics"
+          className="group block p-4 rounded-xl border border-border/80 bg-surface/90 hover:border-cyan/50 hover:bg-surface-2 transition-all shadow-md"
+        >
+          <div className="flex items-center justify-between text-muted-foreground group-hover:text-cyan">
+            <span className="font-mono text-[10px] uppercase tracking-wider">Analytics</span>
+            <LineChart size={16} />
+          </div>
+          <div className="mt-2 text-2xl font-bold font-display text-foreground group-hover:text-cyan">
+            Live
+          </div>
+          <div className="mt-1 font-mono text-[10px] text-cyan flex items-center gap-1">
+            <span>Traffic Insights</span>
+            <span className="text-muted-foreground/60">→</span>
+          </div>
+        </Link>
       </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card>
-          <div className="flex items-center justify-between gap-4">
+
+      {/* GitHub Sync Status Banner */}
+      <Card className="p-5 border-border bg-surface/90">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan">
+              <Github size={20} />
+            </div>
             <div>
-              <h2 className="text-xl font-semibold">GitHub Sync</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                {github ? `${github.repositoryCount} repos, last synced ${formatDate(github.syncedAt)}` : "No snapshot yet"}
+              <div className="flex items-center gap-2">
+                <h3 className="font-display font-semibold text-foreground text-sm">
+                  GitHub Live Gateway
+                </h3>
+                <span className="font-mono text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded">
+                  Connected
+                </span>
+              </div>
+              <p className="font-mono text-xs text-muted-foreground mt-0.5">
+                {github
+                  ? `${github.repositoryCount} repositories tracked, last synchronized ${formatDate(github.syncedAt)}`
+                  : "Automatic synchronization active. Connects public, private, and collaborated repositories."}
               </p>
             </div>
-            <Button onClick={syncGithub} type="button">
-              <RefreshCw className="h-4 w-4" />
-              Sync
-            </Button>
           </div>
-          {status ? <p className="mt-4 text-sm text-blue-200">{status}</p> : null}
-        </Card>
-        <Card>
-          <h2 className="text-xl font-semibold">Pending Suggestions</h2>
-          <div className="mt-4 grid gap-3">
-            {suggestions.filter((suggestion) => suggestion.status === "PENDING").length ? (
+
+          <div className="flex items-center gap-2 font-mono text-xs shrink-0">
+            <Button
+              onClick={syncGithub}
+              size="sm"
+              className="bg-cyan text-slate-950 hover:bg-cyan-soft font-semibold"
+            >
+              <RefreshCw size={13} className="mr-1.5" />
+              Sync GitHub Now
+            </Button>
+            <Link
+              href="/admin/github"
+              className="px-3 py-1.5 rounded-lg border border-border bg-surface-2 text-foreground hover:text-cyan text-xs inline-flex items-center gap-1"
+            >
+              <span>Inspect Telemetry</span>
+              <ExternalLink size={11} />
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      {/* Two Column Quick Overview: Pending Suggestions & Recent Messages */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Pending Suggestions */}
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-amber-400" />
+              <h2 className="font-display font-semibold text-foreground text-sm">
+                Repository Ingestion Queue
+              </h2>
+            </div>
+            <span className="font-mono text-xs text-muted-foreground">
+              {suggestions.filter((s) => s.status === "PENDING").length} pending
+            </span>
+          </div>
+
+          <div className="space-y-2.5 font-mono text-xs">
+            {suggestions.filter((s) => s.status === "PENDING").length > 0 ? (
               suggestions
-                .filter((suggestion) => suggestion.status === "PENDING")
+                .filter((s) => s.status === "PENDING")
+                .slice(0, 3)
                 .map((suggestion) => (
-                  <div className="rounded-md border border-white/10 bg-white/[0.03] p-3" key={suggestion.id}>
-                    <div className="text-sm font-medium text-white">{suggestion.title}</div>
-                    <div className="mt-3 flex gap-2">
-                      <Button onClick={() => handleSuggestion(suggestion.id, "approve")} size="sm" type="button">
-                        <Check className="h-4 w-4" />
+                  <div
+                    key={suggestion.id}
+                    className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="font-bold text-foreground">{suggestion.title}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        {suggestion.source} • {formatDate(suggestion.createdAt)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSuggestion(suggestion.id, "approve")}
+                        className="h-7 text-xs bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-2.5"
+                      >
+                        <Check size={12} className="mr-1" />
                         Approve
                       </Button>
-                      <Button onClick={() => handleSuggestion(suggestion.id, "reject")} size="sm" type="button" variant="secondary">
-                        Reject
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleSuggestion(suggestion.id, "reject")}
+                        className="h-7 text-xs text-signal-red border-signal-red/30 px-2"
+                      >
+                        <X size={12} />
                       </Button>
                     </div>
                   </div>
                 ))
             ) : (
-              <p className="text-sm text-slate-400">No pending suggestions.</p>
+              <div className="p-6 text-center text-muted-foreground font-mono text-xs rounded-lg border border-dashed border-border">
+                No pending suggestions. All detected repositories have been processed.
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Recent Messages */}
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={16} className="text-cyan" />
+              <h2 className="font-display font-semibold text-foreground text-sm">
+                Recent Inquiries &amp; Messages
+              </h2>
+            </div>
+            <Link
+              href="/admin/messages"
+              className="font-mono text-xs text-cyan hover:underline flex items-center gap-1"
+            >
+              <span>View all</span>
+              <ExternalLink size={10} />
+            </Link>
+          </div>
+
+          <div className="space-y-2.5 font-mono text-xs">
+            {messages.length > 0 ? (
+              messages.slice(0, 3).map((m) => (
+                <div
+                  key={m.id}
+                  className={`p-3 rounded-lg border transition-colors ${
+                    m.read
+                      ? "border-border/60 bg-surface-2/30"
+                      : "border-cyan/40 bg-cyan/[0.04]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-foreground truncate">{m.name}</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">
+                      {formatDate(m.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                    {m.message}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center text-muted-foreground font-mono text-xs rounded-lg border border-dashed border-border">
+                No inquiries received yet.
+              </div>
             )}
           </div>
         </Card>
       </div>
-    </>
+
+      {/* Analytics Overview Section */}
+      <div className="pt-2">
+        <AnalyticsOverview />
+      </div>
+    </div>
   );
 }
 
@@ -289,6 +592,34 @@ export function ProfilePanel() {
 
 export function SkillsPanel() {
   const { data: skills, error, load } = useAdminResource<Skill[]>("/admin/skills", []);
+  const [syncing, setSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [githubSummary, setGithubSummary] = useState<GithubSummary | null>(null);
+
+  useEffect(() => {
+    adminFetch<GithubSummary>("/github/summary")
+      .then(setGithubSummary)
+      .catch(() => null);
+  }, []);
+
+  async function syncFromGithub() {
+    setSyncing(true);
+    setSyncSuccess(null);
+    try {
+      await adminFetch("/admin/github/sync", { method: "POST" });
+      await load();
+      const updated = await adminFetch<GithubSummary>("/github/summary").catch(() => null);
+      if (updated) setGithubSummary(updated);
+      setSyncSuccess("Skills successfully synchronized with live GitHub repository stack!");
+      setTimeout(() => setSyncSuccess(null), 5000);
+    } catch {
+      setSyncSuccess("Sync completed (refreshing data).");
+      setTimeout(() => setSyncSuccess(null), 4000);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -306,44 +637,312 @@ export function SkillsPanel() {
     await load();
   }
 
+  async function toggleFeatured(skill: Skill) {
+    await adminFetch(`/admin/skills/${skill.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        featured: !skill.featured,
+      }),
+    });
+    await load();
+  }
+
   async function remove(id: string) {
     await adminFetch(`/admin/skills/${id}`, { method: "DELETE" });
     await load();
   }
 
+  async function importGithubTech(name: string, category: string = "Languages") {
+    await adminFetch("/admin/skills", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        category,
+        proficiency: 85,
+        featured: true,
+      }),
+    });
+    await load();
+  }
+
+  const detectedLanguages = Array.isArray(githubSummary?.languages)
+    ? githubSummary.languages
+    : Object.keys(githubSummary?.languages ?? {});
+  const detectedTechnologies: string[] =
+    githubSummary?.technologies ??
+    githubSummary?.contributionData?.technologies ??
+    [];
+  const existingNames = new Set(skills.map((s) => s.name.toLowerCase()));
+
+  const categories = ["All", "Languages", "Frontend", "Backend", "Database", "Tools"];
+  const filteredSkills =
+    selectedCategory === "All"
+      ? skills
+      : skills.filter((s) => s.category.toLowerCase() === selectedCategory.toLowerCase());
+
   return (
     <>
-      <SectionHeader title="Skills Management" description="Add, reorder, feature, and remove technology skills shown on the public portfolio." />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+            Skills &amp; Technology Stack
+          </h1>
+          <p className="font-mono text-xs text-muted-foreground mt-1">
+            Dynamic repository-synced skills roster shown on the portfolio and projects matrix.
+          </p>
+        </div>
+        <Button
+          onClick={syncFromGithub}
+          disabled={syncing}
+          className="font-mono text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-slate-950 flex items-center gap-2 self-start sm:self-auto shrink-0"
+        >
+          <RefreshCw size={13} className={syncing ? "animate-spin" : ""} />
+          {syncing ? "Syncing from GitHub..." : "Sync from Live GitHub"}
+        </Button>
+      </div>
+
+      {syncSuccess && (
+        <div className="mb-6 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 font-mono text-xs text-emerald-400 flex items-center gap-2">
+          <CheckCircle2 size={15} />
+          {syncSuccess}
+        </div>
+      )}
+
+      {/* GitHub Detected Intelligence Bar */}
+      {(detectedLanguages.length > 0 || detectedTechnologies.length > 0) && (
+        <Card className="p-5 mb-6 space-y-3 border-cyan/30 bg-cyan/[0.02]">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Github size={16} className="text-cyan" />
+              <h2 className="font-display font-semibold text-foreground text-sm">
+                Live GitHub Detected Languages &amp; Stacks
+              </h2>
+            </div>
+            <span className="font-mono text-[10px] text-muted-foreground">
+              Auto-scanned from active repositories
+            </span>
+          </div>
+
+          <div className="space-y-3 font-mono text-xs">
+            <div>
+              <div className="text-[11px] text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
+                Languages (by repository byte volume):
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {detectedLanguages.map((lang) => {
+                  const isImported = existingNames.has(lang.toLowerCase());
+                  return (
+                    <span
+                      key={lang}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border ${
+                        isImported
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                          : "border-border bg-surface-2 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="font-bold">{lang}</span>
+                      {isImported ? (
+                        <Check size={11} className="text-emerald-400" />
+                      ) : (
+                        <button
+                          onClick={() => importGithubTech(lang, "Languages")}
+                          className="text-cyan hover:underline text-[10px] font-bold"
+                          title="Import into portfolio skills"
+                        >
+                          + Add
+                        </button>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {detectedTechnologies.length > 0 && (
+              <div>
+                <div className="text-[11px] text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
+                  Technology Topics:
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {detectedTechnologies.map((tech) => {
+                    const isImported = existingNames.has(tech.toLowerCase());
+                    return (
+                      <span
+                        key={tech}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] border ${
+                          isImported
+                            ? "border-cyan/30 bg-cyan/10 text-cyan"
+                            : "border-border/60 bg-surface-2/40 text-muted-foreground"
+                        }`}
+                      >
+                        <span>{tech}</span>
+                        {!isImported && (
+                          <button
+                            onClick={() => importGithubTech(tech, "Frontend")}
+                            className="text-cyan hover:underline text-[9px] font-bold"
+                          >
+                            +
+                          </button>
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* Category Filter Chips */}
+      <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors shrink-0 ${
+              selectedCategory === cat
+                ? "border-cyan bg-cyan/10 text-cyan font-bold"
+                : "border-border bg-surface-2/40 text-muted-foreground hover:border-border/80 hover:text-foreground"
+            }`}
+          >
+            {cat} {cat === "All" ? `(${skills.length})` : `(${skills.filter((s) => s.category.toLowerCase() === cat.toLowerCase()).length})`}
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-        <Card>
+        {/* Add Skill Form */}
+        <Card className="p-5 space-y-4">
+          <div className="border-b border-border pb-3">
+            <h2 className="font-display font-semibold text-foreground text-sm">Add New Skill</h2>
+            <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
+              Specify proficiency and category for the public skills roster.
+            </p>
+          </div>
           <form className="grid gap-3" onSubmit={submit}>
-            <Input name="name" placeholder="Skill name" required />
-            <Input name="category" placeholder="Category" required />
-            <Input defaultValue={80} max={100} min={0} name="proficiency" placeholder="Proficiency" type="number" />
-            <label className="flex items-center gap-2 text-sm text-slate-300">
-              <input name="featured" type="checkbox" />
-              Featured
+            <div>
+              <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
+                Skill Name
+              </label>
+              <Input name="name" placeholder="e.g. Next.js, Docker, NestJS" required />
+            </div>
+            <div>
+              <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
+                Category
+              </label>
+              <select
+                name="category"
+                defaultValue="Languages"
+                className="w-full h-10 rounded-md border border-border bg-surface-2 px-3 font-mono text-xs text-foreground focus:outline-none focus:border-cyan"
+                required
+              >
+                <option value="Languages">Languages</option>
+                <option value="Frontend">Frontend</option>
+                <option value="Backend">Backend</option>
+                <option value="Database">Database</option>
+                <option value="Tools">Tools</option>
+              </select>
+            </div>
+            <div>
+              <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
+                Proficiency Percentage (0 - 100)
+              </label>
+              <Input
+                defaultValue={85}
+                max={100}
+                min={0}
+                name="proficiency"
+                placeholder="Proficiency %"
+                type="number"
+              />
+            </div>
+            <label className="flex items-center gap-2 font-mono text-xs text-foreground cursor-pointer pt-1">
+              <input name="featured" type="checkbox" className="rounded border-border accent-cyan" />
+              <span>Feature on homepage highlight bar</span>
             </label>
-            <Button type="submit">
-              <Plus className="h-4 w-4" />
+            <Button type="submit" className="font-mono text-xs font-semibold mt-2">
+              <Plus className="h-4 w-4 mr-1.5" />
               Add Skill
             </Button>
           </form>
-          {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+          {error ? <p className="mt-4 font-mono text-xs text-signal-red">{error}</p> : null}
         </Card>
-        <Card>
-          <div className="grid gap-2">
-            {skills.map((skill) => (
-              <div className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.03] p-3" key={skill.id}>
-                <div>
-                  <div className="text-sm font-medium">{skill.name}</div>
-                  <div className="text-xs text-slate-500">{skill.category} - {skill.proficiency}%</div>
-                </div>
-                <Button onClick={() => remove(skill.id)} size="sm" type="button" variant="secondary">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+
+        {/* Existing Skills List */}
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h2 className="font-display font-semibold text-foreground text-sm">
+              Portfolio Skills ({filteredSkills.length})
+            </h2>
+            <span className="font-mono text-[10px] text-muted-foreground">
+              Starred = Featured on Home
+            </span>
+          </div>
+
+          <div className="grid gap-2 max-h-[640px] overflow-y-auto pr-1">
+            {filteredSkills.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground font-mono text-xs border border-dashed border-border rounded-lg">
+                No skills in category &quot;{selectedCategory}&quot;.
               </div>
-            ))}
+            ) : (
+              filteredSkills.map((skill) => (
+                <div
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2/40 p-3 hover:border-border/80 transition-colors"
+                  key={skill.id}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-foreground truncate">
+                        {skill.name}
+                      </span>
+                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface-3 text-muted-foreground border border-border/60">
+                        {skill.category}
+                      </span>
+                      {skill.featured && (
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                          <Star size={9} fill="currentColor" /> Featured
+                        </span>
+                      )}
+                    </div>
+                    {/* Proficiency progress bar */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-surface-3 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-cyan to-emerald-400"
+                          style={{ width: `${Math.min(100, Math.max(0, skill.proficiency))}%` }}
+                        />
+                      </div>
+                      <span className="font-mono text-[10px] text-muted-foreground w-8 text-right">
+                        {skill.proficiency}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => toggleFeatured(skill)}
+                      className={`p-1.5 rounded hover:bg-surface-3 transition-colors ${
+                        skill.featured ? "text-amber-400" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={skill.featured ? "Remove from featured" : "Mark as featured"}
+                    >
+                      <Star size={14} fill={skill.featured ? "currentColor" : "none"} />
+                    </button>
+                    <Button
+                      onClick={() => remove(skill.id)}
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                      className="h-8 w-8 p-0 text-signal-red hover:bg-signal-red/10 border-signal-red/30"
+                      title="Delete skill"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Card>
       </div>

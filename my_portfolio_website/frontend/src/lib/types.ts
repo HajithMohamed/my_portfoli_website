@@ -115,6 +115,9 @@ export type CurrentRepositoryStatus = {
     authoredAt?: string | null;
     author?: string | null;
   } | null;
+  isPrivate?: boolean;
+  isCollaborator?: boolean;
+  ownerLogin?: string;
   activityStatus?: "active" | "recent" | "quiet" | "stale" | "unknown" | "archived" | string;
   statusLabel?: string;
   statusTone?: "green" | "amber" | "cyan" | "red" | string;
@@ -150,6 +153,9 @@ export type PortfolioStats = {
   newRepositories: number;
   hostedProjects: number;
   productionReadyProjects: number;
+  privateRepositories?: number;
+  collaborationRepositories?: number;
+  totalCollaborations?: number;
 };
 
 export type PortfolioRepository = {
@@ -168,6 +174,9 @@ export type PortfolioRepository = {
   forks?: number;
   defaultBranch?: string;
   isArchived?: boolean;
+  isPrivate?: boolean;
+  isCollaborator?: boolean;
+  ownerLogin?: string;
   isHosted?: boolean;
   isProductionReady?: boolean;
   readinessChecked?: boolean;
@@ -183,6 +192,20 @@ export type GithubSummary = {
   repositoryCount: number;
   commitCount: number;
   languages: Record<string, number> | string[];
+  technologies?: string[];
+  privateCount?: number;
+  collaborationCount?: number;
+  collaborations?: Array<{
+    name: string;
+    fullName: string;
+    owner: string;
+    url: string;
+    description?: string | null;
+    language?: string | null;
+    stars?: number;
+    isPrivate?: boolean;
+    role?: string;
+  }>;
   recentRepos: Array<{
     name: string;
     fullName?: string;
@@ -193,6 +216,8 @@ export type GithubSummary = {
     stars?: number;
     forks?: number;
     topics?: string[];
+    isPrivate?: boolean;
+    isCollaborator?: boolean;
   }>;
   recentActivity: Array<{ type: string; repo?: string; createdAt: string }>;
   contributionData?: ContributionData | null;

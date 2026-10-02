@@ -6,17 +6,20 @@ import { Panel } from "@/components/hud/panel";
 import type { Project, Skill } from "@/lib/types";
 import {
   ArrowRight,
+  Brain,
   Cloud,
   Code2,
   Database,
   Globe,
   GraduationCap,
   Layers,
+  LineChart,
   Maximize2,
   Monitor,
   Palette,
   Server,
   Shield,
+  Smartphone,
   Terminal,
   Wrench,
   Zap,
@@ -24,12 +27,12 @@ import {
 
 type CategoryKey =
   | "All"
-  | "Frontend"
-  | "Backend"
-  | "Database"
-  | "DevOps"
-  | "Tools"
-  | "Languages"
+  | "Web Development"
+  | "Mobile App Dev"
+  | "AI / ML"
+  | "Data Science"
+  | "Backend & Cloud"
+  | "Databases"
   | "Other";
 
 type CategoryCardData = {
@@ -48,11 +51,11 @@ type CategoryCardData = {
 
 const CATEGORIES: CategoryCardData[] = [
   {
-    id: "frontend",
-    category: "Frontend",
-    title: "Frontend Development",
-    subtitle: "Modern responsive client interfaces",
-    icon: Monitor,
+    id: "webdev",
+    category: "Web Development",
+    title: "Web Development",
+    subtitle: "Modern full-stack platforms & scalable web APIs",
+    icon: Globe,
     colorClass: {
       bg: "bg-blue-500/10",
       border: "border-blue-500/30",
@@ -61,97 +64,131 @@ const CATEGORIES: CategoryCardData[] = [
     skills: [
       "React.js",
       "Next.js",
-      "JavaScript",
       "TypeScript",
-      "HTML5",
-      "CSS3",
+      "Node.js",
+      "NestJS",
+      "Express.js",
       "Tailwind CSS",
-      "Styled Components",
+      "REST / GraphQL",
     ],
   },
   {
-    id: "backend",
-    category: "Backend",
-    title: "Backend Development",
-    subtitle: "Secure & scalable server architectures",
-    icon: Server,
+    id: "mobile",
+    category: "Mobile App Dev",
+    title: "Mobile App Development",
+    subtitle: "Cross-platform iOS & Android mobile engineering",
+    icon: Smartphone,
+    colorClass: {
+      bg: "bg-cyan/10",
+      border: "border-cyan/30",
+      text: "text-cyan",
+    },
+    skills: [
+      "Flutter",
+      "Dart",
+      "React Native",
+      "Mobile UI/UX",
+      "State Management",
+      "Native Device APIs",
+      "Offline Storage",
+    ],
+  },
+  {
+    id: "ai-ml",
+    category: "AI / ML",
+    title: "AI & Machine Learning",
+    subtitle: "Intelligent models, deep learning & LLM integrations",
+    icon: Brain,
+    colorClass: {
+      bg: "bg-purple-500/10",
+      border: "border-purple-500/30",
+      text: "text-purple-400",
+    },
+    skills: [
+      "Python",
+      "Machine Learning",
+      "Deep Learning",
+      "PyTorch",
+      "TensorFlow",
+      "NLP",
+      "LLM APIs",
+      "Prompt Engineering",
+    ],
+  },
+  {
+    id: "datascience",
+    category: "Data Science",
+    title: "Data Science & Analytics",
+    subtitle: "Statistical analysis, data pipelines & predictive modeling",
+    icon: LineChart,
     colorClass: {
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/30",
       text: "text-emerald-400",
     },
     skills: [
-      "Node.js",
-      "Express.js",
-      "NestJS",
-      "Java",
-      "Spring Boot",
-      "REST APIs",
-      "JWT Authentication",
+      "Data Science",
+      "Pandas",
+      "NumPy",
+      "Data Visualization",
+      "SQL Analytics",
+      "PostgreSQL",
+      "Predictive Analytics",
     ],
   },
   {
-    id: "database",
-    category: "Database",
-    title: "Database Engineering",
-    subtitle: "Data persistence & query modeling",
-    icon: Database,
-    colorClass: {
-      bg: "bg-cyan/10",
-      border: "border-cyan/30",
-      text: "text-cyan",
-    },
-    skills: ["MongoDB", "MySQL", "PostgreSQL", "Prisma ORM", "Mongoose"],
-  },
-  {
-    id: "devops",
-    category: "DevOps",
-    title: "DevOps & Deployment",
-    subtitle: "CI/CD & cloud delivery pipelines",
-    icon: Cloud,
-    colorClass: {
-      bg: "bg-purple-500/10",
-      border: "border-purple-500/30",
-      text: "text-purple-400",
-    },
-    skills: ["Docker", "Git", "GitHub Actions", "Vercel", "Netlify", "Railway", "Render"],
-  },
-  {
-    id: "languages",
-    category: "Languages",
-    title: "Programming Languages",
-    subtitle: "Clean, performant syntax & logic",
-    icon: Terminal,
+    id: "backend-cloud",
+    category: "Backend & Cloud",
+    title: "Backend & Cloud Systems",
+    subtitle: "Distributed microservices, auth & containerization",
+    icon: Server,
     colorClass: {
       bg: "bg-amber-500/10",
       border: "border-amber-500/30",
       text: "text-amber-400",
     },
-    skills: ["TypeScript", "JavaScript", "Java", "C", "C++", "SQL"],
+    skills: [
+      "Node.js",
+      "NestJS",
+      "Express",
+      "Docker",
+      "Git / GitHub",
+      "Postman",
+      "CI/CD Pipelines",
+      "Linux",
+    ],
   },
   {
-    id: "tools",
-    category: "Tools",
-    title: "Tools & Productivity",
-    subtitle: "Workflow acceleration & design systems",
-    icon: Wrench,
+    id: "database",
+    category: "Databases",
+    title: "Databases & Persistence",
+    subtitle: "Relational, NoSQL & transactional data layers",
+    icon: Database,
     colorClass: {
       bg: "bg-sky-500/10",
       border: "border-sky-500/30",
       text: "text-sky-400",
     },
-    skills: ["Postman", "VS Code", "Figma", "Linux", "npm / pnpm", "Cursor"],
+    skills: [
+      "MongoDB",
+      "PostgreSQL",
+      "MySQL",
+      "Prisma ORM",
+      "Redis",
+      "Mongoose",
+      "Supabase",
+    ],
   },
 ];
 
 const NETWORK_NODES = [
-  { id: "frontend", label: "Frontend", tech: "React / Next", x: 200, y: 70, color: "#38bdf8" },
-  { id: "styling", label: "Styling", tech: "Tailwind / CSS", x: 295, y: 110, color: "#2dd4bf" },
-  { id: "database", label: "Database", tech: "MongoDB / SQL", x: 330, y: 200, color: "#34d399" },
-  { id: "tools", label: "Tools", tech: "Docker / Git", x: 295, y: 290, color: "#60a5fa" },
-  { id: "cloud", label: "Cloud", tech: "Vercel / Render", x: 200, y: 330, color: "#a855f7" },
-  { id: "backend", label: "Backend", tech: "Node / Nest", x: 105, y: 290, color: "#c084fc" },
-  { id: "languages", label: "Languages", tech: "TS / Java", x: 70, y: 200, color: "#fb923c" },
+  { id: "web", label: "Web Dev", tech: "React / Next / Node", x: 200, y: 70, color: "#38bdf8" },
+  { id: "mobile", label: "Mobile Dev", tech: "Flutter / Dart", x: 295, y: 110, color: "#2dd4bf" },
+  { id: "ai", label: "AI / ML", tech: "Python / PyTorch", x: 330, y: 200, color: "#c084fc" },
+  { id: "data", label: "Data Science", tech: "Pandas / SQL", x: 295, y: 290, color: "#34d399" },
+  { id: "cloud", label: "Cloud & DevOps", tech: "Docker / CI-CD", x: 200, y: 330, color: "#a855f7" },
+  { id: "backend", label: "Backend", tech: "NestJS / Express", x: 105, y: 290, color: "#60a5fa" },
+  { id: "database", label: "Database", tech: "Postgres / Mongo", x: 70, y: 200, color: "#fb923c" },
   { id: "apis", label: "APIs & Auth", tech: "REST / JWT", x: 105, y: 110, color: "#38bdf8" },
 ];
 
@@ -167,12 +204,12 @@ export function SkillsConstellation({
 
   const tabs: CategoryKey[] = [
     "All",
-    "Frontend",
-    "Backend",
-    "Database",
-    "DevOps",
-    "Tools",
-    "Languages",
+    "Web Development",
+    "Mobile App Dev",
+    "AI / ML",
+    "Data Science",
+    "Backend & Cloud",
+    "Databases",
   ];
 
   const filteredCards =
@@ -493,10 +530,10 @@ export function SkillsConstellation({
                 </div>
                 <div>
                   <div className="font-mono text-[9px] uppercase tracking-widest text-cyan">
-                    Engineering Expansion Focus
+                    Core Specializations &amp; Career Focus
                   </div>
                   <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                    Currently exploring advanced Java architectures, Spring Boot microservices, and distributed cloud systems.
+                    Focused on Web Development (Next.js/Node), Mobile App Engineering (Flutter/Dart), AI &amp; Machine Learning (Python/PyTorch), and Data Science &amp; Analytics.
                   </p>
                 </div>
               </div>

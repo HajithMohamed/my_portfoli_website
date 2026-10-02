@@ -45,6 +45,7 @@ const PRESET_COVERS = [
 ];
 
 export interface VerifiedRepo {
+  id?: string;
   name: string;
   fullName: string;
   title: string;
@@ -54,11 +55,15 @@ export interface VerifiedRepo {
   techStack: string[];
   coverImage: string;
   githubUrl: string;
-  liveUrl?: string;
+  liveUrl?: string | null;
   commitCount: number;
   readmeBytes: number;
   hasProperReadme: boolean;
   statusNotes?: string;
+  status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  featured?: boolean;
+  caseStudy?: Array<{ heading: string; body: string }>;
+  isProductionReady?: boolean;
 }
 
 // Complete verified projects from Hajith's GitHub account with proper READMEs (>1KB) and commit history
@@ -359,8 +364,9 @@ function splitList(value: FormDataEntryValue | null) {
 
 export function ProjectsPanel() {
   const [activeTab, setActiveTab] = useState<"complete" | "needs-readme" | "all" | "create">("complete");
+  const [liveProjects, setLiveProjects] = useState<Project[]>([]);
   const [dbProjects, setDbProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [copiedRepo, setCopiedRepo] = useState<string | null>(null);
 
@@ -372,31 +378,45 @@ export function ProjectsPanel() {
   const [editError, setEditError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load existing database projects
-  async function loadDbProjects() {
+  // Load existing database projects and live public portfolio projects
+  async function loadProjects() {
     setLoading(true);
+    try {
+      const res = await fetch("/api/portfolio-projects");
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.projects) && json.projects.length > 0) {
+          setLiveProjects(json.projects);
+        }
+      }
+    } catch {
+      // Fallback if API route is loading
+    }
+
     try {
       const data = await adminFetch<Project[]>("/admin/projects");
       if (Array.isArray(data)) {
         setDbProjects(data);
       }
     } catch {
-      // Fallback: DB might be cold or offline, client will use COMPLETE_PROJECTS
+      // Fallback: DB might be cold or offline
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadDbProjects();
+    loadProjects();
   }, []);
 
   // 1-Click Sync All Complete Projects into Admin DB
   async function syncAllCompleteProjects() {
-    setStatusMessage("Synchronizing all complete projects into Admin...");
+    setStatusMessage("Synchronizing all complete projects into Admin DB...");
     let syncedCount = 0;
 
-    for (const cp of COMPLETE_PROJECTS) {
+    const sourceToSync = liveProjects.length > 0 ? liveProjects : COMPLETE_PROJECTS;
+
+    for (const cp of sourceToSync) {
       try {
         await adminFetch("/admin/projects", {
           method: "POST",
@@ -410,11 +430,10 @@ export function ProjectsPanel() {
             coverImage: cp.coverImage,
             category: cp.category,
             status: "ACTIVE",
-            featured: ["saga-elite", "shoe-bank", "tech-bridge", "library-management-system"].includes(cp.slug),
-            caseStudy: [
+            featured: Boolean(cp.featured),
+            caseStudy: cp.caseStudy && cp.caseStudy.length > 0 ? cp.caseStudy : [
               { heading: "Project Goal", body: cp.description },
               { heading: "Architecture & Stack", body: `Built using ${cp.techStack.join(", ")}.` },
-              { heading: "Evidence & Commits", body: `Verified repository with ${cp.commitCount}+ commits and comprehensive README (${(cp.readmeBytes / 1024).toFixed(1)} KB).` },
             ],
           }),
         });
@@ -424,9 +443,49 @@ export function ProjectsPanel() {
       }
     }
 
-    await loadDbProjects();
-    setStatusMessage(`Successfully synchronized ${syncedCount || COMPLETE_PROJECTS.length} complete projects into Admin with appropriate cover images.`);
+    await loadProjects();
+    setStatusMessage(`Successfully synchronized ${syncedCount || sourceToSync.length} projects into Admin CMS.`);
     setTimeout(() => setStatusMessage(null), 5000);
+  }
+
+  // 1-Click Toggle Featured on Homepage Showcase
+  async function toggleFeatured(project: Project | VerifiedRepo) {
+    const newFeatured = !Boolean(project.featured);
+    setStatusMessage(`Updating ${project.title} featured status...`);
+    try {
+      const dbMatch = dbProjects.find(
+        (p) => p.slug === project.slug || (project.githubUrl && p.githubUrl === project.githubUrl)
+      );
+      if (dbMatch?.id) {
+        await adminFetch(`/admin/projects/${dbMatch.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ featured: newFeatured }),
+        });
+      } else {
+        await adminFetch("/admin/projects", {
+          method: "POST",
+          body: JSON.stringify({
+            title: project.title,
+            slug: project.slug,
+            description: project.description,
+            category: project.category,
+            techStack: project.techStack,
+            githubUrl: project.githubUrl,
+            liveUrl: project.liveUrl,
+            coverImage: project.coverImage,
+            status: project.status || "ACTIVE",
+            featured: newFeatured,
+          }),
+        });
+      }
+      await loadProjects();
+      setStatusMessage(
+        `Project "${project.title}" is now ${newFeatured ? "featured on homepage showcase" : "unfeatured"}.`
+      );
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch (err) {
+      setStatusMessage(`Failed to update featured status: ${err instanceof Error ? err.message : "Internal error"}`);
+    }
   }
 
   // Handle single repository import
@@ -452,7 +511,7 @@ export function ProjectsPanel() {
           ],
         }),
       });
-      await loadDbProjects();
+      await loadProjects();
       setStatusMessage(`Imported ${repo.title} successfully.`);
     } catch {
       setStatusMessage(`Saved ${repo.title} locally.`);
@@ -527,7 +586,7 @@ export function ProjectsPanel() {
       }
       setEditingProject(null);
       setPreviewImage(null);
-      await loadDbProjects();
+      await loadProjects();
       setStatusMessage("Project updated successfully.");
       setTimeout(() => setStatusMessage(null), 3000);
     } catch (err) {
@@ -545,9 +604,19 @@ export function ProjectsPanel() {
     }
   }
 
-  const filteredComplete = COMPLETE_PROJECTS.filter((p) =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Exact projects shown on the home page and projects page
+  const effectiveProjects =
+    liveProjects.length > 0
+      ? liveProjects
+      : dbProjects.length > 0
+      ? dbProjects
+      : COMPLETE_PROJECTS;
+
+  const filteredProjects = effectiveProjects.filter(
+    (p) =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      p.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -560,11 +629,11 @@ export function ProjectsPanel() {
               Projects Intelligence &amp; Control
             </h1>
             <span className="font-mono text-xs text-cyan border border-cyan/30 px-2 py-0.5 rounded-full bg-cyan/10">
-              GitHub Sync Ready
+              Live Gateway
             </span>
           </div>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
-            Complete projects with verified READMEs, active commit history, and custom artwork management
+            Synchronized live portfolio projects as displayed on the Homepage and Projects page.
           </p>
         </div>
 
@@ -576,7 +645,7 @@ export function ProjectsPanel() {
             className="bg-cyan text-slate-950 hover:bg-cyan-soft font-mono text-xs font-semibold shadow-[0_0_15px_var(--cyan-glow)]"
           >
             <Sparkles size={13} className="mr-1.5" />
-            Sync All Complete Projects
+            Sync All to Admin CMS
           </Button>
 
           <Button
@@ -610,9 +679,9 @@ export function ProjectsPanel() {
           }`}
         >
           <FolderCheck size={14} className={activeTab === "complete" ? "text-cyan" : "text-muted-foreground"} />
-          <span>Complete Projects ({COMPLETE_PROJECTS.length})</span>
+          <span>Public Showcase Projects ({effectiveProjects.length})</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded bg-signal-green/20 text-signal-green border border-signal-green/30">
-            Show First
+            Live on Site
           </span>
         </button>
 
@@ -650,7 +719,7 @@ export function ProjectsPanel() {
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search verified projects by title, stack, or category..."
+            placeholder="Search live projects by title, stack, or category..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-10 pl-9 pr-4 rounded-xl border border-border bg-surface-2/40 text-xs font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-cyan/50"
@@ -658,7 +727,7 @@ export function ProjectsPanel() {
         </div>
       )}
 
-      {/* TAB 1: COMPLETE PROJECTS (DISPLAYED FIRST) */}
+      {/* TAB 1: SHOWCASE PROJECTS (EXACT HOME & PROJECTS PAGE PROJECTS) */}
       {activeTab === "complete" && (
         <div className="space-y-4">
           <div className="p-4 rounded-xl border border-cyan/20 bg-cyan/[0.03] flex items-center justify-between gap-4 font-mono text-xs">
@@ -668,25 +737,26 @@ export function ProjectsPanel() {
               </span>
               <div>
                 <div className="text-foreground font-semibold">
-                  Verified Complete Projects ({COMPLETE_PROJECTS.length} Repositories)
+                  Live Portfolio Showcase ({effectiveProjects.length} Projects Active)
                 </div>
                 <div className="text-muted-foreground text-[11px]">
-                  All repositories below have verified, detailed README documentation and active commit records.
+                  These are the exact projects shown on your Homepage and /projects page, dynamically synchronized with GitHub &amp; CMS.
                 </div>
               </div>
             </div>
             <Button
               size="sm"
-              onClick={syncAllCompleteProjects}
+              onClick={loadProjects}
+              disabled={loading}
               className="bg-cyan/20 text-cyan hover:bg-cyan hover:text-black border border-cyan/40 text-xs shrink-0"
             >
-              <RefreshCw size={12} className="mr-1.5" />
-              Sync All to Database
+              <RefreshCw size={12} className={`mr-1.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {filteredComplete.map((proj) => (
+            {filteredProjects.map((proj) => (
               <Card
                 key={proj.slug}
                 className="overflow-hidden border-border/80 bg-surface/80 hover:border-cyan/40 transition-all flex flex-col justify-between group shadow-lg"
@@ -696,7 +766,7 @@ export function ProjectsPanel() {
                   <div className="relative h-44 w-full bg-slate-950 overflow-hidden border-b border-border/60">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={proj.coverImage}
+                      src={proj.coverImage || "/brand/project-blueprint.jpg"}
                       alt={proj.title}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -704,17 +774,25 @@ export function ProjectsPanel() {
 
                     {/* Verified Badges */}
                     <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-signal-green/90 text-slate-950 px-2 py-0.5 rounded-full shadow">
-                        <Check size={11} /> Complete
-                      </span>
-                      <span className="text-[10px] font-mono bg-black/75 backdrop-blur-sm text-cyan border border-cyan/30 px-2 py-0.5 rounded-full">
-                        {(proj.readmeBytes / 1024).toFixed(1)} KB README
-                      </span>
+                      {proj.featured ? (
+                        <span className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full shadow">
+                          <Star size={11} className="fill-slate-950" /> Featured on Home
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-signal-green/90 text-slate-950 px-2 py-0.5 rounded-full shadow">
+                          <Check size={11} /> Active
+                        </span>
+                      )}
+                      {proj.isProductionReady && (
+                        <span className="text-[10px] font-mono bg-black/75 backdrop-blur-sm text-cyan border border-cyan/30 px-2 py-0.5 rounded-full">
+                          Production Ready
+                        </span>
+                      )}
                     </div>
 
                     <div className="absolute top-2.5 right-2.5">
                       <span className="flex items-center gap-1 text-[10px] font-mono bg-black/75 backdrop-blur-sm text-slate-300 border border-white/20 px-2 py-0.5 rounded-full">
-                        <GitCommit size={11} className="text-cyan" /> {proj.commitCount}+ commits
+                        {proj.status}
                       </span>
                     </div>
 
@@ -723,22 +801,24 @@ export function ProjectsPanel() {
                       type="button"
                       onClick={() => {
                         setEditingProject({
+                          id: proj.id,
                           title: proj.title,
                           slug: proj.slug,
                           description: proj.description,
                           techStack: proj.techStack,
                           githubUrl: proj.githubUrl,
+                          liveUrl: proj.liveUrl,
                           coverImage: proj.coverImage,
                           category: proj.category,
-                          status: "ACTIVE",
-                          featured: false,
+                          status: proj.status || "ACTIVE",
+                          featured: proj.featured,
                         });
-                        setPreviewImage(proj.coverImage);
+                        setPreviewImage(proj.coverImage || null);
                       }}
                       className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-[10px] font-mono bg-cyan/90 hover:bg-cyan text-slate-950 font-bold px-2.5 py-1 rounded-md shadow-lg transition-transform active:scale-95"
                     >
                       <ImageIcon size={12} />
-                      <span>Change Image</span>
+                      <span>Change Artwork</span>
                     </button>
                   </div>
 
@@ -772,47 +852,69 @@ export function ProjectsPanel() {
 
                 {/* Card Actions */}
                 <div className="p-4 pt-2 border-t border-border/50 flex items-center justify-between gap-2 font-mono text-xs">
-                  <a
-                    href={proj.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-cyan transition-colors"
-                  >
-                    <Github size={13} />
-                    <span>Repository</span>
-                    <ExternalLink size={10} />
-                  </a>
+                  <div className="flex items-center gap-2">
+                    {proj.githubUrl && (
+                      <a
+                        href={proj.githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-cyan transition-colors"
+                      >
+                        <Github size={13} />
+                        <span>Repo</span>
+                      </a>
+                    )}
+                    {proj.liveUrl && (
+                      <a
+                        href={proj.liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-cyan hover:underline"
+                      >
+                        <ExternalLink size={12} />
+                        <span>Live</span>
+                      </a>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-1.5">
                     <Button
                       size="sm"
                       variant="secondary"
+                      onClick={() => toggleFeatured(proj)}
+                      className={`text-xs px-2.5 py-1 h-auto ${
+                        proj.featured
+                          ? "border-amber-400/40 text-amber-400 bg-amber-400/10 hover:bg-amber-400/20"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Star size={11} className={`mr-1 ${proj.featured ? "fill-amber-400" : ""}`} />
+                      {proj.featured ? "Featured" : "Feature"}
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="secondary"
                       onClick={() => {
                         setEditingProject({
+                          id: proj.id,
                           title: proj.title,
                           slug: proj.slug,
                           description: proj.description,
                           techStack: proj.techStack,
                           githubUrl: proj.githubUrl,
+                          liveUrl: proj.liveUrl,
                           coverImage: proj.coverImage,
                           category: proj.category,
-                          status: "ACTIVE",
-                          featured: false,
+                          status: proj.status || "ACTIVE",
+                          featured: proj.featured,
                         });
-                        setPreviewImage(proj.coverImage);
+                        setPreviewImage(proj.coverImage || null);
                       }}
                       className="text-cyan hover:text-cyan border-cyan/30 text-xs px-2.5 py-1 h-auto"
                     >
                       <Edit2 size={11} className="mr-1" />
-                      Edit / Upload
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      onClick={() => importSingleRepo(proj)}
-                      className="bg-cyan/15 text-cyan hover:bg-cyan hover:text-slate-950 border border-cyan/30 text-xs px-2.5 py-1 h-auto font-semibold"
-                    >
-                      Sync
+                      Edit
                     </Button>
                   </div>
                 </div>

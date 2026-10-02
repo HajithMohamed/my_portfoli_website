@@ -22,6 +22,22 @@ import type { SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme/theme-provider";
 
+type SettingsResponse = Partial<SiteSettings> & {
+  contactFormEnabled?: boolean;
+  projectRequestsEnabled?: boolean;
+};
+
+function normalizeSettings(data: SettingsResponse, current: SiteSettings): SiteSettings {
+  return {
+    id: data.id ?? current.id,
+    defaultTheme: data.defaultTheme ?? current.defaultTheme,
+    contactEnabled: data.contactEnabled ?? data.contactFormEnabled ?? current.contactEnabled,
+    requestsEnabled: data.requestsEnabled ?? data.projectRequestsEnabled ?? current.requestsEnabled,
+    maintenanceMode: data.maintenanceMode ?? current.maintenanceMode,
+    updatedAt: data.updatedAt ?? current.updatedAt,
+  };
+}
+
 export default function AdminSettingsPage() {
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<SiteSettings>({
@@ -45,9 +61,9 @@ export default function AdminSettingsPage() {
   async function loadSettings() {
     setLoading(true);
     try {
-      const data = await adminFetch<SiteSettings>("/admin/settings");
+      const data = await adminFetch<SettingsResponse>("/admin/settings");
       if (data) {
-        setSettings(data);
+        setSettings((current) => normalizeSettings(data, current));
       }
     } catch (err) {
       console.error("Failed to load settings:", err);
@@ -67,16 +83,15 @@ export default function AdminSettingsPage() {
     setErrorMsg(null);
 
     try {
-      const updated = await adminFetch<SiteSettings>("/admin/settings", {
+      const updated = await adminFetch<SettingsResponse>("/admin/settings", {
         method: "PUT",
         body: JSON.stringify({
           defaultTheme: settings.defaultTheme,
-          contactEnabled: settings.contactEnabled,
-          requestsEnabled: settings.requestsEnabled,
-          maintenanceMode: settings.maintenanceMode,
+          contactFormEnabled: settings.contactEnabled,
+          projectRequestsEnabled: settings.requestsEnabled,
         }),
       });
-      setSettings(updated);
+      setSettings((current) => normalizeSettings(updated, current));
       setSuccessMsg("Platform settings saved successfully.");
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err) {

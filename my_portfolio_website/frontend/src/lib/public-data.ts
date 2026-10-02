@@ -59,6 +59,99 @@ function usableGithub(summary: GithubSummary): boolean {
   return Boolean(summary.contributionData?.repositories?.length || summary.currentRepo || summary.recentRepos.length);
 }
 
+function inferCategory(techName: string): string {
+  const lower = techName.toLowerCase();
+  if (['flutter', 'dart', 'react native', 'android', 'ios', 'swift', 'kotlin'].includes(lower)) {
+    return 'Mobile';
+  }
+  if (['machine learning', 'deep learning', 'ai', 'ml', 'pytorch', 'tensorflow', 'nlp', 'llm', 'langchain', 'computer vision', 'openai', 'scikit-learn', 'artificial intelligence'].includes(lower)) {
+    return 'AI/ML';
+  }
+  if (['data science', 'pandas', 'numpy', 'matplotlib', 'seaborn', 'data analysis', 'statistics', 'analytics', 'big data'].includes(lower)) {
+    return 'Data Science';
+  }
+  if (['javascript', 'typescript', 'java', 'php', 'python', 'html', 'css', 'sql', 'c', 'c++', 'c#', 'go', 'rust', 'shell', 'bash'].includes(lower)) {
+    return 'Languages';
+  }
+  if (['react', 'next.js', 'nextjs', 'redux', 'redux toolkit', 'vue', 'angular', 'tailwind css', 'tailwindcss', 'bootstrap', 'alpine.js', 'jquery', 'html5', 'css3'].includes(lower)) {
+    return 'Frontend';
+  }
+  if (['node.js', 'nodejs', 'express', 'nestjs', 'spring boot', 'spring', 'django', 'fastapi', 'rest api', 'graphql', 'socket.io', 'microservices'].includes(lower)) {
+    return 'Backend';
+  }
+  if (['mongodb', 'mysql', 'postgresql', 'postgres', 'redis', 'prisma', 'supabase', 'firebase'].includes(lower)) {
+    return 'Database';
+  }
+  return 'Tools';
+}
+
+export function syncSkillsWithGithub(baseSkills: Skill[], github: GithubSummary): Skill[] {
+  const skillMap = new Map<string, Skill>();
+  baseSkills.forEach((s) => skillMap.set(s.name.toLowerCase(), { ...s }));
+
+  // Extract all languages from github.languages or repositories
+  const githubLanguages: Array<{ name: string; weight: number }> = [];
+  if (github.languages && typeof github.languages === 'object' && !Array.isArray(github.languages)) {
+    Object.entries(github.languages).forEach(([name, bytes]) => {
+      githubLanguages.push({ name, weight: Number(bytes) || 1000 });
+    });
+  }
+
+  // Also collect languages from repositories
+  const repos = github.contributionData?.repositories ?? [];
+  repos.forEach((repo) => {
+    if (repo.language) {
+      const existing = githubLanguages.find((l) => l.name.toLowerCase() === repo.language?.toLowerCase());
+      if (existing) {
+        existing.weight += 10000 + (repo.stars ?? 0) * 1000;
+      } else {
+        githubLanguages.push({ name: repo.language, weight: 10000 + (repo.stars ?? 0) * 1000 });
+      }
+    }
+  });
+
+  const maxWeight = Math.max(1, ...githubLanguages.map((l) => l.weight));
+
+  githubLanguages.forEach(({ name, weight }) => {
+    const key = name.toLowerCase();
+    const calculatedProficiency = Math.min(95, Math.max(70, Math.round(75 + (weight / maxWeight) * 20)));
+    const existing = skillMap.get(key);
+    if (existing) {
+      existing.proficiency = Math.max(existing.proficiency, calculatedProficiency);
+      existing.featured = true;
+    } else {
+      skillMap.set(key, {
+        id: `gh-lang-${key}`,
+        name,
+        category: inferCategory(name),
+        proficiency: calculatedProficiency,
+        featured: true,
+      });
+    }
+  });
+
+  // Add detected technologies/topics from GitHub
+  const detectedTech = github.contributionData?.technologies ?? [];
+  detectedTech.forEach((tech) => {
+    const key = tech.toLowerCase();
+    if (!skillMap.has(key)) {
+      skillMap.set(key, {
+        id: `gh-tech-${key}`,
+        name: tech,
+        category: inferCategory(tech),
+        proficiency: 82,
+        featured: false,
+      });
+    }
+  });
+
+  const merged = Array.from(skillMap.values());
+  return merged.sort((a, b) => {
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
+    return b.proficiency - a.proficiency;
+  });
+}
+
 /**
  * Public portfolio data is deliberately built from GitHub's public API first.
  * The CMS remains useful for private/admin content, but it cannot replace a
@@ -87,9 +180,11 @@ export async function getHomeData(): Promise<HomeData> {
   const projects = projectsFromGithub(github, [...cmsProjects, ...visibilityOverrides]);
   const blogs = reviewedBlogPosts();
 
+  const dynamicSkills = syncSkillsWithGithub(skills.length ? skills : fallbackSkills, github);
+
   return {
     profile: profileForPortfolio(profile),
-    skills: skills.length ? skills : fallbackSkills,
+    skills: dynamicSkills,
     projects,
     blogs,
     resume,
