@@ -42,6 +42,10 @@ export class PrismaService
   }
 
   async onModuleInit() {
+    void this.connectInBackground();
+  }
+
+  private async connectInBackground() {
     try {
       await this.$connect();
       this.connected = true;

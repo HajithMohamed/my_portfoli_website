@@ -149,6 +149,10 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   // ---- scheduling ----------------------------------------------------------
 
   async onApplicationBootstrap() {
+    void this.initializeSync();
+  }
+
+  private async initializeSync() {
     const latest = await this.latestSummary().catch((error) => {
       this.logger.warn(
         `GitHub snapshot unavailable at startup: ${error instanceof Error ? error.message : 'unknown'}`,
