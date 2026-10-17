@@ -125,12 +125,15 @@ function PublicSystemBackground() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#040710] select-none"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#05070f] select-none"
       aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_72%_35%,rgba(30,91,128,0.18),transparent_66%),radial-gradient(ellipse_62%_45%_at_16%_82%,rgba(7,20,38,0.7),transparent_70%)]" />
+      {/* Subtle Studio Engineering Grid Texture */}
+      <div className="absolute inset-0 bg-studio-grid opacity-60" />
+      {/* Ambient Atmospheric Violet and Cyan Glow Orbs */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_55%_at_70%_25%,rgba(139,92,246,0.12),transparent_65%),radial-gradient(ellipse_65%_45%_at_15%_75%,rgba(6,182,212,0.10),transparent_70%)]" />
       <PersistentDeviceScene portraitUrl={portraitUrl} />
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-60" />
     </div>
   );
 }
