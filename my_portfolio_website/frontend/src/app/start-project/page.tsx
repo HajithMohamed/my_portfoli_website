@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { bffUrl } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
+import { getServiceById } from "@/lib/services-catalog";
 import {
   ArrowLeft,
   ArrowRight,
@@ -394,7 +396,11 @@ const STEPS = [
   { id: 5, label: "Timeline", badgeColor: "text-emerald-400 border-emerald-400/40 bg-emerald-400/10" },
 ];
 
-export default function StartProjectPage() {
+function StartProjectWizardContent() {
+  const searchParams = useSearchParams();
+  const serviceParam = searchParams?.get("service") || "";
+  const matchedService = serviceParam ? getServiceById(serviceParam) : undefined;
+
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [direction, setDirection] = useState<number>(1);
 
@@ -403,7 +409,21 @@ export default function StartProjectPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [buildType, setBuildType] = useState<string>("new-website");
+  const [buildType, setBuildType] = useState<string>(() => {
+    if (matchedService) return matchedService.wizardServiceId;
+    if (serviceParam && BUILD_TYPES.some((b) => b.id === serviceParam)) return serviceParam;
+    return "new-website";
+  });
+
+  useEffect(() => {
+    if (!serviceParam) return;
+    const match = getServiceById(serviceParam);
+    if (match) {
+      setBuildType(match.wizardServiceId);
+    } else if (BUILD_TYPES.some((b) => b.id === serviceParam)) {
+      setBuildType(serviceParam);
+    }
+  }, [serviceParam]);
 
   // Step 2
   const [selectedGoals, setSelectedGoals] = useState<string[]>(["leads", "credibility"]);
@@ -798,11 +818,23 @@ export default function StartProjectPage() {
                         {/* What are you hoping to build? */}
                         <div className="space-y-4 pt-2">
                           <div className="space-y-1">
-                            <h3 className="font-display text-lg font-semibold text-foreground">
-                              What are you hoping to build?
-                            </h3>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <h3 className="font-display text-lg font-semibold text-foreground">
+                                What are you hoping to build?
+                              </h3>
+                              {matchedService && (
+                                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 px-3 py-1 font-mono text-[11px] text-cyan">
+                                  <Sparkles size={12} className="text-cyan animate-pulse" />
+                                  <span>
+                                    Catalog Preselection: <strong className="text-foreground">{matchedService.shortTitle}</strong>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                             <p className="font-mono text-xs text-muted-foreground">
-                              Choose the option that best describes your idea.
+                              {matchedService
+                                ? `Pre-configured for ${matchedService.title}. Feel free to adjust below if your scope spans multiple disciplines.`
+                                : "Choose the option that best describes your idea."}
                             </p>
                           </div>
 
@@ -1640,5 +1672,22 @@ export default function StartProjectPage() {
 
       <CommandFooter />
     </div>
+  );
+}
+
+export default function StartProjectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-mono text-cyan space-y-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan border-t-transparent shadow-[0_0_15px_rgba(0,240,255,0.4)]" />
+          <div className="text-xs uppercase tracking-widest text-cyan/70">
+            INITIALIZING PROJECT REQUEST DECK...
+          </div>
+        </div>
+      }
+    >
+      <StartProjectWizardContent />
+    </Suspense>
   );
 }
