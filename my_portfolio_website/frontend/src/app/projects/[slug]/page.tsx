@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, ExternalLink, Github, Sparkles, Terminal, Code2, Globe2 } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
-import { Panel } from "@/components/hud/panel";
 import { getHomeData, getProject } from "@/lib/public-data";
 import {
   HUD_STATUS_STYLE,
@@ -20,14 +20,14 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const project = await getProject(slug);
   return {
-    title: project ? `${project.title} — Dossier` : "Dossier not found",
-    description: project?.description ?? "Mohamed Hajith project dossier.",
+    title: project ? `${project.title} — Technical Dossier | HZ Labs` : "Project Not Found | HZ Labs",
+    description: project?.description ?? "Technical architecture dossier by Mohamed Hajith.",
   };
 }
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const [project, { profile }] = await Promise.all([getProject(slug), getHomeData()]);
+  const [project, { profile, projects }] = await Promise.all([getProject(slug), getHomeData()]);
 
   if (!project) {
     notFound();
@@ -36,179 +36,218 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const status = projectHudStatus(project, false);
   const sections = project.caseStudy?.length ? project.caseStudy : [];
   const metrics = [
-    { label: "year", value: projectYear(project) },
-    { label: "stack", value: `${project.techStack.length} techs` },
-    { label: "class", value: project.category },
+    { label: "Year", value: projectYear(project) },
+    { label: "Architecture", value: `${project.techStack.length} Technologies` },
+    { label: "Classification", value: project.category ?? "System Engineering" },
   ];
+
+  // Suggest other projects excluding current
+  const relatedProjects = projects
+    .filter((p) => p.slug !== project.slug)
+    .slice(0, 2);
 
   return (
     <div className="relative min-h-screen">
       <TopBar location={profile.location} />
-      <main className="relative z-10 pt-14">
-        <div className="container-responsive section-gap space-y-6 max-w-[1200px]">
-          <Link href="/projects" className="font-mono text-xs text-cyan hover:underline">
-            ← back to reactor.grid
+      <main className="relative z-10 pt-16 pb-24">
+        <div className="container-responsive section-gap space-y-8 max-w-[1100px]">
+          {/* Breadcrumb Navigation */}
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-cyan transition-colors"
+          >
+            <ArrowLeft size={13} />
+            <span>Back to Projects Archive</span>
           </Link>
 
-          <header className="hud-panel corner-brackets p-8">
-            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
-              <span className="text-cyan">DOSSIER / {projectCodename(project)}</span>
-              <span className={`border px-2 py-0.5 ${HUD_STATUS_STYLE[status]}`}>{status}</span>
+          {/* Project Header Studio Card */}
+          <header className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-surface/90 p-6 sm:p-10 backdrop-blur-xl">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+                <span className="h-2 w-2 rounded-full bg-cyan animate-pulse" />
+                <span>DOSSIER // {projectCodename(project)}</span>
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                {status}
+              </span>
             </div>
-            <h1 className="mt-4 font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-glow">
+
+            <h1 className="mt-6 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               {project.title}
             </h1>
-            <div className="mt-2 font-mono text-sm text-muted-foreground">
+
+            <div className="mt-2 font-mono text-xs text-muted-foreground">
               {project.category} · {projectYear(project)}
             </div>
-            <p className="mt-6 max-w-3xl text-lg text-foreground/90">{project.description}</p>
+
+            <p className="mt-5 max-w-3xl text-base sm:text-lg leading-relaxed text-foreground/90">
+              {project.description}
+            </p>
 
             {project.coverImage ? (
-              <figure className="mt-6">
-                <div className="relative aspect-[16/7] w-full overflow-hidden border border-cyan/20 bg-black/30">
+              <figure className="mt-8 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                <div className="relative aspect-[16/8] w-full">
                   <Image
                     src={project.coverImage}
                     alt={project.coverImageAlt ?? project.title}
                     fill
-                    sizes="(max-width: 1200px) 100vw, 1200px"
+                    sizes="(max-width: 1100px) 100vw, 1100px"
                     className="object-cover"
                   />
                 </div>
                 {project.coverImageKind === "concept" ? (
-                  <figcaption className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    Concept illustration generated from the README-described project goal.
+                  <figcaption className="p-3 border-t border-white/[0.06] font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground text-center">
+                    Concept illustration generated from repository architecture and README specification.
                   </figcaption>
                 ) : null}
               </figure>
             ) : null}
 
-            <div className="mt-8 grid gap-3 md:grid-cols-3">
+            {/* Metrics Strip */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {metrics.map((m) => (
-                <div key={m.label} className="border border-cyan/20 bg-surface/40 p-4">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-cyan/70">
+                <div key={m.label} className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan">
                     {m.label}
                   </div>
-                  <div className="mt-1 font-display text-2xl font-semibold text-foreground text-glow">
+                  <div className="mt-1 font-display text-xl font-bold text-foreground">
                     {m.value}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 font-mono text-xs uppercase tracking-[0.2em]">
+            {/* Live Actions Strip */}
+            <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-wrap items-center gap-3">
               {project.githubUrl ? (
                 <a
                   href={project.githubUrl}
                   target="_blank"
                   rel="noreferrer"
                   data-track="github_click"
-                  className="flex items-center justify-center border border-cyan/50 bg-cyan/10 px-5 py-3 text-cyan transition-all hover:bg-cyan/20 touch-target-lg w-full sm:w-auto"
+                  className="inline-flex items-center gap-2 rounded-lg border border-cyan/40 bg-cyan/10 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-cyan hover:bg-cyan/20 transition-all"
                 >
-                  {"> source code"}
+                  <Github size={14} />
+                  <span>View Repository</span>
+                  <ExternalLink size={12} />
                 </a>
               ) : null}
+
               {project.liveUrl ? (
                 <a
                   href={project.liveUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center border border-cyan/30 bg-surface/60 px-5 py-3 text-foreground transition-colors hover:border-cyan/60 hover:text-cyan touch-target-lg w-full sm:w-auto"
+                  className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20 transition-all"
                 >
-                  {"> listed website →"}
+                  <Globe2 size={14} />
+                  <span>Open Live Platform</span>
+                  <ExternalLink size={12} />
                 </a>
               ) : null}
+
               {project.sourceUrl && project.sourceUrl !== project.githubUrl ? (
                 <a
                   href={project.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex w-full items-center justify-center border border-cyan/20 bg-surface/40 px-5 py-3 text-muted-foreground transition-colors hover:border-cyan/60 hover:text-cyan touch-target-lg sm:w-auto"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all"
                 >
-                  {"> README source ↗"}
+                  <span>README Specification</span>
+                  <ExternalLink size={12} />
                 </a>
               ) : null}
             </div>
           </header>
 
-          <Panel label="repository.evidence" subtitle="public GitHub metadata">
-            <div className="grid gap-3 font-mono text-xs md:grid-cols-3">
-              <div className="border border-cyan/10 bg-black/10 p-3">
-                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">repository</div>
-                <div className="mt-1 break-all text-foreground">
-                  {project.repositoryFullName ?? "Public repository"}
-                </div>
-              </div>
-              <div className="border border-cyan/10 bg-black/10 p-3">
-                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">hosting</div>
-                <div className="mt-1 text-foreground">
-                  {project.isHosted ? "Public website listed in GitHub" : "No public website listed"}
-                </div>
-              </div>
-              <div className="border border-cyan/10 bg-black/10 p-3">
-                <div className="text-[9px] uppercase tracking-[0.22em] text-cyan/60">readiness</div>
-                <div className="mt-1 text-foreground">
-                  {project.isProductionReady
-                    ? "Explicit production-ready evidence found"
-                    : project.readinessChecked === false
-                      ? "Production evidence check unavailable"
-                      : "No explicit production-ready evidence"}
-                </div>
-              </div>
-            </div>
-            {project.readinessEvidence?.length ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {project.readinessEvidence.map((evidence) => (
-                  <a
-                    key={`${evidence.kind}-${evidence.url}`}
-                    href={evidence.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="border border-cyan/20 bg-cyan/5 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-cyan hover:border-cyan/60"
-                  >
-                    {evidence.label} ↗
-                  </a>
-                ))}
-              </div>
-            ) : null}
-          </Panel>
-
+          {/* Case Study Sections */}
           {sections.length > 0 ? (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {sections.map((section, index) => (
-                <Panel
+                <div
                   key={`${section.heading}-${index}`}
-                  label={`0${index + 1}.${section.heading.toLowerCase().replace(/\s+/g, ".")}`}
-                  subtitle="case study"
-                  className={index === sections.length - 1 && sections.length % 2 === 1 ? "lg:col-span-2" : undefined}
+                  className={`rounded-2xl border border-white/[0.08] bg-surface/80 p-6 backdrop-blur-xl ${
+                    index === sections.length - 1 && sections.length % 2 === 1 ? "md:col-span-2" : ""
+                  }`}
                 >
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">
+                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+                    <span>{`0${index + 1} // ${section.heading}`}</span>
+                  </div>
+                  <h3 className="mt-2 font-display text-xl font-bold text-foreground">
+                    {section.heading}
+                  </h3>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                     {section.body}
                   </p>
-                </Panel>
+                </div>
               ))}
             </div>
           ) : null}
 
+          {/* Outcome / Impact Signal */}
           {project.outcome ? (
-            <Panel label="outcome" subtitle="signal delivered">
-              <p className="text-base leading-relaxed text-foreground text-glow">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.03] p-6 backdrop-blur-md">
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber-400">
+                <Sparkles size={12} />
+                <span>OUTCOME &amp; DELIVERABLE IMPACT</span>
+              </div>
+              <p className="mt-2 text-base leading-relaxed text-foreground">
                 {project.outcome}
               </p>
-            </Panel>
+            </div>
           ) : null}
 
-          <Panel label="stack" subtitle="documented technology">
+          {/* Full Technology Stack */}
+          <div className="rounded-2xl border border-white/[0.08] bg-surface/80 p-6 backdrop-blur-xl space-y-4">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+              <Code2 size={13} />
+              <span>TECHNOLOGY SPECIFICATION</span>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {project.techStack.map((s) => (
+              {project.techStack.map((tech) => (
                 <span
-                  key={s}
-                  className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-xs uppercase tracking-widest text-cyan"
+                  key={tech}
+                  className="rounded-lg border border-cyan/20 bg-cyan/[0.05] px-3 py-1 font-mono text-xs uppercase tracking-wider text-cyan"
                 >
-                  {s}
+                  {tech}
                 </span>
               ))}
             </div>
-          </Panel>
+          </div>
+
+          {/* Related Projects Footer */}
+          {relatedProjects.length > 0 && (
+            <div className="pt-8 space-y-4 border-t border-white/[0.08]">
+              <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                More Projects From The Archive
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {relatedProjects.map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={`/projects/${p.slug}`}
+                    className="group flex flex-col justify-between rounded-xl border border-white/10 bg-white/[0.02] p-5 transition-all hover:border-cyan/40 hover:bg-white/[0.04]"
+                  >
+                    <div>
+                      <div className="font-mono text-[9px] uppercase tracking-wider text-cyan">
+                        {p.category ?? "Case Study"}
+                      </div>
+                      <h4 className="mt-1 font-display text-lg font-bold text-foreground group-hover:text-cyan transition-colors">
+                        {p.title}
+                      </h4>
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                        {p.description}
+                      </p>
+                    </div>
+                    <div className="mt-4 flex items-center gap-1 font-mono text-xs text-cyan">
+                      <span>Read Dossier</span>
+                      <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <CommandFooter profile={profile} />

@@ -8,7 +8,7 @@ import { GithubTelemetrySection } from "@/components/sections/github-telemetry-s
 import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
 import { NowDeploying } from "@/components/command/now-deploying";
-import { ProjectsShowcase } from "@/components/command/projects-showcase";
+import { StudioProjectsShowcase } from "@/components/sections/studio-projects-showcase";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
@@ -120,9 +120,9 @@ export default async function Home() {
 
           <SectionDivider label="sys.portfolio" />
 
-          {/* Featured projects are curated in the Projects admin page; the full list lives at /projects. */}
+          {/* Selected Work — Featured Projects */}
           <div id="projects" className="scroll-mt-24">
-            <ProjectsShowcase projects={homepageProjects} />
+            <StudioProjectsShowcase projects={projects} />
           </div>
 
           <SectionDivider label="sys.skills" />
