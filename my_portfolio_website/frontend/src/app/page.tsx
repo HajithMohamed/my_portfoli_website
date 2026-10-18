@@ -7,8 +7,8 @@ import { TechnologyShowcase } from "@/components/sections/technology-showcase";
 import { GithubTelemetrySection } from "@/components/sections/github-telemetry-section";
 import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
-import { NowDeploying } from "@/components/command/now-deploying";
 import { StudioProjectsShowcase } from "@/components/sections/studio-projects-showcase";
+import { ServicesShowcase } from "@/components/sections/services-showcase";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
@@ -111,12 +111,8 @@ export default async function Home() {
 
         <div className="container-responsive section-gap space-y-12 md:space-y-16 lg:space-y-24">
           
-          {/* Status Row */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
-            <SystemStatus profile={profile} />
-            <GithubTelemetry github={github} />
-            <NowDeploying project={latestRepository} />
-          </div>
+          {/* Services Catalog — What I Build */}
+          <ServicesShowcase />
 
           <SectionDivider label="sys.portfolio" />
 
