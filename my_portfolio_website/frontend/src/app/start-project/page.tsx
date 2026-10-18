@@ -10,16 +10,19 @@ import { track } from "@/lib/analytics";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { getServiceById } from "@/lib/services-catalog";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   BookOpen,
   Building2,
   Calendar,
   Check,
+  CheckCheck,
   CheckCircle2,
   ChevronDown,
   Clock,
   Code2,
+  Copy,
   CreditCard,
   DollarSign,
   ExternalLink,
@@ -453,6 +456,11 @@ function StartProjectWizardContent() {
   // Submission State
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [serverReferenceId, setServerReferenceId] = useState<string | null>(null);
+  const [copiedRef, setCopiedRef] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const [mountedAtMs] = useState<number>(() => Date.now());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -467,18 +475,20 @@ function StartProjectWizardContent() {
   const handleNext = () => {
     if (currentStep === 1) {
       if (!name.trim()) {
-        alert("Please enter your name to proceed.");
+        setValidationError("Please enter your name to proceed.");
         return;
       }
       if (!email.trim() || !email.includes("@")) {
-        alert("Please enter a valid email address.");
+        setValidationError("Please enter a valid email address.");
         return;
       }
     }
+    setValidationError(null);
     goToStep(currentStep + 1);
   };
 
   const handlePrev = () => {
+    setValidationError(null);
     goToStep(currentStep - 1);
   };
 
@@ -523,33 +533,40 @@ function StartProjectWizardContent() {
   // Final Submission
   const handleSubmit = async () => {
     setSubmitting(true);
+    setValidationError(null);
 
     const chosenBuild = BUILD_TYPES.find((b) => b.id === buildType)?.title || buildType;
     const goalTitles = selectedGoals
       .map((g) => GOAL_OPTIONS.find((opt) => opt.id === g)?.title)
-      .filter(Boolean);
+      .filter(Boolean) as string[];
     const featureTitles = selectedFeatures
       .map((f) => FEATURE_OPTIONS.find((opt) => opt.id === f)?.title)
-      .filter(Boolean);
+      .filter(Boolean) as string[];
+
+    const formattedDetails = [
+      `Primary Goals: ${goalTitles.join(", ") || "General Inquiry"}`,
+      painPoints ? `Pain Points & Context: ${painPoints}` : null,
+      `Core Features: ${featureTitles.join(", ") || "Standard"}`,
+      `Design Language: ${visualStyle}`,
+      `Asset Readiness: ${contentReadiness}`,
+      currentWebsite ? `Existing URL: ${currentWebsite}` : null,
+      `Delivery Urgency: ${urgency.toUpperCase()}`,
+      recommendFits ? "Requested AI architecture recommendation fit" : null,
+    ].filter(Boolean).join(" | ");
 
     const payload = {
-      name,
-      email,
-      company: company || undefined,
+      name: name.trim(),
+      email: email.trim(),
+      company: company.trim() || undefined,
       projectType: chosenBuild,
-      goals: goalTitles,
-      painPoints: painPoints || undefined,
-      features: featureTitles,
-      recommendFits,
-      visualStyle,
-      referenceUrls: referenceUrls.filter(Boolean),
-      uploadedAsset: uploadedFileName || undefined,
-      currentWebsite: currentWebsite || undefined,
-      contentReadiness,
-      budget: budgetRange,
+      details: formattedDetails.length >= 10 ? formattedDetails : `Project inquiry for ${chosenBuild} (${name.trim()})`,
+      requiredFeatures: featureTitles,
+      referenceSites: referenceUrls.filter(Boolean).join(", ") || undefined,
       timeline: targetTimeline,
-      urgency,
-      source: "jarvis_project_request_wizard_v2",
+      budgetRange: budgetRange,
+      preferredContact: "email",
+      honeypot: honeypot || undefined,
+      submittedAtMs: mountedAtMs,
     };
 
     try {
@@ -560,20 +577,35 @@ function StartProjectWizardContent() {
         budget: budgetRange,
       });
 
-      const res = await fetch(bffUrl("/api/lead"), {
+      const res = await fetch(bffUrl("/requests"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        console.warn("Direct API lead ingestion failed, falling back to local ingestion");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.referenceId) {
+          setServerReferenceId(data.referenceId);
+        }
+      } else {
+        const fallbackId = `HZ-LOCAL-${Date.now().toString(36).toUpperCase().slice(-4)}`;
+        setServerReferenceId(fallbackId);
+        try {
+          const offlineQueue = JSON.parse(localStorage.getItem("hz_offline_leads") || "[]");
+          offlineQueue.push({ ...payload, fallbackId, createdAt: new Date().toISOString() });
+          localStorage.setItem("hz_offline_leads", JSON.stringify(offlineQueue));
+        } catch {
+          // Local storage unavailable
+        }
       }
 
       setSubmitted(true);
       window.scrollTo({ top: 120, behavior: "smooth" });
     } catch (err: unknown) {
-      console.error("Submission error:", err);
+      console.warn("Direct API submission exception, fallback engaged:", err);
+      const fallbackId = `HZ-LOCAL-${Date.now().toString(36).toUpperCase().slice(-4)}`;
+      setServerReferenceId(fallbackId);
       setSubmitted(true);
       window.scrollTo({ top: 120, behavior: "smooth" });
     } finally {
@@ -708,13 +740,40 @@ function StartProjectWizardContent() {
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-cyan/20 bg-surface-2/60 p-5 text-left font-mono text-xs space-y-2">
-                      <div className="text-cyan uppercase tracking-wider font-semibold">Transmission Summary:</div>
-                      <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
-                        <div>Client: <span className="text-foreground">{name}</span></div>
-                        <div>Target: <span className="text-foreground">{selectedBuildInfo.title}</span></div>
-                        <div>Timeline: <span className="text-emerald-400">{targetTimeline}</span></div>
-                        <div>Urgency: <span className="text-amber-400 uppercase">{urgency}</span></div>
+                    <div className="rounded-xl border border-cyan/30 bg-surface-2/80 p-5 text-left font-mono text-xs space-y-3 shadow-lg">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
+                        <div className="text-cyan uppercase tracking-wider font-semibold flex items-center gap-2">
+                          <Terminal size={14} className="text-cyan" />
+                          <span>Official Request Dossier</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground">TRACKING ID:</span>
+                          <span className="rounded bg-cyan/15 border border-cyan/40 px-2.5 py-1 text-xs font-bold text-cyan tracking-widest">
+                            {serverReferenceId || "HZ-CONFIRMED"}
+                          </span>
+                          {serverReferenceId && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard?.writeText(serverReferenceId);
+                                setCopiedRef(true);
+                                setTimeout(() => setCopiedRef(false), 2000);
+                              }}
+                              className="rounded border border-border/60 bg-surface-3 p-1 text-muted-foreground hover:text-cyan hover:border-cyan/40 transition-colors"
+                              title="Copy Tracking ID"
+                            >
+                              {copiedRef ? <CheckCheck size={13} className="text-signal-green" /> : <Copy size={13} />}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-muted-foreground pt-1">
+                        <div>Client: <p className="text-foreground font-semibold truncate">{name}</p></div>
+                        <div>Target: <p className="text-foreground font-semibold truncate">{selectedBuildInfo.title}</p></div>
+                        <div>Budget: <p className="text-cyan font-semibold">{budgetRange}</p></div>
+                        <div>Timeline: <p className="text-emerald-400 font-semibold">{targetTimeline}</p></div>
+                        <div>Urgency: <p className="text-amber-400 font-semibold uppercase">{urgency}</p></div>
+                        <div>Scope: <p className="text-purple-400 font-semibold">{selectedFeatures.length} features</p></div>
                       </div>
                     </div>
 
@@ -766,6 +825,27 @@ function StartProjectWizardContent() {
                           <div className="shrink-0 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3.5 py-2 font-mono text-xs text-amber-300">
                             We&apos;re here to help — no tech jargon! 😊
                           </div>
+                        </div>
+
+                        {/* Inline validation alert banner */}
+                        {validationError && (
+                          <div className="flex items-center gap-2.5 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3.5 font-mono text-xs text-rose-300 animate-in fade-in slide-in-from-top-1">
+                            <AlertCircle size={15} className="shrink-0 text-rose-400" />
+                            <span>{validationError}</span>
+                          </div>
+                        )}
+
+                        {/* Bot defense hidden honeypot */}
+                        <div style={{ opacity: 0, position: "absolute", top: 0, left: 0, height: 0, width: 0, zIndex: -1, pointerEvents: "none" }}>
+                          <label htmlFor="company_code_hp">Leave this blank</label>
+                          <input
+                            id="company_code_hp"
+                            type="text"
+                            tabIndex={-1}
+                            autoComplete="off"
+                            value={honeypot}
+                            onChange={(e) => setHoneypot(e.target.value)}
+                          />
                         </div>
 
                         {/* Contact Inputs */}
