@@ -132,7 +132,6 @@ function PublicSystemBackground() {
       <div className="absolute inset-0 bg-studio-grid opacity-60" />
       {/* Ambient Atmospheric Violet and Cyan Glow Orbs */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_55%_at_70%_25%,rgba(139,92,246,0.12),transparent_65%),radial-gradient(ellipse_65%_45%_at_15%_75%,rgba(6,182,212,0.10),transparent_70%)]" />
-      <PersistentDeviceScene portraitUrl={portraitUrl} />
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-60" />
     </div>
   );

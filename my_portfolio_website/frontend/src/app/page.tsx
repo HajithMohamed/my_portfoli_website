@@ -1,12 +1,13 @@
 import { ArrowRight, BriefcaseBusiness } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
-import { CommandDeck } from "@/components/command/command-deck";
+import { StudioHero } from "@/components/sections/studio-hero";
+import { BioSection } from "@/components/sections/bio-section";
+import { TechnologyShowcase } from "@/components/sections/technology-showcase";
 import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
 import { NowDeploying } from "@/components/command/now-deploying";
 import { ProjectsShowcase } from "@/components/command/projects-showcase";
-import { SkillsConstellation } from "@/components/command/skills-constellation";
 import { IntelDossier } from "@/components/command/intel-dossier";
 import { Comms } from "@/components/command/comms";
 import { RecruiterModeClient } from "@/components/sections/recruiter-mode-client";
@@ -16,11 +17,11 @@ import type { GithubSummary, Project } from "@/lib/types";
 
 function SectionDivider({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center w-full py-12">
-      <div className="flex items-center gap-4 w-full max-w-sm mx-auto opacity-50">
-        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-cyan" />
-        <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-cyan">{label}</span>
-        <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan" />
+    <div className="flex items-center justify-center w-full py-10">
+      <div className="flex items-center gap-4 w-full max-w-sm mx-auto opacity-60">
+        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-500/40" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-slate-400">{label}</span>
+        <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-500/40" />
       </div>
     </div>
   );
@@ -102,7 +103,8 @@ export default async function Home() {
       <TopBar location={profile.location} />
 
       <main className="relative z-10">
-        <CommandDeck profile={profile} github={github} resume={resume} />
+        <StudioHero />
+        <BioSection />
 
         <div className="container-responsive section-gap space-y-12 md:space-y-16 lg:space-y-24">
           
@@ -122,9 +124,9 @@ export default async function Home() {
 
           <SectionDivider label="sys.skills" />
 
-          {/* Skills — Technologies I Work With */}
+          {/* Tools across my work — Technology Showcase */}
           <div id="skills" className="scroll-mt-24">
-            <SkillsConstellation skills={skills} projects={projects} />
+            <TechnologyShowcase />
           </div>
 
           <SectionDivider label="sys.intelligence" />
