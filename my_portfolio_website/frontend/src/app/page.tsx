@@ -4,6 +4,7 @@ import { CommandFooter } from "@/components/shell/command-footer";
 import { StudioHero } from "@/components/sections/studio-hero";
 import { BioSection } from "@/components/sections/bio-section";
 import { TechnologyShowcase } from "@/components/sections/technology-showcase";
+import { GithubTelemetrySection } from "@/components/sections/github-telemetry-section";
 import { SystemStatus } from "@/components/command/system-status";
 import { GithubTelemetry } from "@/components/command/github-telemetry";
 import { NowDeploying } from "@/components/command/now-deploying";
@@ -105,6 +106,8 @@ export default async function Home() {
       <main className="relative z-10">
         <StudioHero />
         <BioSection />
+
+        <GithubTelemetrySection github={github} />
 
         <div className="container-responsive section-gap space-y-12 md:space-y-16 lg:space-y-24">
           

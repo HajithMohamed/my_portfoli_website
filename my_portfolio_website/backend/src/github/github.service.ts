@@ -359,8 +359,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         `https://api.github.com/users/${username}/events/public?per_page=50`,
       ).catch(() => [] as GithubEvent[]);
 
-      const sourceRepos = repos
-        .filter((repo) => !repo.fork)
+      const sourceRepos = publicOwnerRepos(repos, username)
         .sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at));
       const currentRepo = await this.resolveCurrentRepoStatus(sourceRepos);
 
@@ -441,7 +440,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         following: userProfile?.following ?? null,
         currentRepo,
         repositories,
-        stats: repositoryStats(repositories, repos.length),
+        stats: repositoryStats(repositories, sourceRepos.length),
         provenance: {
           sourceUrl: `https://github.com/${username}?tab=repositories`,
           syncedAt: new Date().toISOString(),
@@ -915,6 +914,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     languages: Record<string, number>,
     repos: GithubRepo[],
   ) {
+    if (!this.prisma?.skill?.findMany) {
+      return;
+    }
     try {
       const existingSkills = await this.prisma.skill.findMany();
       const existingMap = new Map(

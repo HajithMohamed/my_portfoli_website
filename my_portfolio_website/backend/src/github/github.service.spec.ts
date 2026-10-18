@@ -85,6 +85,10 @@ describe('GithubService sync', () => {
             return Promise.resolve({ count: data.length });
           }),
       },
+      skill: {
+        findMany: jest.fn().mockResolvedValue([]),
+        create: jest.fn().mockResolvedValue({}),
+      },
     };
     const config = {
       get: (key: string) =>

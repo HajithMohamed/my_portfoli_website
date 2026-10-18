@@ -149,6 +149,9 @@ describe('GitHub portfolio facts', () => {
       repositoryStats(items, 5, Date.parse('2026-09-10T00:00:00Z')),
     ).toEqual({
       publicRepositories: 5,
+      privateRepositories: 0,
+      collaborationRepositories: 0,
+      totalCollaborations: 0,
       createdRepositories: 4,
       activeRepositories: 2,
       newRepositories: 1,

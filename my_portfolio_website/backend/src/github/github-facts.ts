@@ -74,6 +74,9 @@ export function publicOwnerRepos(
   return repos.filter(
     (repo) =>
       !repo.fork &&
+      !repo.private &&
+      repo.visibility !== 'private' &&
+      repo.visibility !== 'internal' &&
       repo.full_name.split('/')[0]?.toLowerCase() === username.toLowerCase(),
   );
 }
@@ -82,12 +85,18 @@ export function mostRecentlyPushed(
   repos: GithubRepo[],
   username = 'HajithMohamed',
 ): GithubRepo | null {
+  const isPublic = (repo: GithubRepo) =>
+    !repo.fork &&
+    !repo.archived &&
+    !repo.private &&
+    repo.visibility !== 'private' &&
+    repo.visibility !== 'internal';
+
   // First attempt: prioritize active software code projects (skip profile README like HajithMohamed/HajithMohamed)
   const candidate = repos
     .filter(
       (repo) =>
-        !repo.fork &&
-        !repo.archived &&
+        isPublic(repo) &&
         repo.name.toLowerCase() !== username.toLowerCase() &&
         repo.full_name.toLowerCase() !== `${username}/${username}`.toLowerCase(),
     )
@@ -95,12 +104,11 @@ export function mostRecentlyPushed(
 
   if (candidate) return candidate;
 
-  // Fallback to any non-fork non-archived repo, then any repo
+  // Fallback to any non-fork, non-archived, public repo
   return (
     repos
-      .filter((repo) => !repo.fork && !repo.archived)
+      .filter(isPublic)
       .sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at))[0] ??
-    repos.sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at))[0] ??
     null
   );
 }
@@ -210,7 +218,7 @@ export function repositoryStats(
   const privateCount = repos.filter((r) => r.isPrivate).length;
   const collabCount = repos.filter((r) => r.isCollaborator).length;
   return {
-    publicRepositories: repos.filter((r) => !r.isPrivate).length,
+    publicRepositories: publicCount,
     privateRepositories: privateCount,
     collaborationRepositories: collabCount,
     totalCollaborations: collabCount,
