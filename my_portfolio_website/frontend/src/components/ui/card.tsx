@@ -5,10 +5,11 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/10 bg-slate-950/70 p-5 shadow-2xl shadow-black/20 transition-all duration-300 hover:border-white/20 hover:shadow-blue-950/20",
+        "rounded-2xl border border-white/[0.08] bg-[#0c101c]/75 p-6 backdrop-blur-xl shadow-2xl shadow-black/40 transition-all duration-300 hover:border-white/[0.18] hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]",
         className
       )}
       {...props}
     />
   );
 }
+

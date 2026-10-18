@@ -50,7 +50,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className="relative min-h-full bg-[#040710] text-foreground">
+      <body className="relative min-h-full bg-[#05070f] text-foreground">
         <SmoothScrollProvider>
           <Providers>
             {/* ONE continuous, fixed, futuristic HUD background across the entire website */}
