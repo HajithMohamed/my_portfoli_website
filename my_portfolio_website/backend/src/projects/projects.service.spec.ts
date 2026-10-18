@@ -125,7 +125,7 @@ describe('ProjectsService', () => {
         status: ProjectStatus.ACTIVE,
         featured: true,
         outcome: 'Reduced invoice calculation time',
-        media: [{ url: '/img1.png', type: 'IMAGE', caption: 'Overview' }],
+        media: [{ url: 'https://example.com/img1.png', alt: 'Overview' }],
         caseStudy: [{ heading: 'Goal', body: 'Manage wholesale inventory' }],
       };
 
@@ -139,7 +139,7 @@ describe('ProjectsService', () => {
           title: 'Shoe Bank',
           slug: 'shoe-bank',
           media: {
-            create: [{ url: '/img1.png', type: 'IMAGE', caption: 'Overview', order: 0 }],
+            create: [{ url: 'https://example.com/img1.png', alt: 'Overview', order: 0 }],
           },
           caseStudy: {
             create: [{ heading: 'Goal', body: 'Manage wholesale inventory', order: 0 }],
