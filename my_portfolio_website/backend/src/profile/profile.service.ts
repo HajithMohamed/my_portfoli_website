@@ -53,7 +53,7 @@ export class ProfileService {
       philosophy:
         'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
       location: 'Sri Lanka',
-      email: 'hello@hzlabs.dev',
+      email: 'ahammedlebbehajith@gmail.com',
       availabilityStatus:
         'Available for internships and software engineering opportunities',
       currentlyExploring: [
@@ -64,7 +64,7 @@ export class ProfileService {
         'AI Integration',
       ],
       timeline: [
-        { label: 'Education', value: 'Computer Science undergraduate' },
+        { label: 'Education', value: 'BICT (Hons), Faculty of Technology, University of Ruhuna (2023 - 2027)' },
         {
           label: 'Projects',
           value: 'Commerce, booking, authentication, and admin platforms',

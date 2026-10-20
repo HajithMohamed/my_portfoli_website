@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: `%s | ${PERSONAL_IDENTITY.name}`,
   },
   description:
-    "The portfolio of Mohamed Hajith, full stack developer. Explore GitHub projects, recent work, and project notes. BICT (Hons), Faculty of Technology, University of Ruhuna.",
+    "The portfolio of Mohamed Hajith, full stack developer. Explore GitHub projects, recent work, and project notes. BICT (Hons), Faculty of Technology, University of Ruhuna (2023 - 2027).",
   authors: [{ name: PERSONAL_IDENTITY.name }],
   openGraph: {
     title: `${PERSONAL_IDENTITY.name} | ${PERSONAL_IDENTITY.title}`,

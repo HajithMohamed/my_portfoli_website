@@ -49,6 +49,7 @@ function profileForPortfolio(candidate: Profile): Profile {
     name: PERSONAL_IDENTITY.name,
     title: PERSONAL_IDENTITY.title,
     bio: PERSONAL_IDENTITY.bio,
+    email: PERSONAL_IDENTITY.email,
     location: PERSONAL_IDENTITY.location,
     timeline: [{ label: "Education", value: PERSONAL_IDENTITY.education }],
     socialLinks: [githubLink, ...otherLinks],

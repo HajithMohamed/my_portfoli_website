@@ -57,7 +57,7 @@ const TIMELINE_MILESTONES = [
     badgeColor: "border-purple-400/40 bg-purple-400/10 text-purple-400",
   },
   {
-    year: "2021 – 2026",
+    year: "2023 – 2027",
     title: "Bachelor of Information and Communication Technology (Honours)",
     org: "Faculty of Technology, University of Ruhuna",
     desc: "Rigorous academic study covering Data Structures, Algorithms, Software Architecture, Distributed Systems, Database Design, and Machine Learning.",
@@ -131,7 +131,7 @@ export default async function AboutPage() {
                 <div className="flex flex-wrap items-center gap-3 pt-2 font-mono text-xs">
                   <div className="flex items-center gap-1.5 rounded-lg border border-cyan/30 bg-surface-2/80 px-3 py-1.5 text-cyan">
                     <GraduationCap size={14} />
-                    <span>{PERSONAL_IDENTITY.degree}</span>
+                    <span>{PERSONAL_IDENTITY.degree} ({PERSONAL_IDENTITY.academicYears})</span>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-lg border border-purple-400/30 bg-surface-2/80 px-3 py-1.5 text-purple-300">
                     <BookOpen size={14} />
@@ -347,7 +347,7 @@ export default async function AboutPage() {
                 </Link>
 
                 <a
-                  href={`mailto:${profile.email}?subject=Software%20Engineering%20Inquiry%20from%20Portfolio`}
+                  href={`mailto:${profile.email || PERSONAL_IDENTITY.email}?subject=Software%20Engineering%20Inquiry%20from%20Portfolio`}
                   className="rounded-xl border border-border bg-surface-2 px-7 py-3.5 text-foreground hover:bg-surface-3 hover:border-cyan/40 transition-colors"
                 >
                   Send Direct Email
