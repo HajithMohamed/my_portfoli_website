@@ -1,4 +1,3 @@
-import { ArrowRight, BriefcaseBusiness } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
 import { StudioHero } from "@/components/sections/studio-hero";
@@ -133,47 +132,6 @@ export default async function Home() {
           {/* Credentials & testimonials */}
           <div className="space-y-6">
             <IntelDossier testimonials={testimonials} certificates={certificates} />
-          </div>
-
-          <SectionDivider label="sys.intake" />
-
-          {/* Request a Project Showcase Banner */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-cyan-950/30 via-indigo-950/20 to-purple-950/20 p-8 sm:p-12 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:border-cyan/40">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan/15 blur-3xl" />
-            <div className="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
-            <div className="relative z-10 flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-              <div className="max-w-2xl space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1 font-mono text-xs uppercase tracking-widest text-cyan">
-                  <span className="h-2 w-2 rounded-full bg-cyan animate-pulse" />
-                  <span>SYS.INTAKE // CLIENT PROJECTS &amp; WEB SYSTEMS</span>
-                </div>
-                <h3 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-                  Have a Project in Mind? Let&apos;s Build It.
-                </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground max-w-xl">
-                  Looking for a full-stack engineer to build a production web application, MVP, or API? Submit your project goals, scope, and timeline for an architectural review and estimation.
-                </p>
-                <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1.5 text-slate-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    24h Turnaround
-                  </span>
-                  <span>·</span>
-                  <span className="text-slate-300">Milestone-Driven</span>
-                  <span>·</span>
-                  <span className="text-slate-300">Production-Ready Code</span>
-                </div>
-              </div>
-              <a
-                href="/start-project"
-                data-track="home_project_request_cta"
-                className="group inline-flex items-center justify-center gap-2.5 shrink-0 rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 px-8 py-4 font-display text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40 hover:scale-[1.02] w-full sm:w-auto"
-              >
-                <BriefcaseBusiness size={18} />
-                <span>Request a Project</span>
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </a>
-            </div>
           </div>
 
           <SectionDivider label="sys.communication" />
