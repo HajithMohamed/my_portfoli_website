@@ -16,9 +16,37 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const project = await getProject(slug);
+  if (!project) {
+    return {
+      title: "Project Not Found | HZ Labs",
+      description: "Technical architecture dossier by Mohamed Hajith.",
+    };
+  }
+
+  const ogUrl = `/api/og?title=${encodeURIComponent(project.title)}&category=${encodeURIComponent(project.category || "Case Study")}&badge=DOSSIER&tech=${encodeURIComponent(project.techStack.slice(0, 4).join(","))}`;
+
   return {
-    title: project ? `${project.title} — Technical Dossier | HZ Labs` : "Project Not Found | HZ Labs",
-    description: project?.description ?? "Technical architecture dossier by Mohamed Hajith.",
+    title: `${project.title} — Technical Dossier | HZ Labs`,
+    description: project.description ?? "Technical architecture dossier by Mohamed Hajith.",
+    openGraph: {
+      title: `${project.title} — Technical Dossier | HZ Labs`,
+      description: project.description,
+      type: "article",
+      images: [
+        {
+          url: ogUrl,
+          width: 1200,
+          height: 630,
+          alt: `${project.title} Architecture Dossier`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} — Technical Dossier | HZ Labs`,
+      description: project.description,
+      images: [ogUrl],
+    },
   };
 }
 
