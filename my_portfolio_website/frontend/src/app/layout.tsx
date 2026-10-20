@@ -4,10 +4,13 @@ import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provi
 import { AdminAccess } from "@/components/admin/admin-access";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import { ThemeScript } from "@/components/theme/theme-script";
+import { JsonLd } from "@/components/seo/json-ld";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import { getSiteUrl } from "@/lib/site-url";
 import { GlobalSystemBackground } from "@/components/shell/global-system-background";
 import "./globals.css";
+
+const defaultOgUrl = `/api/og?title=${encodeURIComponent("HZ Labs Studio — Full-Stack Architecture")}&category=Engineering%20Portfolio&badge=PLATFORM`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -25,12 +28,21 @@ export const metadata: Metadata = {
     url: "/",
     siteName: PERSONAL_IDENTITY.name,
     type: "website",
+    images: [
+      {
+        url: defaultOgUrl,
+        width: 1200,
+        height: 630,
+        alt: `${PERSONAL_IDENTITY.name} — HZ Labs Studio`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${PERSONAL_IDENTITY.name} | ${PERSONAL_IDENTITY.title}`,
     description:
       "Mohamed Hajith — Full Stack Developer. Projects, progress, and project notes.",
+    images: [defaultOgUrl],
   },
 };
 
@@ -49,6 +61,7 @@ export default function RootLayout({
     >
       <head>
         <ThemeScript />
+        <JsonLd />
       </head>
       <body className="relative min-h-full bg-[#05070f] text-foreground">
         <SmoothScrollProvider>

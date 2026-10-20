@@ -28,9 +28,40 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
+  if (!post) {
+    return {
+      title: "Dispatch Not Found | HZ Labs",
+      description: "Technical architecture article by Mohamed Hajith.",
+    };
+  }
+
+  const tags = post.tags?.map((t) => t.name).slice(0, 4).join(",") || "Engineering";
+  const ogUrl = `/api/og?title=${encodeURIComponent(post.title)}&category=Engineering%20Dispatch&badge=SIGNAL.LOG&tech=${encodeURIComponent(tags)}`;
+
   return {
-    title: post ? `${post.title} — Engineering Dispatch | HZ Labs` : "Dispatch Not Found | HZ Labs",
-    description: post?.excerpt ?? "Technical architecture article by Mohamed Hajith.",
+    title: `${post.title} — Engineering Dispatch | HZ Labs`,
+    description: post.excerpt ?? "Technical architecture article by Mohamed Hajith.",
+    openGraph: {
+      title: `${post.title} — Engineering Dispatch | HZ Labs`,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.publishedAt ?? undefined,
+      authors: [post.author || "Mohamed Hajith"],
+      images: [
+        {
+          url: ogUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${post.title} — Engineering Dispatch | HZ Labs`,
+      description: post.excerpt,
+      images: [ogUrl],
+    },
   };
 }
 
