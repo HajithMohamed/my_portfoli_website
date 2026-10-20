@@ -134,6 +134,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
   }, [handleKeyDown]);
 
   const isNavActive = (item: NavItem) => {
+    if (!pathname) return false;
     if (pathname === "/" && item.href === "/") {
       return activeSection === "Home";
     }
