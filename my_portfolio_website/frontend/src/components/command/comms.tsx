@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Panel } from "@/components/hud/panel";
 import { bffUrl } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import type { Profile } from "@/lib/types";
@@ -18,6 +17,8 @@ import {
   ArrowRight,
   Briefcase,
   Terminal,
+  ShieldCheck,
+  Radio,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
@@ -37,10 +38,10 @@ export function Comms({ profile }: { profile: Profile }) {
   const githubHandle = githubLink?.replace(/\/$/, "").split("/").pop() ?? "HajithMohamed";
 
   // Validation rules
-  const nameError = touched.name && form.name.trim().length < 2 ? "callsign too short" : null;
+  const nameError = touched.name && form.name.trim().length < 2 ? "Please provide your name or identifier (at least 2 characters)" : null;
   const emailError =
-    touched.from && !validateEmail(form.from) ? "invalid packet address" : null;
-  const bodyError = touched.body && form.body.trim().length < 10 ? "payload under 10 chars" : null;
+    touched.from && !validateEmail(form.from) ? "Please enter a valid email address" : null;
+  const bodyError = touched.body && form.body.trim().length < 10 ? "Message must contain at least 10 characters" : null;
 
   const isFormValid =
     form.name.trim().length >= 2 && validateEmail(form.from) && form.body.trim().length >= 10;
@@ -54,7 +55,7 @@ export function Comms({ profile }: { profile: Profile }) {
     setState("transmitting");
     setProgressStep(1);
 
-    // Simulate multi-stage terminal transmit sequence
+    // Multi-stage transmission feedback
     const t1 = setTimeout(() => setProgressStep(2), 350);
     const t2 = setTimeout(() => setProgressStep(3), 700);
 
@@ -78,13 +79,13 @@ export function Comms({ profile }: { profile: Profile }) {
         track("contact_submit");
       } else {
         const errData = await response.json().catch(() => null);
-        setErrorMsg(errData?.message || "Transmission rejected by upstream node");
+        setErrorMsg(errData?.message || "Transmission rejected by upstream server");
         setState("error");
       }
     } catch (err: unknown) {
       clearTimeout(t1);
       clearTimeout(t2);
-      setErrorMsg("Network error: packet failed to route");
+      setErrorMsg("Network error: message failed to send. Please reach out via email directly.");
       setState("error");
     }
   }
@@ -98,229 +99,266 @@ export function Comms({ profile }: { profile: Profile }) {
   }
 
   return (
-    <Panel label="comms.terminal" subtitle="secure operator channel" live>
-      <div className="grid gap-8 md:grid-cols-[1fr_1.4fr] lg:gap-12">
-        {/* Contact Info Side */}
-        <div className="space-y-6 font-mono text-xs">
-          <div className="border-b border-cyan/10 pb-4">
+    <section
+      aria-label="Secure Operator Channel"
+      className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 sm:p-10 backdrop-blur-2xl shadow-2xl space-y-8"
+    >
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-96 w-96 rounded-full bg-cyan/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-96 w-96 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+        <div>
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+            <span className="h-2 w-2 rounded-full bg-cyan animate-pulse" />
+            <span>COMMS.TERMINAL // SECURE OPERATOR CHANNEL</span>
+          </div>
+          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Contact &amp; Operator Uplink
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Direct communication channel for full-stack engineering, system architecture, commissions, and team placement.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-mono text-emerald-400">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+          <span>Channel Online · 24h SLA</span>
+        </div>
+      </div>
+
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:gap-12">
+        {/* Contact Info Coordinates */}
+        <div className="space-y-6">
+          <div className="space-y-2">
             <h3 className="font-display text-xl font-bold text-foreground">
-              Contact {PERSONAL_IDENTITY.name}
+              Direct Coordinates
             </h3>
-            <p className="mt-2 text-[11px] text-cyan">{PERSONAL_IDENTITY.title}</p>
-            <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-              Direct operator uplink for full-stack engineering, system architecture, internships, and collaborative builds.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Based in {PERSONAL_IDENTITY.location}, available for global remote roles and high-impact engineering projects.
             </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="group flex items-start gap-3">
-              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-cyan/10 text-cyan border border-cyan/20 transition-colors group-hover:bg-cyan/20 group-hover:text-cyan-glow">
-                <Mail size={12} />
-              </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">
-                  direct email
+          <div className="space-y-3 font-mono text-xs">
+            {/* Direct Email */}
+            <a
+              href={`mailto:${profile.email}`}
+              className="group flex items-center justify-between rounded-2xl border border-white/[0.08] bg-surface/80 p-4 backdrop-blur-xl transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04]"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan/20 bg-cyan/10 text-cyan transition-colors group-hover:border-cyan/50 group-hover:bg-cyan/20">
+                  <Mail size={16} />
                 </div>
-                <a
-                  href={`mailto:${profile.email}`}
-                  className="text-foreground transition-colors hover:text-cyan mt-1 inline-block"
-                >
-                  {profile.email}
-                </a>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Direct Email
+                  </div>
+                  <div className="text-sm font-semibold text-foreground group-hover:text-cyan transition-colors">
+                    {profile.email}
+                  </div>
+                </div>
               </div>
-            </div>
+              <ExternalLink size={14} className="text-muted-foreground opacity-40 group-hover:opacity-100 group-hover:text-cyan transition-opacity" />
+            </a>
 
-            <div className="group flex items-start gap-3">
-              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-cyan/10 text-cyan border border-cyan/20 transition-colors group-hover:bg-cyan/20 group-hover:text-cyan-glow">
-                <MapPin size={12} />
+            {/* Base Location */}
+            <div className="flex items-center gap-3.5 rounded-2xl border border-white/[0.08] bg-surface/80 p-4 backdrop-blur-xl">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-400/10 text-indigo-400">
+                <MapPin size={16} />
               </div>
               <div>
-                <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">
-                  base sector
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                  Operational Base
                 </div>
-                <div className="text-foreground mt-1 inline-block">
+                <div className="text-sm font-semibold text-foreground">
                   {PERSONAL_IDENTITY.location}
                 </div>
               </div>
             </div>
 
-            <div className="group flex items-start gap-3">
-              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-cyan/10 text-cyan border border-cyan/20 transition-colors group-hover:bg-cyan/20 group-hover:text-cyan-glow">
-                <Github size={12} />
+            {/* GitHub */}
+            <a
+              href={githubLink ?? `https://github.com/${githubHandle}`}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center justify-between rounded-2xl border border-white/[0.08] bg-surface/80 p-4 backdrop-blur-xl transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04]"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-foreground transition-colors group-hover:border-cyan/50 group-hover:text-cyan">
+                  <Github size={16} />
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    GitHub Profile
+                  </div>
+                  <div className="text-sm font-semibold text-foreground group-hover:text-cyan transition-colors">
+                    @{githubHandle}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">github</div>
-                <a
-                  href={githubLink ?? `https://github.com/${githubHandle}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-foreground transition-colors hover:text-cyan mt-1 flex items-center gap-1"
-                >
-                  @{githubHandle} <ExternalLink size={10} className="opacity-50" />
-                </a>
-              </div>
-            </div>
+              <ExternalLink size={14} className="text-muted-foreground opacity-40 group-hover:opacity-100 group-hover:text-cyan transition-opacity" />
+            </a>
 
+            {/* Social Links */}
             {profile.socialLinks
               ?.filter((l) => !l.url.includes("github.com") && !l.url.startsWith("mailto:"))
               .map((l) => (
-                <div key={l.label} className="group flex items-start gap-3">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-cyan/10 text-cyan border border-cyan/20 transition-colors group-hover:bg-cyan/20 group-hover:text-cyan-glow">
-                    <LinkIcon size={12} />
-                  </div>
-                  <div>
-                    <div className="text-[9px] uppercase tracking-[0.25em] text-cyan/70">
-                      {l.label}
+                <a
+                  key={l.label}
+                  href={l.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center justify-between rounded-2xl border border-white/[0.08] bg-surface/80 p-4 backdrop-blur-xl transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04]"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-foreground transition-colors group-hover:border-cyan/50 group-hover:text-cyan">
+                      <LinkIcon size={16} />
                     </div>
-                    <a
-                      href={l.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="break-all text-foreground transition-colors hover:text-cyan mt-1 flex items-center gap-1"
-                    >
-                      {l.url.replace(/^https?:\/\//, "")}{" "}
-                      <ExternalLink size={10} className="opacity-50" />
-                    </a>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {l.label}
+                      </div>
+                      <div className="text-sm font-semibold text-foreground group-hover:text-cyan transition-colors">
+                        {l.url.replace(/^https?:\/\//, "")}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                  <ExternalLink size={14} className="text-muted-foreground opacity-40 group-hover:opacity-100 group-hover:text-cyan transition-opacity" />
+                </a>
               ))}
           </div>
 
-          {/* Secondary CTA pointing to /start-project */}
-          <div className="rounded-lg border border-cyan/20 bg-cyan/5 p-4 space-y-2 mt-6">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-cyan font-bold">
-              <Briefcase size={12} />
-              <span>Commissioning a Project?</span>
+          {/* Project Commission Callout */}
+          <div className="rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/10 via-indigo-950/20 to-transparent p-5 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-cyan">
+              <Briefcase size={14} />
+              <span>Commissioning a Project or System?</span>
             </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Need a structured proposal with timeline estimation, scope definition, and architectural breakdown?
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Need a full architectural breakdown with milestones, tech stack selection, and budget estimates?
             </p>
             <Link
               href="/start-project"
-              className="mt-2 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan hover:text-cyan-glow transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-cyan/15 px-4 py-2 font-mono text-xs uppercase tracking-wider text-cyan hover:bg-cyan/25 transition-all"
             >
-              <span>launch project intake wizard</span>
-              <ArrowRight size={12} />
+              <span>Launch Project Intake Wizard</span>
+              <ArrowRight size={13} />
             </Link>
           </div>
         </div>
 
-        {/* Form Side */}
-        <div className="relative overflow-hidden rounded-lg border border-cyan/20 bg-black/40 p-6 font-mono text-xs shadow-inner backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 mb-6 flex items-center justify-between border-b border-cyan/20 pb-3">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-cyan/80">
-              <Terminal size={12} />
-              <span>Message Payload</span>
+        {/* Message Form Card */}
+        <div className="relative rounded-2xl border border-white/[0.08] bg-surface/80 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+          <div className="mb-6 flex items-center justify-between border-b border-white/[0.06] pb-4">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan">
+              <Radio size={14} className="animate-pulse" />
+              <span>Direct Dispatch Uplink</span>
             </div>
-            <div className="h-1.5 w-1.5 rounded-full bg-cyan/50 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
+              <ShieldCheck size={12} className="text-emerald-400" />
+              <span>Encrypted &amp; Verified</span>
+            </div>
           </div>
 
           {state === "sent" ? (
-            /* Terminal Success State */
+            /* Success ACK State */
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="py-8 space-y-4 font-mono"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-8 space-y-6 text-center"
             >
-              <div className="flex items-center gap-3 text-signal-green">
-                <CheckCircle2 size={24} />
-                <span className="text-sm font-bold uppercase tracking-wider">
-                  [ACK 200] INGEST_SUCCESSFUL
-                </span>
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                <CheckCircle2 size={32} />
               </div>
-              <div className="rounded-md border border-signal-green/20 bg-signal-green/5 p-4 text-[11px] space-y-2 text-muted-foreground">
-                <p className="text-foreground">
-                  Payload SHA-256 verified and ingested into operator inbox.
+              <div className="space-y-2">
+                <h4 className="font-display text-xl font-bold text-foreground">
+                  Transmission Dispatched Successfully
+                </h4>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                  Your message was authenticated and forwarded directly to Hajith&apos;s primary inbox.
                 </p>
-                <p>
-                  &gt; Priority queue: <span className="text-signal-green font-semibold">HIGH</span>
-                </p>
-                <p>&gt; SLA: reply guaranteed within 24 hours.</p>
               </div>
+
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-xs font-mono text-slate-400 space-y-1 text-left max-w-sm mx-auto">
+                <div className="flex justify-between">
+                  <span>Routing Priority:</span>
+                  <span className="text-emerald-400 font-semibold">HIGH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Target SLA:</span>
+                  <span className="text-slate-200">Reply within 24 Hours</span>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={resetForm}
-                className="mt-4 inline-flex items-center gap-2 rounded-sm border border-cyan/40 bg-cyan/10 px-4 py-2 text-[10px] uppercase tracking-widest text-cyan hover:bg-cyan/20 transition-all"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:border-cyan/40 hover:text-cyan transition-all"
               >
-                <span>transmit new payload</span>
+                <span>Dispatch Another Message</span>
               </button>
             </motion.div>
           ) : (
-            <form onSubmit={submit} className="relative z-10 space-y-4">
+            <form onSubmit={submit} className="space-y-4">
               {/* Callsign / Name */}
-              <div>
-                <div className="group relative flex min-h-[44px] items-center gap-3 border-b border-cyan/15 pb-2 transition-colors focus-within:border-cyan">
-                  <span className="text-cyan/40 transition-colors group-focus-within:text-cyan">
-                    ▸
-                  </span>
-                  <label
-                    htmlFor="comms-name"
-                    className="w-16 shrink-0 text-[10px] uppercase tracking-[0.25em] text-cyan/80 transition-colors group-focus-within:text-cyan"
-                  >
-                    callsign
-                  </label>
-                  <input
-                    id="comms-name"
-                    name="name"
-                    type="text"
-                    value={form.name}
-                    onBlur={() => setTouched((t) => ({ ...t, name: true }))}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    placeholder="Your identifier"
-                    required
-                    className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/40"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="comms-name"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  Your Name / Call Sign <span className="text-cyan">*</span>
+                </label>
+                <input
+                  id="comms-name"
+                  name="name"
+                  type="text"
+                  value={form.name}
+                  onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g. Alex Mercer / Tech Lead"
+                  required
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan/50 focus:bg-white/[0.06] focus:outline-none transition-all"
+                />
                 {nameError && (
-                  <span className="mt-1 block text-[10px] text-signal-red">
-                    [ERR: {nameError}]
+                  <span className="block text-[11px] text-rose-400">
+                    {nameError}
                   </span>
                 )}
               </div>
 
               {/* From / Email */}
-              <div>
-                <div className="group relative flex min-h-[44px] items-center gap-3 border-b border-cyan/15 pb-2 transition-colors focus-within:border-cyan">
-                  <span className="text-cyan/40 transition-colors group-focus-within:text-cyan">
-                    ▸
-                  </span>
-                  <label
-                    htmlFor="comms-email"
-                    className="w-16 shrink-0 text-[10px] uppercase tracking-[0.25em] text-cyan/80 transition-colors group-focus-within:text-cyan"
-                  >
-                    from
-                  </label>
-                  <input
-                    id="comms-email"
-                    name="email"
-                    type="email"
-                    value={form.from}
-                    onBlur={() => setTouched((t) => ({ ...t, from: true }))}
-                    onChange={(e) => setForm((f) => ({ ...f, from: e.target.value }))}
-                    placeholder="operator@company.com"
-                    required
-                    className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/40"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="comms-email"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  Email Address <span className="text-cyan">*</span>
+                </label>
+                <input
+                  id="comms-email"
+                  name="email"
+                  type="email"
+                  value={form.from}
+                  onBlur={() => setTouched((t) => ({ ...t, from: true }))}
+                  onChange={(e) => setForm((f) => ({ ...f, from: e.target.value }))}
+                  placeholder="operator@company.com"
+                  required
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan/50 focus:bg-white/[0.06] focus:outline-none transition-all"
+                />
                 {emailError && (
-                  <span className="mt-1 block text-[10px] text-signal-red">
-                    [ERR: {emailError}]
+                  <span className="block text-[11px] text-rose-400">
+                    {emailError}
                   </span>
                 )}
               </div>
 
               {/* Subject */}
-              <div className="group relative flex min-h-[44px] items-center gap-3 border-b border-cyan/15 pb-2 transition-colors focus-within:border-cyan">
-                <span className="text-cyan/40 transition-colors group-focus-within:text-cyan">
-                  ▸
-                </span>
+              <div className="space-y-1.5">
                 <label
                   htmlFor="comms-subject"
-                  className="w-16 shrink-0 text-[10px] uppercase tracking-[0.25em] text-cyan/80 transition-colors group-focus-within:text-cyan"
+                  className="block text-xs font-medium text-slate-300"
                 >
-                  re
+                  Subject / Objective <span className="text-muted-foreground text-[10px]">(Optional)</span>
                 </label>
                 <input
                   id="comms-subject"
@@ -328,22 +366,19 @@ export function Comms({ profile }: { profile: Profile }) {
                   type="text"
                   value={form.subject}
                   onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-                  placeholder="System architecture / project scope"
-                  className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/40"
+                  placeholder="System architecture / project scope / full-time role"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan/50 focus:bg-white/[0.06] focus:outline-none transition-all"
                 />
               </div>
 
               {/* Message */}
-              <div className="pt-2">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="text-cyan/40">▸</span>
-                  <label
-                    htmlFor="comms-message"
-                    className="text-[10px] uppercase tracking-[0.25em] text-cyan/80"
-                  >
-                    message payload
-                  </label>
-                </div>
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="comms-message"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  Message Payload <span className="text-cyan">*</span>
+                </label>
                 <textarea
                   id="comms-message"
                   name="message"
@@ -352,30 +387,30 @@ export function Comms({ profile }: { profile: Profile }) {
                   onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
                   rows={4}
                   required
-                  className="w-full resize-none rounded-md border border-cyan/20 bg-black/40 p-3 text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-cyan focus:bg-black/60 focus:ring-1 focus:ring-cyan/30"
                   placeholder="State project requirements, system objectives, or technical inquiries..."
+                  className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan/50 focus:bg-white/[0.06] focus:outline-none transition-all"
                 />
                 {bodyError && (
-                  <span className="mt-1 block text-[10px] text-signal-red">
-                    [ERR: {bodyError}]
+                  <span className="block text-[11px] text-rose-400">
+                    {bodyError}
                   </span>
                 )}
               </div>
 
               {/* Transmit Progress Sequence */}
               {state === "transmitting" && (
-                <div className="rounded-md border border-cyan/30 bg-cyan/5 p-3 space-y-1 text-[10px] text-cyan">
+                <div className="rounded-xl border border-cyan/30 bg-cyan/10 p-3.5 space-y-2 text-xs font-mono text-cyan">
                   <div className="flex items-center justify-between">
                     <span>
-                      {progressStep === 1 && "[01/03] ENCRYPTING_PAYLOAD..."}
-                      {progressStep === 2 && "[02/03] ROUTING_TO_PRIMARY_NODE..."}
-                      {progressStep >= 3 && "[03/03] AWAITING_INGEST_ACK..."}
+                      {progressStep === 1 && "[01/03] ENCRYPTING PAYLOAD..."}
+                      {progressStep === 2 && "[02/03] ROUTING TO INBOX..."}
+                      {progressStep >= 3 && "[03/03] AWAITING SERVER ACK..."}
                     </span>
                     <span className="inline-block h-2 w-2 rounded-full bg-cyan animate-ping" />
                   </div>
-                  <div className="h-1 w-full bg-cyan/20 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-cyan/20 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-cyan transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-300"
                       style={{ width: `${progressStep * 33}%` }}
                     />
                   </div>
@@ -384,30 +419,31 @@ export function Comms({ profile }: { profile: Profile }) {
 
               {/* Error Output */}
               {state === "error" && (
-                <div className="flex items-center gap-2 rounded-md border border-signal-red/30 bg-signal-red/10 p-3 text-[10px] text-signal-red">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>[TRANSMIT_FAILED] {errorMsg || "Connection timed out. Email directly."}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-400">
+                  <AlertCircle size={15} className="shrink-0" />
+                  <span>{errorMsg || "Connection timed out. Please email directly."}</span>
                 </div>
               )}
 
               {/* Submit Button */}
               <button
                 type="submit"
+                data-testid="comms-submit-btn"
                 disabled={state === "transmitting"}
-                className="group relative flex w-full touch-target-lg items-center justify-center gap-3 overflow-hidden rounded-md border border-cyan/50 bg-cyan/10 px-4 py-3.5 text-[11px] uppercase tracking-[0.25em] text-cyan transition-all hover:bg-cyan/20 hover:text-cyan-glow hover:shadow-[0_0_20px_rgba(92,208,255,0.15)] disabled:opacity-60"
+                className="group relative flex w-full items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40 hover:opacity-95 disabled:opacity-60 font-display cursor-pointer"
               >
                 <Send
-                  size={14}
-                  className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                  size={15}
+                  className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5"
                 />
                 <span>
-                  {state === "transmitting" ? "transmitting packet..." : "transmit payload"}
+                  {state === "transmitting" ? "Transmitting Dispatch..." : "Send Message"}
                 </span>
               </button>
             </form>
           )}
         </div>
       </div>
-    </Panel>
+    </section>
   );
 }

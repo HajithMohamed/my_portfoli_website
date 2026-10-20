@@ -1,6 +1,9 @@
-import { Panel } from "@/components/hud/panel";
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Quote, Award, Star, ExternalLink, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { Certificate, Testimonial } from "@/lib/types";
-import { Quote, Award, Star, ExternalLink, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function IntelDossier({
@@ -15,37 +18,62 @@ export function IntelDossier({
 
   if (!hasTestimonials && !hasCertificates) return null;
 
-  const twoCol = hasTestimonials && hasCertificates;
-
   return (
-    <Panel label="intel.dossier" subtitle="verified credentials & third-party signals">
-      <div className={cn("grid gap-8", twoCol ? "md:grid-cols-[1.2fr_1fr]" : "max-w-3xl mx-auto")}>
-        {/* Field Reports / Testimonials */}
-        {hasTestimonials && (
-          <div>
-            <div className="mb-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan/70 border-b border-cyan/10 pb-2">
-              <Quote size={12} className="text-cyan" />
-              field reports
+    <section 
+      aria-label="Verified Credentials and Third-Party Signals"
+      className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 sm:p-10 backdrop-blur-2xl shadow-2xl space-y-8"
+    >
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-96 w-96 rounded-full bg-cyan/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-96 w-96 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+        <div>
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+            <span className="h-2 w-2 rounded-full bg-cyan animate-pulse" />
+            <span>INTEL.DOSSIER // THIRD-PARTY SIGNALS</span>
+          </div>
+          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Verified Credentials &amp; Recommendations
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Independent proof of competency, rigorous bootcamp credentials, and client endorsements.
+          </p>
+        </div>
+
+        <Link
+          href="/certificates"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:border-cyan/40 hover:text-cyan transition-all"
+        >
+          <span>All Certificates Archive</span>
+          <ArrowRight size={13} />
+        </Link>
+      </div>
+
+      <div className="relative z-10 grid gap-8 lg:grid-cols-2">
+        {/* Field Reports / Testimonials Column */}
+        {hasTestimonials ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-cyan border-b border-white/[0.06] pb-2">
+              <Quote size={13} />
+              <span>Client Endorsements &amp; Field Reports</span>
             </div>
+
             <div className="space-y-4">
               {testimonials.map((t, i) => (
                 <blockquote
-                  key={t.id}
-                  className="group relative rounded-md border border-cyan/15 bg-surface-2/30 p-5 font-body text-sm leading-relaxed text-foreground transition-all hover:border-cyan/30 hover:bg-surface-2/50"
+                  key={t.id || i}
+                  className="group relative rounded-2xl border border-white/[0.08] bg-surface/80 p-5 backdrop-blur-xl transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04]"
                 >
-                  <div className="absolute -left-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-sm bg-cyan/10 border border-cyan/30 font-mono text-[8px] text-cyan">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-
                   {t.rating && (
                     <div className="mb-3 flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, rIdx) => (
                         <Star
                           key={rIdx}
-                          size={12}
+                          size={13}
                           className={
                             rIdx < (t.rating || 0)
-                              ? "text-signal-amber fill-signal-amber"
+                              ? "text-amber-400 fill-amber-400"
                               : "text-muted-foreground/30"
                           }
                         />
@@ -53,153 +81,88 @@ export function IntelDossier({
                     </div>
                   )}
 
-                  <p className="relative z-10 italic text-muted-foreground transition-colors group-hover:text-foreground">
+                  <p className="italic text-sm leading-relaxed text-foreground/90">
                     &ldquo;{t.quote}&rdquo;
                   </p>
 
-                  <footer className="mt-4 flex items-center gap-3 border-t border-cyan/10 pt-3 font-mono text-[11px]">
-                    <div className="h-8 w-8 overflow-hidden rounded-full border border-cyan/20 bg-cyan/5 flex items-center justify-center">
-                      {t.avatarUrl ? (
-                        <img
-                          src={t.avatarUrl}
-                          alt={t.author}
-                          className="h-full w-full object-cover grayscale transition-all group-hover:grayscale-0"
-                        />
-                      ) : (
-                        <span className="text-[14px] font-bold text-cyan/50">
-                          {t.author.charAt(0)}
-                        </span>
-                      )}
+                  <footer className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-3">
+                    <div className="h-8 w-8 overflow-hidden rounded-full border border-cyan/30 bg-cyan/10 flex items-center justify-center font-mono text-xs font-bold text-cyan">
+                      {t.author.charAt(0)}
                     </div>
                     <div>
-                      <div className="text-cyan font-medium">{t.author}</div>
-                      {t.role || t.company ? (
-                        <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">
+                      <div className="text-sm font-semibold text-foreground group-hover:text-cyan transition-colors">
+                        {t.author}
+                      </div>
+                      {(t.role || t.company) && (
+                        <div className="text-[10px] font-mono text-muted-foreground">
                           {[t.role, t.company].filter(Boolean).join(" · ")}
                         </div>
-                      ) : null}
+                      )}
                     </div>
                   </footer>
                 </blockquote>
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Certifications Section */}
-        <div>
-          <div className="mb-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan/70 border-b border-cyan/10 pb-2">
-            <Award size={12} className="text-violet" />
-            certifications &amp; credentials
+        {/* Verified Certificates Showcase Column */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-indigo-400 border-b border-white/[0.06] pb-2">
+            <Award size={13} />
+            <span>Verified Learning Milestones</span>
           </div>
 
-          {!hasCertificates ? (
-            <div className="rounded-md border border-cyan/10 bg-surface-2/20 p-8 text-center font-mono text-xs text-muted-foreground">
-              <span className="text-cyan/40 block mb-2 font-mono text-[10px] uppercase tracking-widest">
-                [telemetry null]
-              </span>
-              no certifications recorded
-            </div>
-          ) : certificates.length === 1 ? (
-            /* Single Certificate Centered / Featured Intentional Card Layout */
-            <div className="relative overflow-hidden rounded-lg border border-violet/30 bg-surface-2/40 p-6 backdrop-blur-sm transition-all hover:border-violet/60 hover:shadow-[0_0_24px_rgba(167,139,250,0.15)]">
-              <div className="absolute top-0 right-0 p-3 opacity-20 text-violet">
-                <ShieldCheck size={48} />
-              </div>
-
-              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-violet">
-                <span className="h-1.5 w-1.5 rounded-full bg-violet animate-pulse-dot" />
-                <span>verified credential · 01/01</span>
-              </div>
-
-              <h4 className="mt-3 font-display text-xl font-bold text-foreground">
-                {certificates[0].title}
-              </h4>
-
-              <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-xs text-muted-foreground">
-                <span className="rounded-sm border border-violet/30 bg-violet/10 px-2 py-0.5 text-violet font-semibold">
-                  {certificates[0].issuer}
-                </span>
-                {certificates[0].issueDate && (
-                  <span>
-                    Issued {new Date(certificates[0].issueDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+          <div className="space-y-4">
+            {certificates.slice(0, 2).map((cert) => (
+              <div
+                key={cert.id}
+                className="group relative rounded-2xl border border-white/[0.08] bg-surface/80 p-5 sm:p-6 backdrop-blur-xl transition-all duration-300 hover:border-indigo-400/40 hover:bg-white/[0.04] space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="rounded-md border border-indigo-400/30 bg-indigo-400/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-indigo-300 font-semibold">
+                    {cert.issuer}
                   </span>
-                )}
-                {certificates[0].durationHours && (
-                  <span>· {certificates[0].durationHours} hrs intensive</span>
-                )}
-              </div>
-
-              {certificates[0].description && (
-                <p className="mt-4 font-body text-xs leading-relaxed text-muted-foreground border-l-2 border-violet/30 pl-3">
-                  {certificates[0].description}
-                </p>
-              )}
-
-              {certificates[0].credentialUrl && (
-                <div className="mt-6 pt-4 border-t border-violet/15">
-                  <a
-                    href={certificates[0].credentialUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-violet hover:text-white transition-colors"
-                  >
-                    <span>verify external credential</span>
-                    <ExternalLink size={12} />
-                  </a>
+                  {cert.durationHours && (
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      {cert.durationHours} hrs intensive
+                    </span>
+                  )}
                 </div>
-              )}
-            </div>
-          ) : (
-            /* Multi-certificate List */
-            <ul className="space-y-3 font-mono text-xs">
-              {certificates.map((c, i) => {
-                const year = c.issueDate ? new Date(c.issueDate).getFullYear() : null;
-                const inner = (
-                  <>
-                    <span className="text-[10px] text-violet/60 font-medium w-4 shrink-0">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="flex-1">
-                      <div className="text-foreground transition-colors group-hover:text-violet group-hover:text-glow">
-                        {c.title}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2 text-[9px] uppercase tracking-widest text-muted-foreground">
-                        <span className="rounded-sm bg-violet/10 px-1.5 py-0.5 text-violet/80 border border-violet/20">
-                          {c.issuer}
-                        </span>
-                        {year ? <span>{year}</span> : null}
-                      </div>
-                    </div>
-                    <span className="text-lg leading-none text-signal-green opacity-70 transition-opacity group-hover:opacity-100">
-                      ✓
-                    </span>
-                  </>
-                );
 
-                return (
-                  <li key={c.id}>
-                    {c.credentialUrl ? (
-                      <a
-                        href={c.credentialUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group flex items-start gap-4 rounded-md border border-cyan/15 bg-surface-2/30 p-4 transition-all hover:border-violet/40 hover:bg-surface-2/60 hover:shadow-[0_0_15px_rgba(167,139,250,0.1)]"
-                      >
-                        {inner}
-                      </a>
-                    ) : (
-                      <div className="group flex items-start gap-4 rounded-md border border-cyan/15 bg-surface-2/30 p-4">
-                        {inner}
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+                <h4 className="font-display text-lg font-bold text-foreground group-hover:text-indigo-300 transition-colors">
+                  {cert.title}
+                </h4>
+
+                {cert.description && (
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {cert.description}
+                  </p>
+                )}
+
+                <div className="pt-2 flex items-center justify-between border-t border-white/[0.06]">
+                  {cert.instructor && (
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      Instructor: {cert.instructor}
+                    </span>
+                  )}
+                  {cert.credentialUrl && (
+                    <a
+                      href={cert.credentialUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-mono text-xs text-cyan hover:underline"
+                    >
+                      <span>Verify Certificate</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </Panel>
+    </section>
   );
 }
