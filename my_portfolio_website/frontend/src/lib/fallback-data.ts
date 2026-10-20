@@ -8,7 +8,7 @@ export const fallbackProfile: Profile = {
   availabilityStatus: 'Available for internships and software engineering opportunities',
   bio: PERSONAL_IDENTITY.bio,
   philosophy: 'I build high-performance web platforms, cross-platform mobile apps, and intelligent data systems, documenting every breakthrough on GitHub.',
-  location: PERSONAL_IDENTITY.location, email: '',
+  location: PERSONAL_IDENTITY.location, email: PERSONAL_IDENTITY.email,
   currentlyExploring: ['Web Development', 'Mobile App Dev (Flutter)', 'AI / Machine Learning', 'Data Science & Analytics', 'System Design'],
   timeline: [{label:'Education',value:PERSONAL_IDENTITY.education}],
   socialLinks: [{label:'GitHub',url:PERSONAL_IDENTITY.githubUrl,icon:'github'}],

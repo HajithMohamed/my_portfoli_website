@@ -7,7 +7,7 @@ vi.mock("@/lib/public-data", () => ({
   getHomeData: async () => ({
     profile: {
       name: "Mohamed Hajith",
-      email: "mohamedhajith2000@gmail.com",
+      email: "ahammedlebbehajith@gmail.com",
       location: "Batticaloa, Sri Lanka",
     },
     certificates: [

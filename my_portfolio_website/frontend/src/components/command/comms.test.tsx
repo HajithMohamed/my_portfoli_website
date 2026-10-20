@@ -21,7 +21,7 @@ const mockProfile: Profile = {
   title: "Full-Stack Engineer & System Architect",
   bio: "Full-stack developer building resilient distributed systems.",
   location: "Batticaloa, Sri Lanka",
-  email: "mohamedhajith2000@gmail.com",
+  email: "ahammedlebbehajith@gmail.com",
   socialLinks: [
     { label: "github", url: "https://github.com/HajithMohamed" },
     { label: "linkedin", url: "https://linkedin.com/in/hajith-mohamed" },
@@ -42,7 +42,7 @@ describe("Comms Component", () => {
 
     expect(screen.getByText(/COMMS\.TERMINAL \/\/ SECURE OPERATOR CHANNEL/i)).toBeDefined();
     expect(screen.getByText(/Contact & Operator Uplink/i)).toBeDefined();
-    expect(screen.getByText(/mohamedhajith2000@gmail\.com/i)).toBeDefined();
+    expect(screen.getByText(/ahammedlebbehajith@gmail\.com/i)).toBeDefined();
     expect(screen.getByText(/@HajithMohamed/i)).toBeDefined();
     expect(screen.getByText(/Launch Project Intake Wizard/i)).toBeDefined();
   });

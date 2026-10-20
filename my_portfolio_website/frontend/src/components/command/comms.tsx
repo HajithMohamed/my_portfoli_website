@@ -36,6 +36,7 @@ export function Comms({ profile }: { profile: Profile }) {
 
   const githubLink = profile.socialLinks?.find((l) => l.url.includes("github.com"))?.url;
   const githubHandle = githubLink?.replace(/\/$/, "").split("/").pop() ?? "HajithMohamed";
+  const directEmail = profile.email || PERSONAL_IDENTITY.email;
 
   // Validation rules
   const nameError = touched.name && form.name.trim().length < 2 ? "Please provide your name or identifier (at least 2 characters)" : null;
@@ -142,7 +143,7 @@ export function Comms({ profile }: { profile: Profile }) {
           <div className="space-y-3 font-mono text-xs">
             {/* Direct Email */}
             <a
-              href={`mailto:${profile.email}`}
+              href={`mailto:${directEmail}`}
               className="group flex items-center justify-between rounded-2xl border border-white/[0.08] bg-surface/80 p-4 backdrop-blur-xl transition-all duration-300 hover:border-cyan/40 hover:bg-white/[0.04]"
             >
               <div className="flex items-center gap-3.5">
@@ -154,7 +155,7 @@ export function Comms({ profile }: { profile: Profile }) {
                     Direct Email
                   </div>
                   <div className="text-sm font-semibold text-foreground group-hover:text-cyan transition-colors">
-                    {profile.email}
+                    {directEmail}
                   </div>
                 </div>
               </div>

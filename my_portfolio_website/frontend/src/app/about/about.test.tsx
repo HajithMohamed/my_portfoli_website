@@ -7,7 +7,7 @@ vi.mock("@/lib/public-data", () => ({
   getHomeData: async () => ({
     profile: {
       name: "Mohamed Hajith",
-      email: "mohamedhajith2000@gmail.com",
+      email: "ahammedlebbehajith@gmail.com",
       location: "Batticaloa, Sri Lanka",
       bio: "Software Engineer",
       availabilityStatus: "Available",
@@ -60,6 +60,7 @@ describe("AboutPage Component", () => {
     expect(screen.getByText(/HZ Labs Digital Product Studio/i)).toBeDefined();
     expect(screen.getByText(/Footwear BMS/i)).toBeDefined();
     expect(screen.getByText(/Cross-Platform Mobile & Voice AI Engineering/i)).toBeDefined();
+    expect(screen.getByText(/2023 – 2027/i)).toBeDefined();
   });
 
   it("renders the 4 core competency pillars", async () => {

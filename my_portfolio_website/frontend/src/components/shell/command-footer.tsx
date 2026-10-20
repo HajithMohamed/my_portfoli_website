@@ -9,7 +9,7 @@ const VERSION = "v5.0.0";
 export function CommandFooter({ profile }: { profile?: Profile }) {
   const year = new Date().getFullYear();
   const name = profile?.name || PERSONAL_IDENTITY.name;
-  const email = profile?.email || "hajith@hzlabs.studio";
+  const email = profile?.email || PERSONAL_IDENTITY.email;
   const github = profile?.socialLinks?.find((l) => l.url.includes("github.com"));
   const linkedin = profile?.socialLinks?.find((l) => l.url.includes("linkedin.com"));
   

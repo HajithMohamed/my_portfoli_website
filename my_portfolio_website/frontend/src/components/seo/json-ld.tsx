@@ -17,6 +17,7 @@ export function JsonLd({ type = "website", data }: JsonLdProps) {
     jobTitle: PERSONAL_IDENTITY.title,
     description: PERSONAL_IDENTITY.bio,
     url: siteUrl,
+    email: `mailto:${PERSONAL_IDENTITY.email}`,
     alumniOf: {
       "@type": "EducationalOrganization",
       name: "University of Ruhuna",
