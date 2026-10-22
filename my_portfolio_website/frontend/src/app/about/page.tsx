@@ -119,7 +119,7 @@ export default async function AboutPage() {
               <div className="relative shrink-0 p-1.5">
                 <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-3xl overflow-hidden ring-2 ring-indigo-500/70 shadow-[0_0_35px_rgba(99,102,241,0.35)] bg-slate-900">
                   <Image
-                    src="/brand/mohamed-hajith-portrait.png"
+                    src="/brand/mohamed-hajith.png?v=3"
                     alt="Mohamed Hajith"
                     width={160}
                     height={160}
