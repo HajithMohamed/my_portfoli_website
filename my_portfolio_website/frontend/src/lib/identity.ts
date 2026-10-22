@@ -16,6 +16,6 @@ export const PERSONAL_IDENTITY = {
   availability: "Open to software engineering internships, junior development opportunities, and selected freelance projects.",
   githubUsername: "HajithMohamed",
   githubUrl: "https://github.com/HajithMohamed",
-  avatarUrl: "/brand/mohamed-hajith-avatar.png?v=3",
-  portraitUrl: "/brand/mohamed-hajith.png?v=3",
+  avatarUrl: "/brand/mohamed-hajith-avatar.png",
+  portraitUrl: "/brand/mohamed-hajith-v3.png",
 } as const;
