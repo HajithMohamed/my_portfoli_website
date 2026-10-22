@@ -1,0 +1,113 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Contents 6 0 R /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 8307 >>
+stream
+0.05 0.15 0.25 rg BT /F2 22 Tf 45.00 805.00 Td (Mohamed Hajith) Tj ET
+0.00 0.50 0.60 rg BT /F2 10 Tf 45.00 787.00 Td (Full-Stack Software Developer | Backend & Database Engineering) Tj ET
+0.35 0.35 0.35 rg BT /F1 8.5 Tf 45.00 773.00 Td (Batticaloa, Sri Lanka  |  ahammedlebbehajith@gmail.com  |  linkedin.com/in/mohamed-hajith-b53559295) Tj ET
+0.35 0.35 0.35 rg BT /F1 8.5 Tf 45.00 761.00 Td (Portfolio: hzlabs.studio  |  GitHub: github.com/HajithMohamed) Tj ET
+0.00 0.50 0.60 RG 1 w 45.00 751.00 m 550.00 751.00 l S
+0.05 0.15 0.25 rg BT /F2 10 Tf 45.00 735.00 Td (PROFESSIONAL SUMMARY) Tj ET
+0.20 0.20 0.20 rg BT /F1 8.5 Tf 45.00 723.00 Td (Third-year BICT \(Hons\) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs,) Tj ET
+0.20 0.20 0.20 rg BT /F1 8.5 Tf 45.00 712.00 Td (and database-driven business systems using React, Next.js, Node.js, and PostgreSQL. Open to software engineering internships,) Tj ET
+0.20 0.20 0.20 rg BT /F1 8.5 Tf 45.00 701.00 Td (junior development roles, and collaborative full-stack projects.) Tj ET
+0.05 0.15 0.25 rg BT /F2 10 Tf 45.00 687.00 Td (EDUCATION) Tj ET
+0.10 0.10 0.10 rg BT /F2 9 Tf 45.00 675.00 Td (Bachelor of Information and Communication Technology \(Honours\) — BICT \(Hons\)) Tj ET
+0.40 0.40 0.40 rg BT /F1 8.5 Tf 440.00 675.00 Td (2023 – 2027 \(Expected\)) Tj ET
+0.30 0.30 0.30 rg BT /F1 8.5 Tf 45.00 664.00 Td (Faculty of Technology, University of Ruhuna, Sri Lanka) Tj ET
+0.05 0.15 0.25 rg BT /F2 10 Tf 45.00 650.00 Td (TECHNICAL SKILLS) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 638.00 Td (Languages:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 638.00 Td (JavaScript, TypeScript, Java, PHP, SQL, Python fundamentals) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 627.00 Td (Frontend:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 627.00 Td (React, Next.js, Redux Toolkit, Tailwind CSS, HTML5, CSS3) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 616.00 Td (Backend:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 616.00 Td (Node.js, Express.js, NestJS, Spring Boot, REST APIs) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 605.00 Td (Databases:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 605.00 Td (PostgreSQL, MySQL, MongoDB, Prisma ORM, PL/pgSQL) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 594.00 Td (Testing & DevOps:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 594.00 Td (Playwright, Vitest, Git, GitHub Actions, Docker, Docker Compose, Postman) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 583.00 Td (Security & Architecture:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 583.00 Td (JWT, Role-Based Access Control \(RBAC\), Socket.IO, Decoupled MVC / REST) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 572.00 Td (Currently Exploring:) Tj ET
+0.25 0.25 0.25 rg BT /F1 8.5 Tf 175.00 572.00 Td (Flutter / Dart, Applied AI in practical software systems, Cloud fundamentals \(AWS\)) Tj ET
+0.05 0.15 0.25 rg BT /F2 10 Tf 45.00 557.00 Td (FEATURED ENGINEERING PROJECTS) Tj ET
+0.05 0.15 0.25 rg BT /F2 9 Tf 45.00 544.00 Td (1. Saga Elite — Full-Stack E-Commerce Platform) Tj ET
+0.00 0.45 0.55 rg BT /F1 7.5 Tf 290.00 544.00 Td (React, Redux, Node.js, Express, MongoDB, Socket.IO, Playwright, GitHub Actions) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 534.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 534.00 Td (Collaborative e-commerce application developed by a 4-member team. Led API architecture and admin workflows.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 524.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 524.50 Td (Implemented JWT authentication, role-based controls, real-time Socket.IO notifications, and OCR receipt processing.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 515.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 515.00 Td (Established automated end-to-end regression test suites with Playwright integrated into GitHub Actions CI/CD.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 505.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 505.50 Td (Repository: github.com/Hz-Labs-studio/Saga-Elite-Web-project  |  Live: saga-elite.shop) Tj ET
+0.05 0.15 0.25 rg BT /F2 9 Tf 45.00 493.00 Td (2. BenchBook — Laboratory Resource Reservation System) Tj ET
+0.00 0.45 0.55 rg BT /F1 7.5 Tf 290.00 493.00 Td (Next.js, TypeScript, PostgreSQL, Prisma, Vitest) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 483.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 483.00 Td (Engineered resource reservation platform managing medical and laboratory equipment availability.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 473.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 473.50 Td (Designed database-enforced booking constraints in PostgreSQL to eliminate conflicting overlapping reservations.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 464.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 464.00 Td (Constructed comprehensive unit and integration test suites using Vitest verifying reservation business logic.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 454.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 454.50 Td (Repository: github.com/HajithMohamed/Medical-Lab-Resource-Reservation-System) Tj ET
+0.05 0.15 0.25 rg BT /F2 9 Tf 45.00 442.00 Td (3. BloodBridge — Advanced Database Management System \(ADBMS Prototype\)) Tj ET
+0.00 0.45 0.55 rg BT /F1 7.5 Tf 290.00 442.00 Td (PostgreSQL, PL/pgSQL, React, Node.js, Docker, GitHub Actions) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 432.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 432.00 Td (Collaborative academic prototype for blood donation and inventory distribution management.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 422.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 422.50 Td (Contributed pre-handoff architecture, PL/pgSQL transaction procedures, and transfer integrity constraints \(PR #7\).) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 413.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 413.00 Td (Authored database contract tests and integrated automated verification into GitHub Actions CI pipeline.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 403.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 403.50 Td (Repository: github.com/akalanka001/-BloodBridge--ADBMS  |  Academic demonstration project) Tj ET
+0.05 0.15 0.25 rg BT /F2 9 Tf 45.00 391.00 Td (4. HZ Labs — Portfolio and Content Management Platform) Tj ET
+0.00 0.45 0.55 rg BT /F1 7.5 Tf 290.00 391.00 Td (Next.js, NestJS, TypeScript, Prisma, PostgreSQL) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 381.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 381.00 Td (Architected full-stack portfolio and CMS with authenticated admin panel and real-time GitHub telemetry sync.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 371.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 371.50 Td (Engineered type-safe REST APIs with NestJS and Prisma ORM for content updates and contact intake workflows.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 362.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 362.00 Td (Repository: github.com/HajithMohamed/my_portfoli_website  |  Live: hzlabs.studio) Tj ET
+0.05 0.15 0.25 rg BT /F2 9 Tf 45.00 349.50 Td (5. Shoe Bank — Footwear Business Management System) Tj ET
+0.00 0.45 0.55 rg BT /F1 7.5 Tf 290.00 349.50 Td (PHP, MySQL, Tailwind CSS, Docker) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 339.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 339.50 Td (Engineered operational business platform managing inventory, invoices, customer credit, and cheque registers.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 330.00 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 330.00 Td (Dockerized development environment ensuring consistent containerized deployment and reproducible database states.) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 53.00 320.50 Td (•) Tj ET
+0.25 0.25 0.25 rg BT /F1 8 Tf 63.00 320.50 Td (Repository: github.com/HajithMohamed/Footwear_Business_Management_System) Tj ET
+0.05 0.15 0.25 rg BT /F2 10 Tf 45.00 308.00 Td (CERTIFICATIONS & CONTINUOUS LEARNING) Tj ET
+0.15 0.15 0.15 rg BT /F2 8.5 Tf 45.00 296.00 Td (The Complete Full-Stack Web Development Bootcamp \(62 Hours\) — Udemy \(Dr. Angela Yu\)) Tj ET
+0.40 0.40 0.40 rg BT /F1 7.5 Tf 330.00 296.00 Td (Credential: ude.my/UC-8df6ecc3-ffca-4dd1-aafa-c240922d4c5e) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000257 00000 n 
+0000000327 00000 n 
+0000000402 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+8761
+%%EOF

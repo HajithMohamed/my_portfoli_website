@@ -1,7 +1,8 @@
 "use client";
 
 import type { Profile } from "@/lib/types";
-import { ArrowUp, Github, Linkedin, Mail } from "lucide-react";
+import Link from "next/link";
+import { ArrowUp, Github, Linkedin, Mail, Shield } from "lucide-react";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 const VERSION = "v5.0.0";
@@ -81,10 +82,19 @@ export function CommandFooter({ profile }: { profile?: Profile }) {
         </div>
 
         <div className="mt-16 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-cyan/15 pt-8 text-muted-foreground">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <span className="text-[10px] uppercase tracking-widest text-foreground/50">
               © {year} {name}.
             </span>
+            <span className="text-white/20">·</span>
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500 hover:text-cyan transition-colors"
+              title="Studio Admin Control Center"
+            >
+              <Shield size={11} className="text-slate-500 hover:text-cyan" />
+              <span>Studio Admin</span>
+            </Link>
           </div>
           
           {/* Social Icons */}

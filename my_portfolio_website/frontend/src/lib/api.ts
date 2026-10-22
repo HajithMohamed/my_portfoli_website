@@ -64,7 +64,7 @@ export async function getProject(slug: string) {
 }
 
 export async function getBlogPost(slug: string) {
-  return fetchJson<BlogPost | null>(`/blogs/${slug}`, fallbackBlogs.find((post) => post.slug === slug) ?? null);
+  return fetchJson<BlogPost | null>(`/blogs/${slug}`, fallbackBlogs.find((post: BlogPost) => post.slug === slug) ?? null);
 }
 
 /** Same-origin base for admin calls; proxied to the API so the session cookie is first-party. */

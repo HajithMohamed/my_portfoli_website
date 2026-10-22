@@ -44,61 +44,68 @@ export function StudioHero() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
               <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-300">
-                HZ LABS · Available for Client Projects
+                Mohamed Hajith · BICT (Hons) · Open to Internships
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-tight leading-[1.12]">
-              Engineering ideas <br className="hidden sm:inline" />
-              into{" "}
-              <span className="text-gradient-violet">intelligent</span>{" "}
-              <br className="hidden sm:inline" />
-              digital products
-            </h1>
-
-            {/* Specialty Subtitle Cycling */}
-            <div className="h-8 flex items-center">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={currentSpecialtyIndex}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.3 }}
-                  className="font-mono text-sm sm:text-base text-slate-400 font-medium tracking-wide"
-                >
-                  {SPECIALTIES[currentSpecialtyIndex]}
-                </motion.p>
-              </AnimatePresence>
+            <div className="space-y-2">
+              <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-tight leading-[1.1]">
+                Mohamed Hajith
+              </h1>
+              <p className="font-display text-xl sm:text-2xl lg:text-3xl font-semibold text-gradient-violet">
+                Full-Stack Software Developer | Backend &amp; Database Engineering
+              </p>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
-              {/* Primary Button */}
+            {/* Bio & Academic Specialization */}
+            <p className="font-sans text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
+              Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.
+            </p>
+
+            {/* Availability Notice */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.08] text-xs font-mono text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Open to software engineering internships, junior development opportunities, and selected freelance projects.</span>
+            </div>
+
+            {/* CTA Buttons: View Engineering Projects, Download CV, plus secondary Hire HZ Labs */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2 w-full sm:w-auto">
+              {/* Primary Action 1: View Engineering Projects */}
               <Link
                 href="#projects"
-                data-track="hero_explore_work"
-                className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white font-medium text-sm shadow-lg shadow-violet-500/25 transition-all duration-300 hover:shadow-cyan-500/25 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+                data-track="hero_view_projects"
+                className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white font-medium text-xs sm:text-sm shadow-lg shadow-violet-500/25 transition-all duration-300 hover:shadow-cyan-500/25 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
               >
-                <span>Explore work</span>
+                <span>View Engineering Projects</span>
                 <ArrowRight
-                  size={16}
+                  size={15}
                   className="transition-transform duration-300 group-hover:translate-x-1"
                 />
               </Link>
 
-              {/* Secondary Button */}
-              <Link
-                href="/about"
-                data-track="hero_see_timeline"
-                className="group inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full studio-glass-interactive text-slate-200 border border-slate-700/70 hover:border-slate-500 hover:text-white font-medium text-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+              {/* Primary Action 2: Download CV */}
+              <a
+                href="/api/cv"
+                download
+                data-track="hero_download_cv"
+                className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full studio-glass-interactive text-slate-200 border border-slate-700/70 hover:border-cyan/50 hover:text-white font-medium text-xs sm:text-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
               >
-                <span>See my timeline</span>
+                <span>Download CV</span>
                 <ArrowUpRight
                   size={15}
                   className="text-slate-400 group-hover:text-white transition-colors"
                 />
+              </a>
+
+              {/* Secondary Action: Hire HZ Labs */}
+              <Link
+                href="/start-project"
+                data-track="hero_hire_hzlabs"
+                className="group inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-full text-slate-400 hover:text-cyan font-mono text-xs uppercase tracking-wider transition-colors w-full sm:w-auto text-center"
+              >
+                <span>Hire HZ Labs</span>
+                <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
@@ -106,15 +113,15 @@ export function StudioHero() {
             <div className="pt-4 flex flex-wrap items-center gap-4 sm:gap-6 border-t border-slate-800/80 w-full text-slate-400 font-mono text-[11px]">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck size={14} className="text-emerald-400" />
-                <span>Verified Public Repos</span>
+                <span>BICT (Hons) Undergraduate</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Code2 size={14} className="text-cyan-400" />
-                <span>Clean Architecture</span>
+                <span>Backend &amp; Database Design</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Terminal size={14} className="text-violet-400" />
-                <span>Next.js 16 + NestJS + Flutter</span>
+                <span>React · Next.js · Node.js · PostgreSQL</span>
               </div>
             </div>
 

@@ -50,16 +50,16 @@ describe("AboutPage Component", () => {
     expect(screen.getByText(/ABOUT \/\/ MOHAMED HAJITH/i)).toBeDefined();
     expect(screen.getAllByText(/BICT \(Hons\)/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/University of Ruhuna/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/Batticaloa, Sri Lanka/i)).toBeDefined();
+    expect(screen.getAllByText(/Batticaloa, Sri Lanka/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders chronological career milestones", async () => {
     const Component = await AboutPage();
     render(Component);
 
-    expect(screen.getByText(/HZ Labs Digital Product Studio/i)).toBeDefined();
+    expect(screen.getByText(/Full-Stack Web & Backend Engineering/i)).toBeDefined();
     expect(screen.getByText(/Footwear BMS/i)).toBeDefined();
-    expect(screen.getByText(/Cross-Platform Mobile & Voice AI Engineering/i)).toBeDefined();
+    expect(screen.getByText(/Collaborative Engineering & Database Systems/i)).toBeDefined();
     expect(screen.getByText(/2023 – 2027/i)).toBeDefined();
   });
 
@@ -68,9 +68,9 @@ describe("AboutPage Component", () => {
     render(Component);
 
     expect(screen.getByText("Full-Stack Web Engineering")).toBeDefined();
-    expect(screen.getByText("Backend & API Architecture")).toBeDefined();
-    expect(screen.getByText("Cross-Platform Mobile")).toBeDefined();
-    expect(screen.getByText("AI & Workflow Automation")).toBeDefined();
+    expect(screen.getByText("Backend & Database Architecture")).toBeDefined();
+    expect(screen.getByText("Testing, CI/CD & DevOps")).toBeDefined();
+    expect(screen.getByText("Mobile & Applied Exploration")).toBeDefined();
   });
 
   it("renders links to start-project and certificates", async () => {

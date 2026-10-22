@@ -16,7 +16,7 @@ describe("BioSection Component", () => {
     const bictElements = screen.getAllByText(/BICT \(Hons\)/i);
     expect(bictElements.length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByText(/HZ Labs is where I design and build software for clients/i)
+      screen.getByText(/I build practical web applications, secure REST APIs, and database-driven business systems/i)
     ).toBeDefined();
   });
 
@@ -24,7 +24,7 @@ describe("BioSection Component", () => {
     render(<BioSection />);
 
     expect(screen.getByText(/BICT \(Hons\) Undergraduate/i)).toBeDefined();
-    expect(screen.getByText(/Client-Verified Delivery/i)).toBeDefined();
+    expect(screen.getByText(/Verified Public Code/i)).toBeDefined();
 
     const githubLink = screen.getByRole("link", { name: /@HajithMohamed/i });
     expect(githubLink).toBeDefined();

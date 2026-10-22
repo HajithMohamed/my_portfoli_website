@@ -74,7 +74,7 @@ describe("ProjectArchitectureVisualizer Component", () => {
     fireEvent.click(dataTierBtn);
 
     // Verify active tier inspection updates
-    expect(screen.getByText(/High-throughput storage tier engineered for ACID transaction guarantees/i)).toBeTruthy();
+    expect(screen.getByText(/Storage tier engineered for ACID transaction guarantees/i)).toBeTruthy();
   });
 });
 
@@ -97,7 +97,7 @@ describe("ProjectDossierView Component", () => {
 
     expect(screen.getByText("Footwear Business Management System")).toBeTruthy();
     expect(screen.getByText(/DOSSIER \/\/ OP-SHOE-BANK/i)).toBeTruthy();
-    expect(screen.getByText("< 120ms")).toBeTruthy();
+    expect(screen.getByText("Layered MVC / REST")).toBeTruthy();
     const repoLink = screen.getByRole("link", { name: /View Repository/i });
     expect(repoLink.getAttribute("href")).toBe(
       "https://github.com/HajithMohamed/Footwear_Business_Management_System"

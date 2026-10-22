@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 export default defineConfig({
+  cacheDir: path.resolve(__dirname, "../node_modules/.vite"),
   test: {
     environment: "jsdom",
     testTimeout: 15000,

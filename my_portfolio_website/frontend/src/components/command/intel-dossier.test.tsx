@@ -19,6 +19,7 @@ const mockCertificates: Certificate[] = [
     id: "cert-1",
     title: "Full-Stack Web Development Bootcamp",
     issuer: "Tech Academy Global",
+    type: "certification",
     issueDate: "2024-05-15",
     instructor: "Dr. Angela Yu",
     durationHours: 65,

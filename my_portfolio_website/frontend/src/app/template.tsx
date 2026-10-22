@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
+// Client-side animated page transitions for route changes
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const prefersReduced = useReducedMotion();

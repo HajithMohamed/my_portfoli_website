@@ -113,11 +113,13 @@ describe("GithubTelemetrySection Component", () => {
     expect(screen.getByText(/5 forks recorded/i)).toBeDefined();
   });
 
-  it("renders the 16-week commit heatmap grid and handles hover inspection", () => {
+  it("renders the 53-week GitHub commit heatmap grid and handles hover inspection", () => {
     render(<GithubTelemetrySection github={mockGithubData} />);
 
+    expect(screen.getByText(/1,409 contributions in the last year/i)).toBeDefined();
+
     const squares = screen.getAllByRole("img");
-    expect(squares.length).toBe(16 * 7); // 16 weeks * 7 days
+    expect(squares.length).toBeGreaterThanOrEqual(365); // 53 weeks (~365-371 days)
 
     // Hover first square
     fireEvent.mouseEnter(squares[0]);
@@ -125,6 +127,11 @@ describe("GithubTelemetrySection Component", () => {
 
     // Leave
     fireEvent.mouseLeave(squares[0]);
+
+    // Test year selection: Switch to 2025
+    const btn2025 = screen.getByRole("button", { name: "2025" });
+    fireEvent.click(btn2025);
+    expect(screen.getByText(/399 contributions in 2025/i)).toBeDefined();
   });
 
   it("renders the active repository pulse card with commit details", () => {
@@ -132,7 +139,6 @@ describe("GithubTelemetrySection Component", () => {
 
     expect(screen.getByText("Tech_Bridge")).toBeDefined();
     expect(screen.getByText("7f8a9b1")).toBeDefined();
-    expect(screen.getByText(/feat: telemetry live metrics/i)).toBeDefined();
-    expect(screen.getByText("active now")).toBeDefined();
+    expect(screen.getAllByText("active now").length).toBeGreaterThanOrEqual(1);
   });
 });

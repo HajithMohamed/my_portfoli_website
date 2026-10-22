@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 import { absoluteApiUrl } from "@/lib/utils";
 import type { CvAsset } from "@/lib/types";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
-// The CMS stores the CV as a Cloudinary `raw` upload, so the file is served as
-// application/octet-stream under its opaque public id — linking straight to it
-// downloads an extensionless blob the OS can't open. Cloudinary can't fix this from the
-// URL either: fl_attachment rejects a filename containing a dot, and the public id has
-// no extension to append. So the bytes are streamed through this same-origin route,
-// which is the only place the correct type and filename can be attached.
 export const dynamic = "force-dynamic";
 
 function filenameFor(name?: string): string {
@@ -16,32 +12,55 @@ function filenameFor(name?: string): string {
   return `${base || "CV"}_CV.pdf`;
 }
 
-export async function GET() {
-  const resumeRes = await fetch(absoluteApiUrl("/resume/latest"), { cache: "no-store" });
-
-  if (!resumeRes.ok) {
-    return NextResponse.json({ error: "CV unavailable" }, { status: 502 });
+async function serveFallbackCv() {
+  try {
+    const filePath = path.join(process.cwd(), "public", "Mohamed_Hajith_CV.pdf");
+    const fileBuffer = await fs.readFile(filePath);
+    return new NextResponse(fileBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filenameFor(PERSONAL_IDENTITY.name)}"`,
+        "Content-Length": String(fileBuffer.length),
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  } catch (err) {
+    return NextResponse.json({ error: "CV unavailable" }, { status: 404 });
   }
-
-  const resume = (await resumeRes.json()) as CvAsset | null;
-  if (!resume?.fileUrl) {
-    return NextResponse.json({ error: "No CV published" }, { status: 404 });
-  }
-
-  const file = await fetch(resume.fileUrl, { cache: "no-store" });
-  if (!file.ok || !file.body) {
-    return NextResponse.json({ error: "CV fetch failed" }, { status: 502 });
-  }
-
-  const headers = new Headers({
-    "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="${filenameFor(PERSONAL_IDENTITY.name)}"`,
-    "Cache-Control": "public, max-age=300",
-  });
-  const length = file.headers.get("content-length");
-  if (length) {
-    headers.set("Content-Length", length);
-  }
-
-  return new NextResponse(file.body, { headers });
 }
+
+export async function GET() {
+  try {
+    const resumeRes = await fetch(absoluteApiUrl("/resume/latest"), { cache: "no-store" });
+
+    if (!resumeRes.ok) {
+      return await serveFallbackCv();
+    }
+
+    const resume = (await resumeRes.json()) as CvAsset | null;
+    if (!resume?.fileUrl) {
+      return await serveFallbackCv();
+    }
+
+    const file = await fetch(resume.fileUrl, { cache: "no-store" });
+    if (!file.ok || !file.body) {
+      return await serveFallbackCv();
+    }
+
+    const headers = new Headers({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filenameFor(PERSONAL_IDENTITY.name)}"`,
+      "Cache-Control": "public, max-age=300",
+    });
+    const length = file.headers.get("content-length");
+    if (length) {
+      headers.set("Content-Length", length);
+    }
+
+    return new NextResponse(file.body, { headers });
+  } catch {
+    return await serveFallbackCv();
+  }
+}
+

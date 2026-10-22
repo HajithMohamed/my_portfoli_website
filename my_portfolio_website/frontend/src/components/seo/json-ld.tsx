@@ -38,7 +38,7 @@ export function JsonLd({ type = "website", data }: JsonLdProps) {
     ],
     sameAs: [
       "https://github.com/HajithMohamed",
-      "https://linkedin.com/in/hajithmohamed",
+      PERSONAL_IDENTITY.linkedInUrl,
     ],
   };
 

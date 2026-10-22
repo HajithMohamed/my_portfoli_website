@@ -19,9 +19,13 @@ vi.mock("framer-motion", () => ({
 const mockProfile: Profile = {
   name: "Mohamed Hajith",
   title: "Full-Stack Engineer & System Architect",
+  tagline: "Engineering resilient, high-performance web systems and scalable backends.",
   bio: "Full-stack developer building resilient distributed systems.",
+  philosophy: "Building resilient distributed architectures with precision.",
   location: "Batticaloa, Sri Lanka",
   email: "ahammedlebbehajith@gmail.com",
+  availabilityStatus: "Available for Architecture & Engineering Engagements",
+  currentlyExploring: ["Event-Driven Architectures", "Distributed Consensus"],
   socialLinks: [
     { label: "github", url: "https://github.com/HajithMohamed" },
     { label: "linkedin", url: "https://linkedin.com/in/hajith-mohamed" },

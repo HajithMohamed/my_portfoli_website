@@ -37,25 +37,29 @@ describe("StudioHero Component", () => {
 
     // Check status pill
     expect(
-      screen.getByText(/HZ LABS · Available for Client Projects/i)
+      screen.getByText(/Mohamed Hajith · BICT \(Hons\) · Open to Internships/i)
     ).toBeDefined();
 
     // Check headline text fragments
-    expect(screen.getByText(/Engineering ideas/i)).toBeDefined();
-    expect(screen.getByText(/intelligent/i)).toBeDefined();
-    expect(screen.getByText(/digital products/i)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Mohamed Hajith" })).toBeDefined();
+    expect(screen.getByText(/Full-Stack Software Developer | Backend & Database Engineering/i)).toBeDefined();
+    expect(screen.getByText(/Third-year BICT \(Hons\) undergraduate at the University of Ruhuna/i)).toBeDefined();
   });
 
   it("renders the primary and secondary CTA buttons with correct destinations", () => {
     render(<StudioHero />);
 
-    const exploreBtn = screen.getByRole("link", { name: /explore work/i });
-    expect(exploreBtn).toBeDefined();
-    expect(exploreBtn.getAttribute("href")).toBe("#projects");
+    const projectsBtn = screen.getByRole("link", { name: /view engineering projects/i });
+    expect(projectsBtn).toBeDefined();
+    expect(projectsBtn.getAttribute("href")).toBe("#projects");
 
-    const timelineBtn = screen.getByRole("link", { name: /see my timeline/i });
-    expect(timelineBtn).toBeDefined();
-    expect(timelineBtn.getAttribute("href")).toBe("/about");
+    const cvBtn = screen.getByRole("link", { name: /download cv/i });
+    expect(cvBtn).toBeDefined();
+    expect(cvBtn.getAttribute("href")).toBe("/api/cv");
+
+    const hireLink = screen.getByRole("link", { name: /hire hz labs/i });
+    expect(hireLink).toBeDefined();
+    expect(hireLink.getAttribute("href")).toBe("/start-project");
   });
 
   it("renders the interactive architecture visualization with 6 orbital nodes", () => {
@@ -97,8 +101,8 @@ describe("StudioHero Component", () => {
   it("renders verified credibility badges in the hero footer", () => {
     render(<StudioHero />);
 
-    expect(screen.getByText(/Verified Public Repos/i)).toBeDefined();
-    expect(screen.getByText(/Clean Architecture/i)).toBeDefined();
-    expect(screen.getByText(/Next\.js 16 \+ NestJS \+ Flutter/i)).toBeDefined();
+    expect(screen.getAllByText(/BICT \(Hons\) Undergraduate/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/Backend & Database Design/i)).toBeDefined();
+    expect(screen.getByText(/React · Next\.js · Node\.js · PostgreSQL/i)).toBeDefined();
   });
 });

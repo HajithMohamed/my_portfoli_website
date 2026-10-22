@@ -19,6 +19,8 @@ import {
   Terminal,
   ShieldCheck,
   Radio,
+  Download,
+  GraduationCap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
@@ -229,11 +231,50 @@ export function Comms({ profile }: { profile: Profile }) {
               ))}
           </div>
 
+          {/* Recruiter & Internship Contact Option */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-surface/80 to-transparent p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                <GraduationCap size={15} />
+                <span>Recruiter &amp; Internship Contact</span>
+              </div>
+              <span className="font-mono text-[10px] uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                Internship Ready
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Third-year BICT (Hons) undergraduate open to Software Engineering Internships and Junior Developer roles.
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
+              <a
+                href="/Mohamed_Hajith_CV.pdf"
+                download="Mohamed_Hajith_CV.pdf"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-3.5 py-1.5 text-emerald-300 hover:bg-emerald-500/30 transition-all font-semibold"
+              >
+                <Download size={13} />
+                <span>Download PDF CV</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setForm((f) => ({
+                    ...f,
+                    subject: "Software Engineering Internship / Full-Stack Role",
+                    body: "Hi Mohamed,\n\nWe reviewed your portfolio and would like to connect regarding a software engineering opportunity at [Company Name].",
+                  }));
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-slate-300 hover:border-cyan/40 hover:text-cyan transition-all"
+              >
+                <span>Prefill Recruiter Form</span>
+              </button>
+            </div>
+          </div>
+
           {/* Project Commission Callout */}
           <div className="rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/10 via-indigo-950/20 to-transparent p-5 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-cyan">
               <Briefcase size={14} />
-              <span>Commissioning a Project or System?</span>
+              <span>Commissioning a Client Project? (HZ Labs)</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Need a full architectural breakdown with milestones, tech stack selection, and budget estimates?
@@ -351,6 +392,47 @@ export function Comms({ profile }: { profile: Profile }) {
                     {emailError}
                   </span>
                 )}
+              </div>
+
+              {/* Quick Inquiry Preset Buttons */}
+              <div className="space-y-1.5 pt-1">
+                <span className="block text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                  Quick Inquiry Preset
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      subject: "Software Engineering Internship / Full-Stack Role",
+                      body: f.body || "Hi Mohamed,\n\nWe would like to speak with you regarding an engineering internship opportunity at [Company Name].",
+                    }))}
+                    className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-mono text-emerald-300 hover:bg-emerald-500/20 transition-all"
+                  >
+                    Recruiter / Internship
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      subject: "Client Project Inquiry — HZ Labs",
+                      body: f.body || "Hi Mohamed,\n\nWe would like to discuss building a web platform / system for [Project Name].",
+                    }))}
+                    className="rounded-lg border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-[11px] font-mono text-cyan hover:bg-cyan/20 transition-all"
+                  >
+                    Client Project (HZ Labs)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      subject: "General Technical Inquiry",
+                    }))}
+                    className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-mono text-slate-300 hover:border-white/20 transition-all"
+                  >
+                    General
+                  </button>
+                </div>
               </div>
 
               {/* Subject */}

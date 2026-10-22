@@ -3,33 +3,40 @@ import { PERSONAL_IDENTITY } from './identity';
 import { projectsFromGithub, reviewedBlogPosts } from './portfolio-mapping';
 
 export const fallbackProfile: Profile = {
-  name: PERSONAL_IDENTITY.name, title: PERSONAL_IDENTITY.title,
-  tagline: 'Full Stack Web Platforms • Flutter Mobile Apps • AI/ML Systems • Data Science',
-  availabilityStatus: 'Available for internships and software engineering opportunities',
+  name: PERSONAL_IDENTITY.name,
+  title: PERSONAL_IDENTITY.title,
+  tagline: 'Full-Stack Web Applications · Secure REST APIs · Relational & NoSQL Database Systems',
+  availabilityStatus: PERSONAL_IDENTITY.availability,
   bio: PERSONAL_IDENTITY.bio,
-  philosophy: 'I build high-performance web platforms, cross-platform mobile apps, and intelligent data systems, documenting every breakthrough on GitHub.',
-  location: PERSONAL_IDENTITY.location, email: PERSONAL_IDENTITY.email,
-  currentlyExploring: ['Web Development', 'Mobile App Dev (Flutter)', 'AI / Machine Learning', 'Data Science & Analytics', 'System Design'],
-  timeline: [{label:'Education',value:PERSONAL_IDENTITY.education}],
-  socialLinks: [{label:'GitHub',url:PERSONAL_IDENTITY.githubUrl,icon:'github'}],
+  philosophy: 'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
+  location: PERSONAL_IDENTITY.location,
+  email: PERSONAL_IDENTITY.email,
+  profileImageUrl: PERSONAL_IDENTITY.portraitUrl,
+  currentlyExploring: ['Python (Exploring)', 'Flutter (Exploring)', 'Dart (Exploring)', 'Microsoft Azure (Cloud)', 'Applied AI in Practical Systems'],
+  timeline: [{ label: 'Education', value: PERSONAL_IDENTITY.education }],
+  socialLinks: [
+    { label: 'GitHub', url: PERSONAL_IDENTITY.githubUrl, icon: 'github' },
+    { label: 'LinkedIn', url: PERSONAL_IDENTITY.linkedInUrl, icon: 'linkedin' },
+  ],
 };
 
 export const fallbackSkills: Skill[] = [
-  // Web Development
-  'React|Frontend|94', 'Next.js|Frontend|92', 'TypeScript|Frontend|90',
-  'Tailwind CSS|Frontend|92', 'Redux Toolkit|Frontend|84',
-  'Node.js|Backend|88', 'NestJS|Backend|84', 'Express|Backend|86',
-  // Mobile App Development
-  'Flutter|Mobile|90', 'Dart|Mobile|88', 'React Native|Mobile|82',
-  // AI & Machine Learning
-  'Python|AI/ML|92', 'Machine Learning|AI/ML|84', 'PyTorch|AI/ML|80', 'AI Integration|AI/ML|86',
-  // Data Science
-  'Data Science|Data Science|86', 'Pandas & NumPy|Data Science|85', 'PostgreSQL|Database|86', 'MongoDB|Database|84',
-  // Tools & Cloud
-  'Docker|Tools|80', 'Git|Tools|90', 'GitHub|Tools|92', 'Postman|Tools|88', 'Figma|Tools|78',
-].map((item,index) => {
-  const [name,category,proficiency] = item.split('|');
-  return {id:category+'-'+name,name,category,proficiency:Number(proficiency),featured:index<10,order:index};
+  // Professional Project Experience (Strongest verified)
+  'React|Frontend|92', 'Next.js|Frontend|90', 'TypeScript|Frontend|88',
+  'JavaScript|Languages|90', 'Tailwind CSS|Frontend|90', 'Node.js|Backend|88',
+  'Express|Backend|86', 'PHP|Backend|84', 'PostgreSQL|Database|88',
+  'MySQL|Database|86', 'MongoDB|Database|84', 'Docker|Tools|82',
+  'Git|Tools|90', 'GitHub|Tools|90',
+  // Academic / Project Experience
+  'Redux Toolkit|Frontend|84', 'NestJS|Backend|82', 'Spring Boot|Backend|78',
+  'Java|Languages|80', 'Prisma|Database|84', 'PL/pgSQL|Database|82',
+  'Socket.IO|Backend|82', 'Vitest|Testing|84', 'Playwright|Testing|82',
+  'REST APIs|Backend|90', 'Postman|Tools|86', 'Azure|Cloud|75',
+  // Exploring
+  'Python|Exploring|70', 'Flutter|Exploring|70', 'Dart|Exploring|70',
+].map((item, index) => {
+  const [name, category, proficiency] = item.split('|');
+  return { id: category + '-' + name, name, category, proficiency: Number(proficiency), featured: index < 12, order: index };
 });
 
 // The UI renders unavailable statistics as a dash, rather than pretending zero is live data.
@@ -40,8 +47,15 @@ export const fallbackGithub: GithubSummary = {
 };
 export const fallbackProjects = projectsFromGithub(fallbackGithub);
 export const fallbackBlogs = reviewedBlogPosts();
-export const fallbackResume: CvAsset | null = null;
+export const fallbackResume: CvAsset = {
+  id: "mohamed-hajith-cv",
+  title: "Mohamed Hajith - Full-Stack Developer CV",
+  fileUrl: "/Mohamed_Hajith_CV.pdf",
+  version: 1,
+  isActive: true,
+};
 export const fallbackTestimonials: Testimonial[] = [];
+
 export const fallbackCertificates: Certificate[] = [
   {
     id: "udemy-full-stack-web-development-bootcamp",
