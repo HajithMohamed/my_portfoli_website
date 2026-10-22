@@ -38,9 +38,9 @@ async function main() {
       bio: 'Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.',
       philosophy:
         'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
-      location: 'Batticaloa, Sri Lanka',
+      location: 'Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
-      profileImageUrl: '/brand/mohamed-hajith-portrait.png',
+      profileImageUrl: '/brand/mohamed-hajith-v3.png',
       availabilityStatus:
         'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [
@@ -73,9 +73,9 @@ async function main() {
       bio: 'Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.',
       philosophy:
         'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
-      location: 'Batticaloa, Sri Lanka',
+      location: 'Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
-      profileImageUrl: '/brand/mohamed-hajith-portrait.png',
+      profileImageUrl: '/brand/mohamed-hajith-v3.png',
       availabilityStatus:
         'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [
@@ -163,42 +163,41 @@ async function main() {
   });
 
   await prisma.project.upsert({
-    where: { slug: 'shoe-bank-mernstack' },
+    where: { slug: 'shoe-bank' },
     update: {},
     create: {
-      title: 'Shoe Bank MERN Stack',
-      slug: 'shoe-bank-mernstack',
+      title: 'Shoe Bank — Footwear Business Management System',
+      slug: 'shoe-bank',
       description:
-        'A MERN-stack shoe banking and commerce platform with product workflows, account logic, and admin-ready foundations.',
-      techStack: ['React', 'Node.js', 'Express', 'MongoDB'],
-      githubUrl: 'https://github.com/HajithMohamed/SHOE_Bank_Mrnstack',
-      category: 'MERN Commerce',
+        'Wholesale ERP engineered for the footwear industry using PHP and MySQL. Accurately calculates landed cost per invoice, manages customer credit ledgers, tracks cheque clearance, and cleanly separates paper profit from cash collected.',
+      techStack: ['PHP', 'MySQL', 'Tailwind CSS', 'Alpine.js', 'Docker'],
+      githubUrl: 'https://github.com/HajithMohamed/Footwear_Business_Management_System',
+      category: 'Business Systems',
       status: 'ACTIVE',
       featured: true,
-      coverImage:
-        'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2000&auto=format&fit=crop',
+      coverImage: '/projects/shoe-bank-cover.png',
       outcome:
-        'Current working repository connected through the live GitHub telemetry layer.',
+        'Working footwear wholesale management ERP repository with Docker Compose development workflow.',
       caseStudy: {
         create: [
           {
             heading: 'Problem',
-            body: 'Shoe commerce workflows need clear product handling, reliable account flows, and maintainable MERN architecture.',
+            body: 'Wholesale footwear shops purchase stock in bulk, handle customs import clearance, sell on credit, and collect customer payments over months. Confusing invoiced sales with cash collected leads to severe cash-flow shortages.',
             order: 1,
           },
           {
             heading: 'Solution',
-            body: 'Built a focused MERN-stack foundation with React UI, Node/Express services, and MongoDB persistence.',
+            body: 'Engineered a wholesale management system with landed-cost snapshots, customer ledger replaying, cheque clearing, and financial reporting built with PHP, MySQL, and Docker.',
             order: 2,
           },
           {
             heading: 'Architecture',
-            body: 'React -> Node.js -> Express -> MongoDB',
+            body: 'PHP MVC -> MySQL Relational Engine -> Tailwind CSS / Alpine.js -> Docker Compose',
             order: 3,
           },
           {
             heading: 'Outcome',
-            body: 'The project is now treated as the portfolio current GitHub focus.',
+            body: 'Verified wholesale business platform with accurate landed-cost profit isolation.',
             order: 4,
           },
         ],

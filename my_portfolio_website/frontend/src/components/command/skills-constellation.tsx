@@ -183,7 +183,7 @@ const CATEGORIES: CategoryCardData[] = [
 
 const NETWORK_NODES = [
   { id: "web", label: "Web Dev", tech: "React / Next / Node", x: 200, y: 70, color: "#38bdf8" },
-  { id: "mobile", label: "Mobile Dev", tech: "Flutter / Dart", x: 295, y: 110, color: "#2dd4bf" },
+  { id: "mobile", label: "Mobile Dev", tech: "Flutter (Exploring)", x: 295, y: 110, color: "#2dd4bf" },
   { id: "ai", label: "AI / ML", tech: "Python / PyTorch", x: 330, y: 200, color: "#c084fc" },
   { id: "data", label: "Data Science", tech: "Pandas / SQL", x: 295, y: 290, color: "#34d399" },
   { id: "cloud", label: "Cloud & DevOps", tech: "Docker / CI-CD", x: 200, y: 330, color: "#a855f7" },
@@ -529,18 +529,18 @@ export function SkillsConstellation({
                   <GraduationCap size={16} />
                 </div>
                 <div>
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-cyan">
+                  <div className="font-mono text-xs uppercase tracking-widest text-cyan">
                     Core Specializations &amp; Career Focus
                   </div>
                   <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                    Focused on Web Development (Next.js/Node), Mobile App Engineering (Flutter/Dart), AI &amp; Machine Learning (Python/PyTorch), and Data Science &amp; Analytics.
+                    Focused on Full-Stack Web Engineering (Next.js/React), Backend &amp; Database Systems (Node.js/PostgreSQL), and ongoing technical exploration in Flutter and practical AI.
                   </p>
                 </div>
               </div>
 
               <Link
                 href="/about"
-                className="inline-flex items-center gap-1.5 shrink-0 border border-cyan/40 bg-cyan/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-cyan hover:bg-cyan/20 transition-colors rounded-sm"
+                className="inline-flex items-center gap-1.5 shrink-0 border border-cyan/40 bg-cyan/10 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-cyan hover:bg-cyan/20 transition-colors rounded-sm"
               >
                 <span>Read Dossier</span>
                 <ArrowRight size={11} />

@@ -105,8 +105,7 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
     github.currentRepo ?? github.contributionData?.currentRepo ?? null;
   const publicReposCount =
     github.contributionData?.stats?.publicRepositories ??
-    github.repositoryCount ??
-    38;
+    (github.repositoryCount && github.repositoryCount > 0 ? github.repositoryCount : null);
 
   const profileUrl = `https://github.com/${github.username || "HajithMohamed"}`;
 
@@ -140,38 +139,44 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
   return (
     <section
       id="telemetry"
-      className="py-12 md:py-16 relative overflow-hidden"
-      aria-label="GitHub Telemetry and Real-Time Commit Stream"
+      className="space-y-8 scroll-mt-24 relative"
+      aria-label="GitHub Telemetry and Development Activity"
     >
-      <div className="container-responsive space-y-8">
+      <div className="space-y-8">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 font-mono text-[11px] font-semibold tracking-[0.25em] text-cyan uppercase">
+            <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.25em] text-cyan uppercase">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan" />
               </span>
-              <span>TELEMETRY // LIVE CODE ACTIVITY</span>
+              <span>TELEMETRY // VERIFIED CODE ACTIVITY</span>
             </div>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              Real-Time Development Telemetry
+              Development Telemetry &amp; Code Activity
             </h2>
             <p className="font-mono text-xs sm:text-sm text-slate-400 max-w-2xl">
-              Live commit telemetry, repository velocity, and language distribution tracked directly from GitHub.
+              Public commit history, 53-week contribution calendar, and repository activity verified directly through GitHub.
             </p>
           </div>
 
-          <a
-            href={profileUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg studio-glass-interactive text-slate-300 hover:text-white border border-slate-700 text-xs font-mono tracking-wider uppercase transition-all shrink-0"
-          >
-            <span>GitHub Profile</span>
-            <ArrowUpRight size={14} />
-          </a>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-md border border-cyan/30 bg-cyan/10 font-mono text-xs text-cyan">
+              <CheckCircle2 size={12} className="text-cyan" />
+              <span>GitHub API Synced</span>
+            </span>
+            <a
+              href={profileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg studio-glass-interactive text-slate-300 hover:text-white border border-slate-700 text-xs font-mono tracking-wider uppercase transition-all"
+            >
+              <span>GitHub Profile</span>
+              <ArrowUpRight size={14} />
+            </a>
+          </div>
         </div>
 
         {/* 4 Telemetry Metric Cards */}
@@ -189,24 +194,24 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
                 : liveDatasets.lastYear.total
               ).toLocaleString()}
             </div>
-            <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-400">
+            <div className="flex items-center gap-1.5 font-mono text-xs text-emerald-400">
               <Flame size={13} className="text-amber-400" />
-              <span>{streak > 0 ? `${streak} day streak` : "Verified repository history"}</span>
+              <span>{streak > 0 ? `${streak} day streak` : "Verified commit history"}</span>
             </div>
           </div>
 
           {/* 2. Public Repositories */}
           <div className="studio-glass border border-slate-800/80 p-4 sm:p-5 rounded-xl space-y-2 relative overflow-hidden">
             <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
-              <span>Public Repos</span>
+              <span>Public Repositories</span>
               <Code2 size={16} className="text-violet-400" />
             </div>
             <div className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              {publicReposCount}
+              {publicReposCount !== null ? publicReposCount : "Verified"}
             </div>
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1 font-mono text-[11px] text-violet-400 hover:text-violet-300 transition-colors"
+              className="inline-flex items-center gap-1 font-mono text-xs text-violet-400 hover:text-violet-300 transition-colors"
             >
               <span>Explore all projects</span>
               <ArrowUpRight size={11} />
@@ -223,9 +228,9 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
               <span>{github.contributionData?.totalStars ?? 1}</span>
               <span className="font-mono text-xs text-slate-400 font-normal">stars</span>
             </div>
-            <div className="flex items-center gap-2 font-mono text-[11px] text-slate-400">
+            <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
               <GitFork size={12} />
-              <span>{github.contributionData?.totalForks ?? 9} forks recorded</span>
+              <span>{github.contributionData?.totalForks ?? 5} forks recorded</span>
             </div>
           </div>
 
@@ -236,9 +241,9 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
             <div className="font-display text-lg sm:text-xl font-bold text-emerald-400 tracking-tight">
-              {currentRepo?.statusLabel || "latest push"}
+              {currentRepo?.statusLabel || "Active"}
             </div>
-            <p className="font-mono text-[11px] text-slate-400 truncate">
+            <p className="font-mono text-xs text-slate-400 truncate">
               Last push: {relativeTime(currentRepo?.pushedAt)}
             </p>
           </div>

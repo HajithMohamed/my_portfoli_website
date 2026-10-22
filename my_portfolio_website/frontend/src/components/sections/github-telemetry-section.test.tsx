@@ -94,9 +94,9 @@ describe("GithubTelemetrySection Component", () => {
   it("renders the telemetry header, eyebrow, and GitHub profile link", () => {
     render(<GithubTelemetrySection github={mockGithubData} />);
 
-    expect(screen.getByText(/TELEMETRY \/\/ LIVE CODE ACTIVITY/i)).toBeDefined();
+    expect(screen.getByText(/TELEMETRY \/\/ VERIFIED CODE ACTIVITY/i)).toBeDefined();
     expect(
-      screen.getByRole("heading", { name: /Real-Time Development Telemetry/i })
+      screen.getByRole("heading", { name: /Development Telemetry & Code Activity/i })
     ).toBeDefined();
 
     const profileLink = screen.getByRole("link", { name: /github profile/i });

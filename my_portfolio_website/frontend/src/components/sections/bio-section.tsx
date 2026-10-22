@@ -8,7 +8,7 @@ import { GraduationCap, Github, CheckCircle2, ArrowRight } from "lucide-react";
 export function BioSection() {
   return (
     <section
-      className="py-12 md:py-16 border-y border-slate-800/60 bg-[#060814]/90 relative overflow-hidden"
+      className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 sm:p-8 lg:p-10 backdrop-blur-2xl shadow-2xl"
       aria-label="About Mohamed Hajith"
     >
       {/* Cybernetic circuit line accents matching reference design */}
@@ -45,7 +45,7 @@ export function BioSection() {
         </svg>
       </div>
 
-      <div className="container-responsive relative z-10">
+      <div className="relative z-10">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 lg:gap-12">
           
           {/* Left: Glowing Portrait Card + Main Statement */}

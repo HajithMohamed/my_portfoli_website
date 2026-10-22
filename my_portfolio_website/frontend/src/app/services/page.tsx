@@ -21,7 +21,7 @@ import { getAllServices, getRelatedProjectsForService } from "@/lib/services-cat
 export const metadata = {
   title: "Services & Capabilities | HZ Labs",
   description:
-    "Explore our full-stack engineering disciplines: Web & SaaS platforms, Flutter mobile apps, E-Commerce, Backend & APIs, Admin Dashboards, and AI Automation.",
+    "Explore our full-stack engineering disciplines: Web & SaaS platforms, Mobile & Responsive Web, E-Commerce, Backend & APIs, Admin Dashboards, and AI Automation.",
 };
 
 const ICON_MAP = {
