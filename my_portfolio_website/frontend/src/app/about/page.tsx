@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   Award,
@@ -113,7 +114,28 @@ export default async function AboutPage() {
             <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-96 w-96 rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-              <div className="space-y-4 max-w-3xl">
+              
+              {/* Glowing Portrait Card */}
+              <div className="relative shrink-0 p-1.5">
+                <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-3xl overflow-hidden ring-2 ring-indigo-500/70 shadow-[0_0_35px_rgba(99,102,241,0.35)] bg-slate-900">
+                  <Image
+                    src="/brand/mohamed-hajith-portrait.png"
+                    alt="Mohamed Hajith"
+                    width={160}
+                    height={160}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    priority
+                  />
+                </div>
+                <div
+                  className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#080b18] ring-4 ring-[#080b18] shadow-lg shadow-emerald-500/30"
+                  title="Active & Available"
+                >
+                  <span className="h-3.5 w-3.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981] animate-pulse" />
+                </div>
+              </div>
+
+              <div className="space-y-4 max-w-2xl flex-1">
                 <div className="inline-flex items-center gap-2 rounded-full border border-cyan/40 bg-cyan/10 px-3.5 py-1 font-mono text-xs uppercase tracking-widest text-cyan">
                   <Terminal size={13} className="text-cyan animate-pulse" />
                   <span>ABOUT // MOHAMED HAJITH</span>

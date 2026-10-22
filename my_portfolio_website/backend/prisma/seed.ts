@@ -40,6 +40,7 @@ async function main() {
         'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
       location: 'Batticaloa, Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
+      profileImageUrl: '/brand/mohamed-hajith-portrait.png',
       availabilityStatus:
         'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [
@@ -74,6 +75,7 @@ async function main() {
         'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
       location: 'Batticaloa, Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
+      profileImageUrl: '/brand/mohamed-hajith-portrait.png',
       availabilityStatus:
         'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [

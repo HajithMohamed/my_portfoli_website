@@ -11,6 +11,7 @@ export const fallbackProfile: Profile = {
   philosophy: 'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
   location: PERSONAL_IDENTITY.location,
   email: PERSONAL_IDENTITY.email,
+  profileImageUrl: PERSONAL_IDENTITY.portraitUrl,
   currentlyExploring: ['Python (Exploring)', 'Flutter (Exploring)', 'Dart (Exploring)', 'Microsoft Azure (Cloud)', 'Applied AI in Practical Systems'],
   timeline: [{ label: 'Education', value: PERSONAL_IDENTITY.education }],
   socialLinks: [
