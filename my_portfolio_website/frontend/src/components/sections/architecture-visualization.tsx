@@ -90,8 +90,8 @@ const NODES: NodeData[] = [
   {
     id: "mobile",
     name: "Mobile",
-    category: "Cross-Platform",
-    tech: ["Flutter", "Dart", "iOS", "Android"],
+    category: "Cross-Platform (Exploring)",
+    tech: ["Flutter (Exploring)", "Dart", "PWA", "Responsive UI"],
     x: 105,
     y: 335,
     labelPosition: "left",

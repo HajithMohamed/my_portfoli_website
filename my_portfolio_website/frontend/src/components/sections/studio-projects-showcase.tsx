@@ -48,7 +48,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
       {/* SECTION HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-white/[0.08] pb-6">
         <div>
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.3em] text-cyan">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
             <span>SELECTED WORK // ENGINEERING SHOWCASE</span>
           </div>
@@ -134,7 +134,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
                 </g>
               </svg>
 
-              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded border border-violet-500/30 bg-black/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-violet-300 backdrop-blur-md">
+              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded border border-violet-500/30 bg-black/80 px-2.5 py-1 font-mono text-xs uppercase tracking-wider text-violet-300 backdrop-blur-md">
                 <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
                 <span>Architecture // Event-Driven E-Commerce</span>
               </div>
@@ -146,11 +146,11 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
             <div>
               {/* Badge strip */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-violet-300">
+                <span className="inline-flex items-center gap-1 rounded border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold uppercase tracking-wider text-violet-300">
                   <Sparkles size={11} />
                   <span>Team Leadership · Top Featured</span>
                 </span>
-                <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                   E-Commerce Platform
                 </span>
               </div>
@@ -170,7 +170,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
                 {["React", "Redux Toolkit", "Node.js", "Express", "MongoDB", "Socket.IO", "Playwright", "GitHub Actions"].map((tech) => (
                   <span
                     key={tech}
-                    className="rounded border border-violet-500/25 bg-violet-500/[0.06] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-violet-300"
+                    className="rounded border border-violet-500/25 bg-violet-500/[0.06] px-2.5 py-1 font-mono text-xs uppercase tracking-wider text-violet-300"
                   >
                     {tech}
                   </span>
@@ -226,20 +226,20 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
               <div className="flex items-center justify-between border-b border-cyan/15 pb-2">
                 <div className="flex items-center gap-1.5">
                   <Database size={13} className="text-cyan" />
-                  <span className="font-mono text-[10px] text-cyan font-semibold">PostgreSQL Relational Constraints</span>
+                  <span className="font-mono text-xs text-cyan font-semibold">PostgreSQL Relational Constraints</span>
                 </div>
-                <span className="font-mono text-[9px] text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded">
+                <span className="font-mono text-[11px] text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded">
                   VITEST VERIFIED
                 </span>
               </div>
 
-              <div className="space-y-1 font-mono text-[10px] text-slate-300 py-1">
+              <div className="space-y-1 font-mono text-xs text-slate-300 py-1">
                 <div className="text-cyan">&gt; prisma migrate status</div>
                 <div className="text-muted-foreground">✓ EXCLUDE USING GIST (equipment_id WITH =, reservation_period WITH &amp;&amp;)</div>
                 <div className="text-emerald-400">✓ Zero overlapping reservations guaranteed at DB level</div>
               </div>
 
-              <div className="flex items-center justify-between font-mono text-[8px] text-cyan/60 border-t border-cyan/10 pt-1.5">
+              <div className="flex items-center justify-between font-mono text-[10px] text-cyan/60 border-t border-cyan/10 pt-1.5">
                 <span>WORKFLOW: MAINTENANCE BLACKOUTS</span>
                 <span>STACK: NEXT.JS + PRISMA</span>
               </div>
@@ -248,10 +248,10 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
             {/* Title & Description */}
             <div className="mt-4">
               <div className="flex items-center gap-2">
-                <span className="rounded border border-cyan/30 bg-cyan/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-cyan">
+                <span className="rounded border border-cyan/30 bg-cyan/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-cyan">
                   DATABASE CASE STUDY
                 </span>
-                <span className="font-mono text-[10px] text-muted-foreground">Laboratory Scheduling</span>
+                <span className="font-mono text-xs text-muted-foreground">Laboratory Scheduling</span>
               </div>
               <h4 className="mt-2 font-display text-xl font-bold text-foreground group-hover:text-cyan transition-colors">
                 BenchBook — Laboratory Resource Reservation System
@@ -265,7 +265,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
                 {["Next.js", "TypeScript", "PostgreSQL", "Prisma", "Vitest", "Tailwind CSS"].map((tech) => (
                   <span
                     key={tech}
-                    className="rounded border border-cyan/20 bg-cyan/[0.05] px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-cyan"
+                    className="rounded border border-cyan/20 bg-cyan/[0.05] px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-cyan"
                   >
                     {tech}
                   </span>
@@ -307,20 +307,20 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
               <div className="flex items-center justify-between border-b border-rose-500/15 pb-2">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck size={13} className="text-rose-400" />
-                  <span className="font-mono text-[10px] text-rose-300 font-semibold">PL/pgSQL Transaction Procedures</span>
+                  <span className="font-mono text-xs text-rose-300 font-semibold">PL/pgSQL Transaction Procedures</span>
                 </div>
-                <span className="font-mono text-[9px] text-amber-400 bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded">
+                <span className="font-mono text-[11px] text-amber-400 bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded">
                   ACADEMIC PROTOTYPE
                 </span>
               </div>
 
-              <div className="space-y-1 font-mono text-[10px] text-slate-300 py-1">
+              <div className="space-y-1 font-mono text-xs text-slate-300 py-1">
                 <div className="text-rose-300">&gt; git log -1 --grep=&quot;PR #7&quot;</div>
                 <div className="text-muted-foreground">✓ Merged pre-handoff architecture &amp; database contract</div>
                 <div className="text-emerald-400">✓ Atomic transfer integrity &amp; institution authorization</div>
               </div>
 
-              <div className="flex items-center justify-between font-mono text-[8px] text-rose-400/60 border-t border-rose-500/10 pt-1.5">
+              <div className="flex items-center justify-between font-mono text-[10px] text-rose-400/60 border-t border-rose-500/10 pt-1.5">
                 <span>COURSEWORK: ADBMS</span>
                 <span>STATUS: DEMONSTRATION PROTOTYPE</span>
               </div>
@@ -329,10 +329,10 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
             {/* Title & Description */}
             <div className="mt-4">
               <div className="flex items-center gap-2">
-                <span className="rounded border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-rose-300">
+                <span className="rounded border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-rose-300">
                   ADVANCED DATABASE SYSTEM
                 </span>
-                <span className="font-mono text-[10px] text-amber-400">Academic Prototype</span>
+                <span className="font-mono text-xs text-amber-400">Academic Prototype</span>
               </div>
               <h4 className="mt-2 font-display text-xl font-bold text-foreground group-hover:text-rose-300 transition-colors">
                 BloodBridge — Advanced Database Management System
@@ -346,7 +346,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
                 {["PostgreSQL", "PL/pgSQL", "React", "Node.js", "Docker", "GitHub Actions"].map((tech) => (
                   <span
                     key={tech}
-                    className="rounded border border-rose-500/20 bg-rose-500/[0.05] px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-rose-300"
+                    className="rounded border border-rose-500/20 bg-rose-500/[0.05] px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-rose-300"
                   >
                     {tech}
                   </span>
@@ -401,10 +401,10 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
 
           <div>
             <div className="flex items-center justify-between">
-              <span className="rounded border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-indigo-300">
+              <span className="rounded border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-indigo-300">
                 FULL-STACK &amp; CMS
               </span>
-              <span className="font-mono text-[10px] text-muted-foreground">90+ Automated Tests</span>
+              <span className="font-mono text-xs text-muted-foreground">90+ Automated Tests</span>
             </div>
 
             <h4 className="mt-3 font-display text-xl font-bold text-foreground group-hover:text-indigo-300 transition-colors">
@@ -419,7 +419,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
               {["Next.js", "NestJS", "TypeScript", "Prisma", "PostgreSQL", "Vitest", "Tailwind CSS"].map((tech) => (
                 <span
                   key={tech}
-                  className="rounded border border-indigo-500/20 bg-indigo-500/[0.05] px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-indigo-300"
+                  className="rounded border border-indigo-500/20 bg-indigo-500/[0.05] px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-indigo-300"
                 >
                   {tech}
                 </span>
@@ -466,10 +466,10 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
 
           <div>
             <div className="flex items-center justify-between">
-              <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-amber-300">
+              <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-amber-300">
                 WHOLESALE ERP // PHP &amp; MYSQL
               </span>
-              <span className="font-mono text-[10px] text-muted-foreground">Business Systems</span>
+              <span className="font-mono text-xs text-muted-foreground">Business Systems</span>
             </div>
 
             <h4 className="mt-3 font-display text-xl font-bold text-foreground group-hover:text-amber-300 transition-colors">
@@ -485,7 +485,7 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
               {["PHP", "MySQL", "Tailwind CSS", "Alpine.js", "Docker"].map((tech) => (
                 <span
                   key={tech}
-                  className="rounded border border-amber-500/20 bg-amber-500/[0.06] px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-amber-300"
+                  className="rounded border border-amber-500/20 bg-amber-500/[0.06] px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-amber-300"
                 >
                   {tech}
                 </span>
@@ -520,11 +520,11 @@ export function StudioProjectsShowcase({ projects = [] }: StudioProjectsShowcase
       {/* Complete Archive Callout */}
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/[0.08] font-mono text-xs text-muted-foreground">
         <p>
-          Also exploring TechBridge (Developer Network), University Library (PHP MVC), and Spring Boot services.
+          Also exploring TechBridge (Student Opportunity &amp; Collaboration), University Library (PHP MVC), and Spring Boot services.
         </p>
         <Link
           href="/projects"
-          className="inline-flex items-center gap-1.5 text-cyan hover:underline font-semibold uppercase tracking-wider text-[11px]"
+          className="inline-flex items-center gap-1.5 text-cyan hover:underline font-semibold uppercase tracking-wider text-xs"
         >
           <span>View complete project directory</span>
           <ArrowRight size={13} />

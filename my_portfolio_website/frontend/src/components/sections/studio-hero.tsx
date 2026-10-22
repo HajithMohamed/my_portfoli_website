@@ -7,10 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArchitectureVisualization } from "./architecture-visualization";
 
 const SPECIALTIES = [
-  "+ Full-Stack Dev · Cloud & Mobile Architecture",
-  "+ High-Performance APIs · Scalable Backend Systems",
-  "+ Cross-Platform Flutter Apps · Realtime Platforms",
-  "+ Modern Next.js 16 & React 19 Architectures",
+  "+ Full-Stack Engineering · React & Next.js",
+  "+ Backend & API Design · Node.js & NestJS",
+  "+ Relational Database Integrity · PostgreSQL & Prisma",
+  "+ Automated Testing & CI/CD · Vitest & Playwright",
 ];
 
 export function StudioHero() {
@@ -25,7 +25,7 @@ export function StudioHero() {
 
   return (
     <section
-      className="relative pt-12 pb-16 md:pt-20 md:pb-24 lg:pt-28 lg:pb-32 overflow-hidden"
+      className="relative pt-10 pb-8 md:pt-16 md:pb-12 lg:pt-20 lg:pb-16 overflow-hidden"
       aria-label="HZ Labs Studio Introduction"
     >
       {/* Background radial gradients for ambient studio glow */}
@@ -43,7 +43,7 @@ export function StudioHero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-300">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-300">
                 Mohamed Hajith · BICT (Hons) · Open to Internships
               </span>
             </div>
@@ -56,6 +56,23 @@ export function StudioHero() {
               <p className="font-display text-xl sm:text-2xl lg:text-3xl font-semibold text-gradient-violet">
                 Full-Stack Software Developer | Backend &amp; Database Engineering
               </p>
+              
+              {/* Verified Rotating Specialty Ticker */}
+              <div className="h-6 overflow-hidden flex items-center pt-1">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSpecialtyIndex}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.3 }}
+                    className="font-mono text-xs sm:text-sm text-cyan flex items-center gap-2 font-medium"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
+                    <span>{SPECIALTIES[currentSpecialtyIndex]}</span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Bio & Academic Specialization */}
@@ -110,7 +127,7 @@ export function StudioHero() {
             </div>
 
             {/* Micro Highlights Pill Row */}
-            <div className="pt-4 flex flex-wrap items-center gap-4 sm:gap-6 border-t border-slate-800/80 w-full text-slate-400 font-mono text-[11px]">
+            <div className="pt-4 flex flex-wrap items-center gap-4 sm:gap-6 border-t border-slate-800/80 w-full text-slate-400 font-mono text-xs">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck size={14} className="text-emerald-400" />
                 <span>BICT (Hons) Undergraduate</span>

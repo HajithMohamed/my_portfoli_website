@@ -9,31 +9,31 @@ interface ToolItem {
   name: string;
   queryParam: string;
   icon: keyof typeof TechIcons;
-  category: "Professional project experience" | "Academic/project experience" | "Currently learning";
+  category: "Hands-on project experience" | "Academic/project experience" | "Currently learning";
   experience: string;
 }
 
 const TOOLS_BY_CATEGORY: {
-  category: "Professional project experience" | "Academic/project experience" | "Currently learning";
+  category: "Hands-on project experience" | "Academic/project experience" | "Currently learning";
   description: string;
   tools: ToolItem[];
 }[] = [
   {
-    category: "Professional project experience",
+    category: "Hands-on project experience",
     description: "Strongest verified technologies backed by shipped platforms, production business systems, and public repositories.",
     tools: [
-      { name: "React", queryParam: "React", icon: "React", category: "Professional project experience", experience: "Verified Project" },
-      { name: "Next.js", queryParam: "Next.js", icon: "NextJS", category: "Professional project experience", experience: "Verified Project" },
-      { name: "Node.js", queryParam: "Node.js", icon: "NodeJS", category: "Professional project experience", experience: "Verified Project" },
-      { name: "PHP", queryParam: "PHP", icon: "NodeJS", category: "Professional project experience", experience: "Verified Project" },
-      { name: "PostgreSQL", queryParam: "PostgreSQL", icon: "PostgreSQL", category: "Professional project experience", experience: "Relational DB" },
-      { name: "MySQL", queryParam: "MySQL", icon: "PostgreSQL", category: "Professional project experience", experience: "Relational DB" },
-      { name: "MongoDB", queryParam: "MongoDB", icon: "MongoDB", category: "Professional project experience", experience: "NoSQL DB" },
-      { name: "TypeScript", queryParam: "TypeScript", icon: "TypeScript", category: "Professional project experience", experience: "Verified Project" },
-      { name: "JavaScript", queryParam: "JavaScript", icon: "JavaScript", category: "Professional project experience", experience: "Verified Project" },
-      { name: "Tailwind CSS", queryParam: "TailwindCSS", icon: "TailwindCSS", category: "Professional project experience", experience: "Verified Project" },
-      { name: "Docker", queryParam: "Docker", icon: "Docker", category: "Professional project experience", experience: "Containerization" },
-      { name: "GitHub", queryParam: "GitHub", icon: "GitHub", category: "Professional project experience", experience: "CI/CD & Git" },
+      { name: "React", queryParam: "React", icon: "React", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "Next.js", queryParam: "Next.js", icon: "NextJS", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "Node.js", queryParam: "Node.js", icon: "NodeJS", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "PHP", queryParam: "PHP", icon: "PHP", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "PostgreSQL", queryParam: "PostgreSQL", icon: "PostgreSQL", category: "Hands-on project experience", experience: "Relational DB" },
+      { name: "MySQL", queryParam: "MySQL", icon: "MySQL", category: "Hands-on project experience", experience: "Relational DB" },
+      { name: "MongoDB", queryParam: "MongoDB", icon: "MongoDB", category: "Hands-on project experience", experience: "NoSQL DB" },
+      { name: "TypeScript", queryParam: "TypeScript", icon: "TypeScript", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "JavaScript", queryParam: "JavaScript", icon: "JavaScript", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "Tailwind CSS", queryParam: "TailwindCSS", icon: "TailwindCSS", category: "Hands-on project experience", experience: "Verified Project" },
+      { name: "Docker", queryParam: "Docker", icon: "Docker", category: "Hands-on project experience", experience: "Containerization" },
+      { name: "GitHub", queryParam: "GitHub", icon: "GitHub", category: "Hands-on project experience", experience: "CI/CD & Git" },
     ],
   },
   {
@@ -62,10 +62,10 @@ export function TechnologyShowcase() {
   return (
     <section
       id="skills"
-      className="py-16 md:py-24 relative overflow-hidden"
+      className="space-y-8 scroll-mt-24 relative"
       aria-label="Technology Stack and Tools"
     >
-      <div className="container-responsive space-y-12">
+      <div className="space-y-8">
         
         {/* Section Header */}
         <div className="max-w-2xl space-y-3">
@@ -122,7 +122,7 @@ export function TechnologyShowcase() {
                       </span>
 
                       {/* Micro hover indicator */}
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-mono text-[9px] uppercase tracking-wider text-violet-400 mt-0.5">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-mono text-[11px] uppercase tracking-wider text-violet-400 mt-0.5">
                         {tool.experience}
                       </span>
                     </Link>
@@ -140,7 +140,7 @@ export function TechnologyShowcase() {
           </p>
           <Link
             href="/projects"
-            className="inline-flex items-center gap-1.5 text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-wider text-[11px] font-semibold"
+            className="inline-flex items-center gap-1.5 text-violet-400 hover:text-violet-300 transition-colors uppercase tracking-wider text-xs font-semibold"
           >
             <span>View all public repositories</span>
             <ArrowUpRight size={14} />

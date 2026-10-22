@@ -300,12 +300,12 @@ A cost snapshot is taken when an invoice is created. Recalculating an import shi
     },
   },
 
-  // 6. TechBridge — Developer Collaboration Network
+  // 6. TechBridge — Student Opportunity & Collaboration Platform
   {
     repository: "HajithMohamed/Tech_Bridge",
-    title: "TechBridge — Developer Collaboration Network",
-    goal: "Connect university software engineering teams with milestone evaluation, structured peer reviews, and mentor feedback.",
-    summary: "A MERN-stack collaborative platform connecting undergraduate engineering projects with milestone tracking, repository links, and structured peer review workflows.",
+    title: "TechBridge — Student Opportunity & Collaboration Platform",
+    goal: "Connect university technology students with curated academic resources, software project showcases, internship opportunities, and structured peer collaboration.",
+    summary: "A MERN-stack web platform built for undergraduate technology students to discover academic resources, showcase technical projects, explore industry opportunities, and collaborate with peers.",
     technologies: ["React", "Node.js", "Express", "MongoDB", "Tailwind CSS"],
     coverImage: "/projects/tech-bridge-cover.png",
     sourceUrl: "https://github.com/HajithMohamed/Tech_Bridge",
@@ -313,27 +313,27 @@ A cost snapshot is taken when an invoice is created. Recalculating an import shi
     sections: [
       {
         heading: "Problem",
-        body: "University software engineering students often lack structured platforms to submit progress milestones, receive peer code reviews, and track development iterations across group assignments.",
+        body: "Undergraduate technology students frequently struggle with fragmented information: course resources, study materials, student project showcases, and early-career internship opportunities are scattered across messaging channels without a centralized repository or peer network.",
       },
       {
         heading: "Your contribution",
-        body: "Developed full-stack features including project registration, user profile directories, milestone submission endpoints, and reviewer evaluation forms.",
+        body: "Architected and built full-stack features including student profiles, categorized resource directories, project showcase submissions, industry opportunity listings, and responsive UI components.",
       },
       {
         heading: "Architecture",
-        body: "React client with responsive Tailwind CSS interface, Node.js and Express REST API gateway, and MongoDB database persistence.",
+        body: "React frontend with responsive Tailwind CSS components, communicating with an Express.js and Node.js REST API layer backed by MongoDB for student portfolios, resource documents, and opportunity listings.",
       },
       {
         heading: "Key technical decisions",
-        body: "Structured review feedback schemas linking comments directly to specific milestone deliverables; implemented role-based permissions distinguishing students from evaluators.",
+        body: "Structured flexible document schemas in MongoDB to accommodate varied resource types (lecture notes, code snippets, documentation) and internship announcements; established clean REST routes separating student public portfolios from authenticated account actions.",
       },
       {
         heading: "Testing",
-        body: "Component rendering tests and API endpoint validation using Postman.",
+        body: "Verified API endpoint responses and validation rules with Postman; tested responsive layouts across desktop and mobile browsers.",
       },
       {
         heading: "Current status",
-        body: "Open-source collaboration platform repository.",
+        body: "Open-source student opportunity, resource-sharing, and collaboration repository.",
       },
       {
         heading: "Repository/Demo",
@@ -341,11 +341,17 @@ A cost snapshot is taken when an invoice is created. Recalculating an import shi
       },
     ],
     blog: {
-      title: "TechBridge: structuring peer review workflows for engineering students",
-      slug: "techbridge-peer-review-milestones",
-      excerpt: "Notes on building milestone evaluation and peer review tools for university software engineering teams.",
-      content: `# Structured peer review in software education
-TechBridge connects undergraduate developer teams with structured milestone evaluations. By anchoring review feedback directly to project milestones and repository commits, teams receive actionable technical feedback.`,
+      title: "TechBridge: connecting students with resources and industry opportunities",
+      slug: "techbridge-student-opportunity-platform",
+      excerpt: "Architecture notes on centralizing academic resources, student project portfolios, and industry connections in a full-stack MERN application.",
+      content: `# A centralized bridge for undergraduate students
+TechBridge addresses the fragmentation undergraduate students face when discovering academic learning materials, project references, and early industry opportunities.
+
+# Unified portfolios and resource sharing
+Students can publish technical project showcases, share verified study resources across courses, and view relevant technical opportunities without relying on dispersed social media channels.
+
+# The MERN architecture
+Built on React, Node.js, Express, and MongoDB, the system emphasizes fast retrieval of categorized documents and responsive mobile accessibility.`,
     },
   },
 

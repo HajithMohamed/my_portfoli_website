@@ -157,4 +157,37 @@ export const TechIcons = {
       <path d="M54 44C54 44 48 50 50 62C52 74 64 78 64 78C64 78 56 74 56 66C56 58 64 54 64 54C64 54 72 60 72 70C72 80 62 84 62 84C62 84 76 82 78 68C80 54 68 46 68 46C68 46 72 40 64 36C56 32 54 44 54 44Z" fill="white" />
     </svg>
   ),
+
+  PHP: (props: IconProps) => (
+    <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <rect width="128" height="128" rx="20" fill="#232531" />
+      <ellipse cx="64" cy="64" rx="54" ry="34" fill="#777BB4" />
+      <path
+        d="M34 50h14c5.5 0 9.5 2.8 9.5 7.5s-4 8.5-9.5 8.5h-6l-3.5 12H30l8-28zm8.5 10.5h4.5c2 0 3.5-.8 3.5-2.2s-1.5-2.3-3.5-2.3h-3.5l-1 4.5zm19.5-10.5h8l-6.5 28h-8l6.5-28zm15 0h14c5.5 0 9.5 2.8 9.5 7.5s-4 8.5-9.5 8.5h-6l-3.5 12H77l8-28zm8.5 10.5h4.5c2 0 3.5-.8 3.5-2.2s-1.5-2.3-3.5-2.3h-3.5l-1 4.5z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  ),
+
+  MySQL: (props: IconProps) => (
+    <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <rect width="128" height="128" rx="20" fill="#00618A" />
+      <path
+        d="M88.5 44c-3.2-6.5-9.8-11.2-17.5-12.8-5.8-1.2-12 .2-16.7 3.8-6.8 5.2-9.6 13.7-7.2 21.8 1.9 6.4 6.8 11.2 12.8 13.8 2.2.9 4.6 1.6 7 1.8-1.5 2.1-3.6 3.7-6 4.7-4.1 1.7-8.8 1.6-13.1-.3-1.8-.8-3.4-1.9-4.8-3.2l-4.5 5.2c2.2 2 4.7 3.6 7.4 4.8 6.5 2.8 13.8 2.8 20.2.1 4.7-2 8.7-5.3 11.5-9.6 4.6-7 5.6-15.8 2.8-23.7-.8-2.3-2-4.5-3.5-6.4 4.5 1.5 8.3 4.8 10.5 9.1l8.6-5.5z"
+        fill="#E48E00"
+      />
+      <text
+        x="64"
+        y="110"
+        textAnchor="middle"
+        fill="#FFFFFF"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        fontSize="24"
+        fontWeight="800"
+        letterSpacing="1"
+      >
+        MySQL
+      </text>
+    </svg>
+  ),
 };

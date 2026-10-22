@@ -22,7 +22,7 @@ describe("ServicesShowcase Component", () => {
   it("renders all 6 service cards with their titles", () => {
     render(<ServicesShowcase />);
     expect(screen.getByText("Web & SaaS platforms")).toBeDefined();
-    expect(screen.getByText("Mobile apps (Flutter)")).toBeDefined();
+    expect(screen.getByText("Mobile apps (In Development)")).toBeDefined();
     expect(screen.getByText("E-commerce")).toBeDefined();
     expect(screen.getByText("Backend & APIs")).toBeDefined();
     expect(screen.getByText("Admin dashboards")).toBeDefined();
@@ -32,7 +32,7 @@ describe("ServicesShowcase Component", () => {
   it("renders technology stack tags for services", () => {
     render(<ServicesShowcase />);
     expect(screen.getAllByText("Next.js").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Flutter")).toBeDefined();
+    expect(screen.getByText("Flutter (Exploring)")).toBeDefined();
     expect(screen.getByText("Dart")).toBeDefined();
     expect(screen.getByText("NestJS")).toBeDefined();
   });

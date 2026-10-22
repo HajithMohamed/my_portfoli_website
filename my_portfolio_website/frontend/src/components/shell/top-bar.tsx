@@ -16,9 +16,12 @@ export interface NavItem {
 
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/#services", isSection: true },
   { label: "Work", href: "/#projects", isSection: true },
-  { label: "About", href: "/about" },
+  { label: "About", href: "/#about", isSection: true },
+  { label: "Skills", href: "/#skills", isSection: true },
+  { label: "Activity", href: "/#telemetry", isSection: true },
+  { label: "Services", href: "/#services", isSection: true },
+  { label: "Contact", href: "/#comms", isSection: true },
 ];
 
 export const SECONDARY_NAV_ITEMS = [
@@ -61,7 +64,11 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
 
     const sections = [
       { id: "projects", label: "Work" },
+      { id: "about", label: "About" },
+      { id: "skills", label: "Skills" },
+      { id: "telemetry", label: "Activity" },
       { id: "services", label: "Services" },
+      { id: "comms", label: "Contact" },
     ];
 
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
@@ -141,10 +148,13 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
     if (pathname === "/" && item.isSection) {
       return activeSection === item.label;
     }
-    if (item.href === "/about" && pathname.startsWith("/about")) {
+    if (item.label === "About" && pathname.startsWith("/about")) {
       return true;
     }
-    if (item.href === "/#projects" && pathname.startsWith("/projects")) {
+    if (item.label === "Work" && pathname.startsWith("/projects")) {
+      return true;
+    }
+    if (item.label === "Services" && pathname.startsWith("/services")) {
       return true;
     }
     return false;
@@ -191,7 +201,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
           {/* Desktop Navigation Links */}
           <nav
             aria-label="Main Navigation"
-            className="hidden md:flex items-center gap-1 rounded-full border border-white/[0.08] bg-[#0c101c]/60 p-1.5 backdrop-blur-xl shadow-inner shadow-black/40"
+            className="hidden lg:flex items-center gap-0.5 rounded-full border border-white/[0.08] bg-[#0c101c]/60 p-1 backdrop-blur-xl shadow-inner shadow-black/40"
           >
             {PRIMARY_NAV_ITEMS.map((item) => {
               const active = isNavActive(item);
@@ -200,7 +210,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "relative px-4 py-1.5 text-xs font-medium tracking-wide transition-colors",
+                    "relative px-3 py-1.5 text-xs font-medium tracking-wide transition-colors",
                     active
                       ? "text-white"
                       : "text-slate-400 hover:text-white"
@@ -239,7 +249,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
           {/* Mobile Menu Hamburger Button */}
           <button
             type="button"
-            className="md:hidden relative z-[60] flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
+            className="lg:hidden relative z-[60] flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={mobileMenuOpen}
@@ -284,7 +294,7 @@ export function TopBar({ location = PERSONAL_IDENTITY.location }: { location?: s
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed inset-x-0 top-0 z-40 flex flex-col border-b border-white/[0.08] bg-[#070a14]/95 pt-24 pb-8 px-6 backdrop-blur-2xl shadow-2xl md:hidden"
+            className="fixed inset-x-0 top-0 z-40 flex flex-col border-b border-white/[0.08] bg-[#070a14]/95 pt-24 pb-8 px-6 backdrop-blur-2xl shadow-2xl lg:hidden"
           >
             {/* Primary Navigation Links */}
             <nav aria-label="Mobile Primary Navigation" className="flex flex-col space-y-2">

@@ -50,15 +50,15 @@ describe("AboutPage Component", () => {
     expect(screen.getByText(/ABOUT \/\/ MOHAMED HAJITH/i)).toBeDefined();
     expect(screen.getAllByText(/BICT \(Hons\)/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/University of Ruhuna/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Batticaloa, Sri Lanka/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Sri Lanka/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders chronological career milestones", async () => {
     const Component = await AboutPage();
     render(Component);
 
-    expect(screen.getByText(/Full-Stack Web & Backend Engineering/i)).toBeDefined();
-    expect(screen.getByText(/Footwear BMS/i)).toBeDefined();
+    expect(screen.getByText(/Full-Stack Web & Relational Systems Engineering/i)).toBeDefined();
+    expect(screen.getByText(/Shoe Bank/i)).toBeDefined();
     expect(screen.getByText(/Collaborative Engineering & Database Systems/i)).toBeDefined();
     expect(screen.getByText(/2023 – 2027/i)).toBeDefined();
   });

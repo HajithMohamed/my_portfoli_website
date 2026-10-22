@@ -21,7 +21,7 @@ describe("TechnologyShowcase Component", () => {
   it("renders all three core categories", () => {
     render(<TechnologyShowcase />);
 
-    expect(screen.getByRole("heading", { name: "Professional project experience" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Hands-on project experience" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Academic/project experience" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Currently learning" })).toBeDefined();
   });

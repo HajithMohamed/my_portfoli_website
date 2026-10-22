@@ -15,17 +15,7 @@ import { getHomeData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 import type { GithubSummary, Project } from "@/lib/types";
 
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-center w-full py-10">
-      <div className="flex items-center gap-4 w-full max-w-sm mx-auto opacity-60">
-        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-500/40" />
-        <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-slate-400">{label}</span>
-        <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-500/40" />
-      </div>
-    </div>
-  );
-}
+
 
 function titleFromRepoName(name: string) {
   return name.replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -78,8 +68,6 @@ export default async function Home() {
     ...(profile.email ? { email: `mailto:${profile.email}` } : {}),
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Batticaloa",
-      addressRegion: "Eastern Province",
       addressCountry: "LK",
     },
     alumniOf: {
@@ -102,44 +90,44 @@ export default async function Home() {
       <TopBar location={profile.location} />
 
       <main className="relative z-10">
+        {/* 01 // INTRODUCTION */}
         <StudioHero />
-        <BioSection />
 
-        <GithubTelemetrySection github={github} />
-
-        <div className="container-responsive section-gap space-y-12 md:space-y-16 lg:space-y-24">
-          
-          {/* Services Catalog — What I Build */}
-          <ServicesShowcase />
-
-          <SectionDivider label="sys.portfolio" />
-
-          {/* Selected Work — Featured Projects */}
-          <div id="projects" className="scroll-mt-24">
+        <div className="container-responsive pt-6 md:pt-10 lg:pt-12 pb-24 space-y-16 md:space-y-20 lg:space-y-24">
+          {/* 02 // FEATURED ENGINEERING WORK */}
+          <div id="projects" className="scroll-mt-24 pb-4 md:pb-6">
             <StudioProjectsShowcase projects={projects} />
           </div>
 
-          <SectionDivider label="sys.skills" />
+          {/* 03 // ABOUT & ENGINEERING APPROACH */}
+          <div id="about" className="scroll-mt-24">
+            <BioSection />
+          </div>
 
-          {/* Tools across my work — Technology Showcase */}
+          {/* 04 // TECHNICAL SKILLS */}
           <div id="skills" className="scroll-mt-24">
             <TechnologyShowcase />
           </div>
 
-          <SectionDivider label="sys.intelligence" />
+          {/* 05 // GITHUB ACTIVITY — Compact, Reliable Development Activity */}
+          <div id="telemetry" className="scroll-mt-24">
+            <GithubTelemetrySection github={github} />
+          </div>
 
-          {/* Credentials & testimonials */}
-          <div className="space-y-6">
+          {/* 06 // HZ LABS SERVICES — Separate Offerings for Clients */}
+          <div id="services" className="scroll-mt-24">
+            <ServicesShowcase />
+          </div>
+
+          {/* 07 // CREDENTIALS & TESTIMONIALS */}
+          <div className="scroll-mt-24">
             <IntelDossier testimonials={testimonials} certificates={certificates} />
           </div>
 
-          <SectionDivider label="sys.communication" />
-
-          {/* Contact */}
+          {/* 08 // CONTACT */}
           <div id="comms" className="scroll-mt-24">
             <Comms profile={profile} />
           </div>
-          
         </div>
       </main>
 
