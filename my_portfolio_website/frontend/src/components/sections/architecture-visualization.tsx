@@ -43,7 +43,7 @@ const NODES: NodeData[] = [
     id: "cloud",
     name: "Cloud & Infra",
     category: "Edge & Hosting",
-    tech: ["AWS", "Vercel", "Docker", "CDN / Edge"],
+    tech: ["Azure", "Vercel", "Docker", "CDN / Edge"],
     x: 250,
     y: 75,
     labelPosition: "top",

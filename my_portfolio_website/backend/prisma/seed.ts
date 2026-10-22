@@ -4,89 +4,97 @@ import * as argon2 from 'argon2';
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? 'ahammedlebbehajith@gmail.com';
-  const password = process.env.ADMIN_PASSWORD ?? 'ChangeMe123!';
+  const adminPassword = process.env.ADMIN_PASSWORD ?? 'HAzi@1915';
+  const passwordHash = await argon2.hash(adminPassword);
+  
+  // Seed both personal and portal emails so admin access always works
+  const adminEmails = [
+    process.env.ADMIN_EMAIL ?? 'hanoufaatif@gmail.com',
+    'ahammedlebbehajith@gmail.com',
+  ];
 
-  await prisma.adminUser.upsert({
-    where: { email },
-    update: {
-      name: process.env.ADMIN_NAME ?? 'Mohamed Hajith',
-      passwordHash: await argon2.hash(password),
-      isActive: true,
-    },
-    create: {
-      email,
-      name: process.env.ADMIN_NAME ?? 'Mohamed Hajith',
-      passwordHash: await argon2.hash(password),
-    },
-  });
+  for (const email of adminEmails) {
+    await prisma.adminUser.upsert({
+      where: { email },
+      update: {
+        name: process.env.ADMIN_NAME ?? 'Mohamed Hajith',
+        passwordHash,
+        isActive: true,
+      },
+      create: {
+        email,
+        name: process.env.ADMIN_NAME ?? 'Mohamed Hajith',
+        passwordHash,
+      },
+    });
+  }
 
   const profile = await prisma.profile.upsert({
     where: { id: 'hz-labs-profile' },
     update: {
       name: 'Mohamed Hajith',
-      title: 'Full Stack Developer',
-      tagline: 'Building Digital Products, Platforms, and Scalable Systems',
-      bio: "I'm Mohamed Hajith, a full stack developer based in Batticaloa, Sri Lanka. My work spans web applications, APIs, and tools, with projects and progress documented on GitHub.",
+      title: 'Full-Stack Software Developer | Backend & Database Engineering',
+      tagline: 'Practical Web Applications · REST APIs · Database-Driven Business Systems',
+      bio: 'Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.',
       philosophy:
-        'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
-      location: 'Beach Road Palamunai-11, Arayampathy, Batticaloa',
+        'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
+      location: 'Batticaloa, Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
       availabilityStatus:
-        'Available for internships and software engineering opportunities',
+        'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [
-        'NestJS Architecture',
-        'System Design',
-        'Docker',
-        'Data Science',
-        'AI Integration',
+        'Python (Exploring)',
+        'Flutter (Exploring)',
+        'Dart (Exploring)',
+        'Microsoft Azure (Cloud)',
+        'Applied AI in Practical Systems',
       ],
       timeline: [
         {
           label: 'Education',
-          value: 'BICT (Hons), Faculty of Technology, University of Ruhuna (2023 - 2027)',
+          value: 'Third-year BICT (Hons) undergraduate, Faculty of Technology, University of Ruhuna (2023 - 2027)',
         },
         {
-          label: 'Major Projects',
-          value: 'Commerce, booking, authentication, and admin systems',
+          label: 'Specialization',
+          value: 'Full-Stack Web, Backend APIs, PostgreSQL & Database Engineering',
         },
         {
-          label: 'Focus',
-          value: 'Modern full-stack platforms and product engineering',
+          label: 'Availability',
+          value: 'Open to software engineering internships and junior development roles',
         },
       ],
     },
     create: {
       id: 'hz-labs-profile',
       name: 'Mohamed Hajith',
-      title: 'Full Stack Developer',
-      tagline: 'Building Digital Products, Platforms, and Scalable Systems',
-      bio: "I'm Mohamed Hajith, a full stack developer based in Batticaloa, Sri Lanka. My work spans web applications, APIs, and tools, with projects and progress documented on GitHub.",
+      title: 'Full-Stack Software Developer | Backend & Database Engineering',
+      tagline: 'Practical Web Applications · REST APIs · Database-Driven Business Systems',
+      bio: 'Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.',
       philosophy:
-        'I enjoy building software that solves real operational problems. Whether it is a booking platform, authentication system, or commerce solution, I focus on scalability, maintainability, security, and user experience.',
-      location: 'Beach Road Palamunai-11, Arayampathy, Batticaloa',
+        'I build practical web applications, robust REST APIs, and database-driven business systems, focusing on clean architecture, automated testing, and relational database integrity.',
+      location: 'Batticaloa, Sri Lanka',
       email: 'ahammedlebbehajith@gmail.com',
       availabilityStatus:
-        'Available for internships and software engineering opportunities',
+        'Open to software engineering internships, junior development opportunities, and selected freelance projects.',
       currentlyExploring: [
-        'NestJS Architecture',
-        'System Design',
-        'Docker',
-        'Data Science',
-        'AI Integration',
+        'Python (Exploring)',
+        'Flutter (Exploring)',
+        'Dart (Exploring)',
+        'Microsoft Azure (Cloud)',
+        'Applied AI in Practical Systems',
       ],
       timeline: [
         {
           label: 'Education',
-          value: 'BICT (Hons), Faculty of Technology, University of Ruhuna (2023 - 2027)',
+          value: 'Third-year BICT (Hons) undergraduate, Faculty of Technology, University of Ruhuna (2023 - 2027)',
         },
         {
-          label: 'Major Projects',
-          value: 'Commerce, booking, authentication, and admin systems',
+          label: 'Specialization',
+          value: 'Full-Stack Web, Backend APIs, PostgreSQL & Database Engineering',
         },
         {
-          label: 'Focus',
-          value: 'Modern full-stack platforms and product engineering',
+          label: 'Availability',
+          value: 'Open to software engineering internships and junior development roles',
         },
       ],
     },
@@ -104,7 +112,7 @@ async function main() {
       {
         profileId: profile.id,
         label: 'LinkedIn',
-        url: 'https://www.linkedin.com/',
+        url: 'https://www.linkedin.com/in/mohamed-hajith-b53559295',
         icon: 'linkedin',
         order: 2,
       },
@@ -130,14 +138,18 @@ async function main() {
       ['Express', 'Backend', 84],
       ['NestJS', 'Backend', 82],
       ['PHP', 'Backend', 74],
+      ['PostgreSQL', 'Database', 88],
+      ['MySQL', 'Database', 82],
       ['MongoDB', 'Database', 82],
-      ['PostgreSQL', 'Database', 84],
-      ['MySQL', 'Database', 78],
+      ['Azure', 'Cloud', 75],
+      ['Docker', 'Tools', 76],
       ['Git', 'Tools', 88],
       ['GitHub', 'Tools', 88],
-      ['Docker', 'Tools', 72],
       ['Postman', 'Tools', 86],
       ['Figma', 'Tools', 74],
+      ['Python', 'Exploring', 70],
+      ['Flutter', 'Exploring', 70],
+      ['Dart', 'Exploring', 70],
     ].map(([name, category, proficiency], index) => ({
       name: String(name),
       category: String(category),

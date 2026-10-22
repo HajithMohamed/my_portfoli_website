@@ -26,41 +26,41 @@ import { getHomeData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 export const metadata = {
-  title: "About Mohamed Hajith | Software Engineer & Systems Builder",
+  title: "About Mohamed Hajith | Full-Stack Software Developer",
   description:
-    "Software Engineer with a Bachelor of Information and Communication Technology (Honours) from the University of Ruhuna. Specializing in Web Development, Flutter Mobile Apps, Backend APIs, and AI Automations.",
+    "Third-year BICT (Hons) undergraduate at the University of Ruhuna. Building practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL.",
 };
 
 const TIMELINE_MILESTONES = [
   {
     year: "2026",
-    title: "Lead Full-Stack Engineer & Studio Founder",
-    org: "HZ Labs Digital Product Studio",
-    desc: "Architecting high-performance web platforms, microservices, and bespoke software solutions with Next.js 16, NestJS, and cloud infrastructure.",
-    badge: "Current Lead",
+    title: "Full-Stack Web & Backend Engineering",
+    org: "University of Ruhuna & HZ Labs",
+    desc: "Building database-driven web platforms, secure REST APIs, and open-source full-stack applications with React, Next.js, Node.js, and PostgreSQL.",
+    badge: "Current Focus",
     badgeColor: "border-cyan/40 bg-cyan/10 text-cyan",
   },
   {
     year: "2024 – 2025",
-    title: "Lead Enterprise Architect — Footwear BMS (Shoe Bank)",
-    org: "Wholesale Footwear Industry",
-    desc: "Engineered an end-to-end wholesale enterprise resource system with automated invoice generation, supplier tracking, inventory reservations, and role-based staff portals.",
-    badge: "Enterprise Production",
+    title: "Developer — Footwear BMS (Shoe Bank)",
+    org: "Business Systems Project",
+    desc: "Engineered an operational footwear business management application covering inventory, invoices, customer credit, cheque tracking, and financial reports using PHP, MySQL, and Docker.",
+    badge: "Full-Stack Project",
     badgeColor: "border-amber-400/40 bg-amber-400/10 text-amber-400",
   },
   {
     year: "2023 – 2024",
-    title: "Cross-Platform Mobile & Voice AI Engineering",
-    org: "Goyo Elite & NextGen Mobile",
-    desc: "Developed fluid native 60fps Flutter mobile applications and low-latency speech pipelines using Python, PyTorch, and WebAudio.",
-    badge: "Mobile & AI",
+    title: "Collaborative Engineering & Database Systems",
+    org: "Academic & Team Projects",
+    desc: "Collaborated on team projects including Saga Elite (4-member e-commerce) and BloodBridge (ADBMS PostgreSQL/PL-pgSQL prototype), contributing API architecture, database integrity constraints, and automated tests.",
+    badge: "Collaborative / Academic",
     badgeColor: "border-purple-400/40 bg-purple-400/10 text-purple-400",
   },
   {
     year: "2023 – 2027",
     title: "Bachelor of Information and Communication Technology (Honours)",
     org: "Faculty of Technology, University of Ruhuna",
-    desc: "Rigorous academic study covering Data Structures, Algorithms, Software Architecture, Distributed Systems, Database Design, and Machine Learning.",
+    desc: "Rigorous academic coursework covering Data Structures & Algorithms, Software Architecture, Advanced Database Systems (PostgreSQL, PL/pgSQL), Object-Oriented Programming (Java), and Web Systems.",
     badge: "Academic Degree",
     badgeColor: "border-emerald-400/40 bg-emerald-400/10 text-emerald-400",
   },
@@ -70,29 +70,29 @@ const CORE_PILLARS = [
   {
     icon: Code2,
     title: "Full-Stack Web Engineering",
-    desc: "Modern reactive web platforms, SaaS dashboards, and Progressive Web Apps built with clean component architectures, state management, and strict TypeScript verification.",
-    tools: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS", "Redux Toolkit", "Framer Motion"],
+    desc: "Modern reactive web applications, user dashboards, and practical business tools built with clean component architectures, state management, and strict TypeScript verification.",
+    tools: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Redux Toolkit", "HTML5", "CSS3"],
     color: "cyan",
   },
   {
     icon: Server,
-    title: "Backend & API Architecture",
-    desc: "High-throughput RESTful and GraphQL APIs, microservices, and database models designed for reliability, strict validation, rate limiting, and containerized deployment.",
-    tools: ["NestJS", "Node.js", "Express", "Spring Boot", "PostgreSQL", "Prisma", "Docker", "Redis"],
+    title: "Backend & Database Architecture",
+    desc: "Reliable RESTful APIs, relational schema design, transactional integrity, and containerized deployment with Node.js, Express, NestJS, and relational databases.",
+    tools: ["Node.js", "Express.js", "NestJS", "Spring Boot", "PostgreSQL", "MySQL", "MongoDB", "Prisma"],
     color: "amber",
   },
   {
-    icon: Smartphone,
-    title: "Cross-Platform Mobile",
-    desc: "Native 60fps mobile applications engineered with Flutter and Dart, supporting offline caching, local SQLite storage, biometrics, and unified iOS/Android delivery.",
-    tools: ["Flutter", "Dart", "Riverpod", "SQLite", "Firebase", "REST APIs"],
+    icon: ShieldCheck,
+    title: "Testing, CI/CD & DevOps",
+    desc: "Automated regression testing, database constraint verification, containerization, and continuous integration pipelines that ensure software reliability.",
+    tools: ["Vitest", "Playwright", "GitHub Actions", "Docker", "Docker Compose", "Postman", "Git"],
     color: "purple",
   },
   {
-    icon: Cpu,
-    title: "AI & Workflow Automation",
-    desc: "Machine learning integration, low-latency speech pipelines, LLM APIs, and intelligent data extraction scripts that eliminate repetitive operational workflows.",
-    tools: ["Python", "PyTorch", "FastAPI", "OpenAI / Claude APIs", "WebAudio", "Pandas"],
+    icon: Smartphone,
+    title: "Mobile & Applied Exploration",
+    desc: "Currently exploring cross-platform mobile development with Flutter/Dart, Microsoft Azure cloud services, and practical integration of applied AI tools into production software.",
+    tools: ["Flutter (Exploring)", "Dart (Exploring)", "Applied AI APIs", "Microsoft Azure", "Python (Exploring)"],
     color: "rose",
   },
 ];
@@ -120,11 +120,11 @@ export default async function AboutPage() {
                 </div>
 
                 <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-                  Building scalable digital products with engineering precision
+                  Building practical web applications and database-driven systems
                 </h1>
 
                 <p className="font-mono text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  Software Engineer with a Bachelor of Information and Communication Technology (Honours) from the University of Ruhuna. Passionate about building robust web applications, high-performance mobile apps with Flutter, resilient backend APIs, and practical AI integrations.
+                  Third-year BICT (Hons) undergraduate at the University of Ruhuna. I build practical web applications, secure REST APIs, and database-driven business systems using React, Next.js, Node.js, and PostgreSQL. Open to software engineering internships and junior development opportunities.
                 </p>
 
                 {/* Identity Telemetry Chips */}

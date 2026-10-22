@@ -17,7 +17,7 @@ export type ArchitectureTier = {
   subtitle: string;
   icon: "client" | "gateway" | "services" | "data";
   protocol: string;
-  latency: string;
+  spec: string;
   technologies: string[];
   description: string;
   responsibilities: string[];
@@ -32,7 +32,7 @@ interface ProjectArchitectureVisualizerProps {
 export function ProjectArchitectureVisualizer({
   projectTitle,
   techStack,
-  category = "Enterprise System",
+  category = "Full-Stack System",
 }: ProjectArchitectureVisualizerProps) {
   // Map tech stack into tiers intelligently
   const clientTech = techStack.filter((t) =>
@@ -58,13 +58,13 @@ export function ProjectArchitectureVisualizer({
       subtitle: "Responsive UI & State Engine",
       icon: "client",
       protocol: "HTTPS / WSS (HTTP/2)",
-      latency: "< 45ms First Input",
+      spec: "Component State & Hydration",
       technologies: clientTech.length > 0 ? clientTech : ["React", "TypeScript", "Tailwind CSS"],
-      description: "Delivers an accessible, zero-latency user interface with optimistic state management and responsive client views.",
+      description: "Delivers a responsive, accessible user interface with modular components, reactive state management, and client-side validation.",
       responsibilities: [
-        "Optimistic state caching and immediate UI feedback",
-        "Responsive glassmorphic design system compliance",
-        "Client-side schema validation and bot defense telemetry",
+        "Component state management and immediate UI feedback",
+        "Responsive design system layout compliance",
+        "Client-side form validation and accessible interaction states",
       ],
     },
     {
@@ -73,9 +73,9 @@ export function ProjectArchitectureVisualizer({
       subtitle: "Reverse Proxy & Authentication",
       icon: "gateway",
       protocol: "RESTful JSON / WebSockets",
-      latency: "< 35ms Edge Proxy",
+      spec: "JWT Auth & Route Guard",
       technologies: gatewayTech.length > 0 ? gatewayTech : ["Node.js", "Express / NestJS", "JWT"],
-      description: "Serves as the guarded perimeter handling CORS headers, rate limiting, token verification, and payload normalization.",
+      description: "Serves as the guarded perimeter handling CORS headers, route protection, token verification, and payload normalization.",
       responsibilities: [
         "Role-Based Access Control (RBAC) token inspection",
         "Request sanitization and DTO constraint validation",
@@ -85,12 +85,12 @@ export function ProjectArchitectureVisualizer({
     {
       id: "services-tier",
       name: "Domain Core & Business Engine",
-      subtitle: "Microservices & Worker Dispatcher",
+      subtitle: "Domain Services & Background Workers",
       icon: "services",
-      protocol: "Async Event Bus / Worker Queue",
-      latency: "< 80ms Transaction Cycle",
+      protocol: "Service Layer / Worker Queue",
+      spec: "Business Rules & Transactions",
       technologies: servicesTech.length > 0 ? servicesTech : ["Business Logic", "Service Workers", "Docker"],
-      description: "Orchestrates transactional boundaries, inventory synchronization, financial reconciliations, and reporting pipelines.",
+      description: "Orchestrates domain business rules, transaction boundaries, inventory calculations, and automated report pipelines.",
       responsibilities: [
         "Idempotent transaction processing with rollbacks",
         "Concurrent event processing and inventory lock management",
@@ -103,13 +103,13 @@ export function ProjectArchitectureVisualizer({
       subtitle: "Document / Relational & Cache",
       icon: "data",
       protocol: "TCP Wire Protocol / Redis",
-      latency: "< 12ms Query Indexing",
-      technologies: dataTech.length > 0 ? dataTech : ["MongoDB / PostgreSQL", "Redis", "Cloud Storage"],
-      description: "High-throughput storage tier engineered for ACID transaction guarantees, structured indexing, and sub-second querying.",
+      spec: "ACID Schema & Relational Integrity",
+      technologies: dataTech.length > 0 ? dataTech : ["PostgreSQL / MongoDB", "Prisma", "MySQL"],
+      description: "Storage tier engineered for ACID transaction guarantees, relational schema constraints, and structured querying.",
       responsibilities: [
         "Schema-enforced collections and relational constraints",
-        "Hot-path key-value caching for frequent operational queries",
-        "Automated point-in-time recovery and snapshot replication",
+        "Structured indexing for frequent operational queries",
+        "Automated migration pipelines and consistent schema versioning",
       ],
     },
   ];
@@ -185,7 +185,7 @@ export function ProjectArchitectureVisualizer({
 
               <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between font-mono text-[10px] text-cyan">
                 <span>{tier.protocol.split(" ")[0]}</span>
-                <span className="text-muted-foreground">{tier.latency}</span>
+                <span className="text-muted-foreground">{tier.spec}</span>
               </div>
             </button>
           );
@@ -212,8 +212,8 @@ export function ProjectArchitectureVisualizer({
             <span className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-muted-foreground">
               Protocol: <span className="text-foreground">{activeTier.protocol}</span>
             </span>
-            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-400">
-              SLA: {activeTier.latency}
+            <span className="rounded-md border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-cyan">
+              Tier Focus: {activeTier.spec}
             </span>
           </div>
         </div>

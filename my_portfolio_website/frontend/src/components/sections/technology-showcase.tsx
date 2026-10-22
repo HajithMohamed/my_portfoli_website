@@ -9,46 +9,51 @@ interface ToolItem {
   name: string;
   queryParam: string;
   icon: keyof typeof TechIcons;
-  category: "Languages" | "Frameworks & Libraries" | "Cloud & DevOps";
+  category: "Professional project experience" | "Academic/project experience" | "Currently learning";
   experience: string;
 }
 
 const TOOLS_BY_CATEGORY: {
-  category: "Languages" | "Frameworks & Libraries" | "Cloud & DevOps";
+  category: "Professional project experience" | "Academic/project experience" | "Currently learning";
+  description: string;
   tools: ToolItem[];
 }[] = [
   {
-    category: "Languages",
+    category: "Professional project experience",
+    description: "Strongest verified technologies backed by shipped platforms, production business systems, and public repositories.",
     tools: [
-      { name: "TypeScript", queryParam: "TypeScript", icon: "TypeScript", category: "Languages", experience: "Production" },
-      { name: "JavaScript", queryParam: "JavaScript", icon: "JavaScript", category: "Languages", experience: "Production" },
-      { name: "Dart", queryParam: "Dart", icon: "Dart", category: "Languages", experience: "Production" },
-      { name: "Python", queryParam: "Python", icon: "Python", category: "Languages", experience: "Data & APIs" },
-      { name: "Go", queryParam: "Go", icon: "Go", category: "Languages", experience: "Services" },
+      { name: "React", queryParam: "React", icon: "React", category: "Professional project experience", experience: "Verified Project" },
+      { name: "Next.js", queryParam: "Next.js", icon: "NextJS", category: "Professional project experience", experience: "Verified Project" },
+      { name: "Node.js", queryParam: "Node.js", icon: "NodeJS", category: "Professional project experience", experience: "Verified Project" },
+      { name: "PHP", queryParam: "PHP", icon: "NodeJS", category: "Professional project experience", experience: "Verified Project" },
+      { name: "PostgreSQL", queryParam: "PostgreSQL", icon: "PostgreSQL", category: "Professional project experience", experience: "Relational DB" },
+      { name: "MySQL", queryParam: "MySQL", icon: "PostgreSQL", category: "Professional project experience", experience: "Relational DB" },
+      { name: "MongoDB", queryParam: "MongoDB", icon: "MongoDB", category: "Professional project experience", experience: "NoSQL DB" },
+      { name: "TypeScript", queryParam: "TypeScript", icon: "TypeScript", category: "Professional project experience", experience: "Verified Project" },
+      { name: "JavaScript", queryParam: "JavaScript", icon: "JavaScript", category: "Professional project experience", experience: "Verified Project" },
+      { name: "Tailwind CSS", queryParam: "TailwindCSS", icon: "TailwindCSS", category: "Professional project experience", experience: "Verified Project" },
+      { name: "Docker", queryParam: "Docker", icon: "Docker", category: "Professional project experience", experience: "Containerization" },
+      { name: "GitHub", queryParam: "GitHub", icon: "GitHub", category: "Professional project experience", experience: "CI/CD & Git" },
     ],
   },
   {
-    category: "Frameworks & Libraries",
+    category: "Academic/project experience",
+    description: "Architectures, frameworks, and tools used in university coursework, database engineering prototypes, and team systems.",
     tools: [
-      { name: "React", queryParam: "React", icon: "React", category: "Frameworks & Libraries", experience: "Production" },
-      { name: "Next.js", queryParam: "Next.js", icon: "NextJS", category: "Frameworks & Libraries", experience: "Production" },
-      { name: "Flutter", queryParam: "Flutter", icon: "Flutter", category: "Frameworks & Libraries", experience: "Production" },
-      { name: "NestJS", queryParam: "NestJS", icon: "NestJS", category: "Frameworks & Libraries", experience: "Production" },
-      { name: "Node.js", queryParam: "Node.js", icon: "NodeJS", category: "Frameworks & Libraries", experience: "Production" },
-      { name: "Spring Boot", queryParam: "Spring Boot", icon: "SpringBoot", category: "Frameworks & Libraries", experience: "Enterprise" },
+      { name: "NestJS", queryParam: "NestJS", icon: "NestJS", category: "Academic/project experience", experience: "REST Architecture" },
+      { name: "Spring Boot", queryParam: "Spring Boot", icon: "SpringBoot", category: "Academic/project experience", experience: "Academic Coursework" },
+      { name: "Supabase", queryParam: "Supabase", icon: "Supabase", category: "Academic/project experience", experience: "Project DB" },
+      { name: "Firebase", queryParam: "Firebase", icon: "Firebase", category: "Academic/project experience", experience: "Realtime Store" },
     ],
   },
   {
-    category: "Cloud & DevOps",
+    category: "Currently learning",
+    description: "Active technical explorations expanding into mobile engineering, cloud fundamentals, and practical AI systems.",
     tools: [
-      { name: "PostgreSQL", queryParam: "PostgreSQL", icon: "PostgreSQL", category: "Cloud & DevOps", experience: "Relational" },
-      { name: "MongoDB", queryParam: "MongoDB", icon: "MongoDB", category: "Cloud & DevOps", experience: "NoSQL" },
-      { name: "Docker", queryParam: "Docker", icon: "Docker", category: "Cloud & DevOps", experience: "Containers" },
-      { name: "AWS", queryParam: "AWS", icon: "AWS", category: "Cloud & DevOps", experience: "Cloud" },
-      { name: "Supabase", queryParam: "Supabase", icon: "Supabase", category: "Cloud & DevOps", experience: "Backend" },
-      { name: "Firebase", queryParam: "Firebase", icon: "Firebase", category: "Cloud & DevOps", experience: "Realtime" },
-      { name: "Tailwind CSS", queryParam: "TailwindCSS", icon: "TailwindCSS", category: "Cloud & DevOps", experience: "Styling" },
-      { name: "GitHub", queryParam: "GitHub", icon: "GitHub", category: "Cloud & DevOps", experience: "CI/CD" },
+      { name: "Python", queryParam: "Python", icon: "Python", category: "Currently learning", experience: "Exploring" },
+      { name: "Flutter", queryParam: "Flutter", icon: "Flutter", category: "Currently learning", experience: "Exploring" },
+      { name: "Dart", queryParam: "Dart", icon: "Dart", category: "Currently learning", experience: "Exploring" },
+      { name: "Azure", queryParam: "Azure", icon: "Azure", category: "Currently learning", experience: "Cloud Services" },
     ],
   },
 ];
@@ -80,9 +85,14 @@ export function TechnologyShowcase() {
         <div className="space-y-8">
           {TOOLS_BY_CATEGORY.map((group) => (
             <div key={group.category} className="space-y-3">
-              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                {group.category}
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  {group.category}
+                </h3>
+                <p className="font-mono text-[11px] text-slate-500">
+                  {group.description}
+                </p>
+              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
                 {group.tools.map((tool) => {

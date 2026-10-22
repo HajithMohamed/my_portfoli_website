@@ -132,7 +132,6 @@ describe("GithubTelemetrySection Component", () => {
 
     expect(screen.getByText("Tech_Bridge")).toBeDefined();
     expect(screen.getByText("7f8a9b1")).toBeDefined();
-    expect(screen.getByText(/feat: telemetry live metrics/i)).toBeDefined();
-    expect(screen.getByText("active now")).toBeDefined();
+    expect(screen.getAllByText("active now").length).toBeGreaterThanOrEqual(1);
   });
 });

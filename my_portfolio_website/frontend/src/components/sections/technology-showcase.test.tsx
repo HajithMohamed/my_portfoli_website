@@ -21,9 +21,9 @@ describe("TechnologyShowcase Component", () => {
   it("renders all three core categories", () => {
     render(<TechnologyShowcase />);
 
-    expect(screen.getByRole("heading", { name: "Languages" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Frameworks & Libraries" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Cloud & DevOps" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Professional project experience" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Academic/project experience" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Currently learning" })).toBeDefined();
   });
 
   it("renders key technology tiles with appropriate project filter links", () => {

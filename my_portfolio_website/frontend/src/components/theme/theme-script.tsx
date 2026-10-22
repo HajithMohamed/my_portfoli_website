@@ -1,3 +1,5 @@
+import Script from "next/script";
+
 export function ThemeScript() {
   const code = `(function() {
     try {
@@ -9,5 +11,10 @@ export function ThemeScript() {
     }
   })();`;
 
-  return <script dangerouslySetInnerHTML={{ __html: code }} />;
+  return (
+    <Script id="hz-theme-script" strategy="beforeInteractive">
+      {code}
+    </Script>
+  );
 }
+

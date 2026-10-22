@@ -39,8 +39,11 @@ async function fetchBackend<T>(path: string, fallback: T): Promise<T> {
 
 function profileForPortfolio(candidate: Profile): Profile {
   const githubLink = { label: "GitHub", url: PERSONAL_IDENTITY.githubUrl, icon: "github" };
+  const linkedInLink = { label: "LinkedIn", url: PERSONAL_IDENTITY.linkedInUrl, icon: "linkedin" };
   const otherLinks = (candidate.socialLinks ?? []).filter(
-    (link) => link.url.replace(/\/$/, "").toLowerCase() !== PERSONAL_IDENTITY.githubUrl.toLowerCase(),
+    (link) =>
+      link.url.replace(/\/$/, "").toLowerCase() !== PERSONAL_IDENTITY.githubUrl.toLowerCase() &&
+      !link.url.toLowerCase().includes("linkedin.com"),
   );
 
   return {
@@ -51,8 +54,9 @@ function profileForPortfolio(candidate: Profile): Profile {
     bio: PERSONAL_IDENTITY.bio,
     email: PERSONAL_IDENTITY.email,
     location: PERSONAL_IDENTITY.location,
+    availabilityStatus: PERSONAL_IDENTITY.availability,
     timeline: [{ label: "Education", value: PERSONAL_IDENTITY.education }],
-    socialLinks: [githubLink, ...otherLinks],
+    socialLinks: [githubLink, linkedInLink, ...otherLinks],
   };
 }
 

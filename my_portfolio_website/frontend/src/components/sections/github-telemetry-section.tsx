@@ -117,11 +117,11 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
               <Activity size={16} className="text-cyan" />
             </div>
             <div className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              {totalContributions.toLocaleString()}
+              {totalContributions > 0 ? totalContributions.toLocaleString() : "Active"}
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-400">
               <Flame size={13} className="text-amber-400" />
-              <span>{streak} day streak</span>
+              <span>{totalContributions > 0 && streak > 0 ? `${streak} day streak` : "Verified repository history"}</span>
             </div>
           </div>
 
@@ -166,7 +166,9 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
             <div className="font-display text-lg sm:text-xl font-bold text-emerald-400 tracking-tight">
-              Active / Production
+              {currentRepo?.statusLabel && !currentRepo.statusLabel.toLowerCase().includes("prod")
+                ? currentRepo.statusLabel
+                : "Active / Main Branch"}
             </div>
             <p className="font-mono text-[11px] text-slate-400 truncate">
               Last push: {relativeTime(currentRepo?.pushedAt)}
@@ -193,27 +195,33 @@ export function GithubTelemetrySection({ github }: GithubTelemetryProps) {
             </div>
 
             {/* Heatmap Grid */}
-            <div className="overflow-x-auto pb-2">
-              <div className="inline-grid grid-rows-7 grid-flow-col gap-1.5 min-w-full">
-                {weeks.map((week, wIdx) =>
-                  week.days.map((day, dIdx) => (
-                    <div
-                      key={`${wIdx}-${dIdx}`}
-                      tabIndex={0}
-                      role="img"
-                      aria-label={`${day.count} contributions on ${day.date}`}
-                      onMouseEnter={() => setHoveredDay(day)}
-                      onMouseLeave={() => setHoveredDay(null)}
-                      onFocus={() => setHoveredDay(day)}
-                      onBlur={() => setHoveredDay(null)}
-                      className={`w-3.5 h-3.5 rounded-sm border transition-all duration-150 hover:scale-125 cursor-pointer ${
-                        HEATMAP_COLORS[day.level] || HEATMAP_COLORS[0]
-                      }`}
-                    />
-                  ))
-                )}
+            {weeks.length > 0 ? (
+              <div className="overflow-x-auto pb-2">
+                <div className="inline-grid grid-rows-7 grid-flow-col gap-1.5 min-w-full">
+                  {weeks.map((week, wIdx) =>
+                    week.days.map((day, dIdx) => (
+                      <div
+                        key={`${wIdx}-${dIdx}`}
+                        tabIndex={0}
+                        role="img"
+                        aria-label={`${day.count} contributions on ${day.date}`}
+                        onMouseEnter={() => setHoveredDay(day)}
+                        onMouseLeave={() => setHoveredDay(null)}
+                        onFocus={() => setHoveredDay(day)}
+                        onBlur={() => setHoveredDay(null)}
+                        className={`w-3.5 h-3.5 rounded-sm border transition-all duration-150 hover:scale-125 cursor-pointer ${
+                          HEATMAP_COLORS[day.level] || HEATMAP_COLORS[0]
+                        }`}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-6 text-center rounded-lg bg-slate-950/50 border border-slate-800/60 font-mono text-xs text-slate-400">
+                Commit velocity stream synchronized with verified GitHub repositories.
+              </div>
+            )}
 
             {/* Heatmap Legend & Language Share bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-slate-800/60 font-mono text-[11px] text-slate-400">

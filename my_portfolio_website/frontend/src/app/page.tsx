@@ -78,9 +78,8 @@ export default async function Home() {
     ...(profile.email ? { email: `mailto:${profile.email}` } : {}),
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Beach Road Palamunai-11",
-      addressLocality: "Arayampathy",
-      addressRegion: "Batticaloa",
+      addressLocality: "Batticaloa",
+      addressRegion: "Eastern Province",
       addressCountry: "LK",
     },
     alumniOf: {

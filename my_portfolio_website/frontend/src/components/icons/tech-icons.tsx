@@ -85,6 +85,14 @@ export const TechIcons = {
     </svg>
   ),
 
+  Azure: (props: IconProps) => (
+    <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <rect width="128" height="128" rx="20" fill="#0078D4" />
+      <path d="M72.2 28L39.8 84.8L28 100H49.2L74.8 62.8L93.8 100H100L72.2 28Z" fill="white" />
+      <path d="M49.2 100L74.8 62.8L63.5 42.5L34 94.2L49.2 100Z" fill="#B3D9FF" opacity="0.7" />
+    </svg>
+  ),
+
   AWS: (props: IconProps) => (
     <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <rect width="128" height="128" rx="20" fill="#232F3E" />

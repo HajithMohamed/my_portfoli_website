@@ -20,31 +20,58 @@ export function publicWebsite(value?: string | null): string | null {
 
 export function getProjectDedupeKey(repoFullName?: string | null, slug?: string | null): string {
   const normalized = (repoFullName ?? slug ?? "").toLowerCase();
-  if (
-    normalized.includes("footwear_business_management_system") ||
-    normalized.includes("footwear-business-management-system") ||
-    normalized.includes("shoe_bank") ||
-    normalized.includes("shoe-bank")
-  ) {
-    return "shoe-bank";
-  }
+  if (normalized.includes("saga-elite")) return "saga-elite";
+  if (normalized.includes("medical-lab-resource-reservation-system") || normalized.includes("benchbook")) return "benchbook";
+  if (normalized.includes("bloodbridge")) return "bloodbridge";
+  if (normalized.includes("my_portfoli") || normalized.includes("my-portfolio") || normalized.includes("hzlabs")) return "hzlabs-studio";
+  if (normalized.includes("footwear_business_management_system") || normalized.includes("footwear-business-management-system")) return "shoe-bank";
+  if (normalized.includes("shoe_bank_mrnstack") || normalized.includes("shoe-bank-mern")) return "shoe-bank-mern";
+  if (normalized.includes("tech_bridge") || normalized.includes("tech-bridge")) return "tech-bridge";
+  if (normalized.includes("library-management-system")) return "library-management-system";
+  if (normalized.includes("nextgen")) return "nextgen-mobile-shop";
   return repoFullName?.toLowerCase() || slug?.toLowerCase() || "";
+}
+
+const PRIORITY_ORDER = [
+  "saga-elite",
+  "benchbook",
+  "bloodbridge",
+  "hzlabs-studio",
+  "shoe-bank",
+  "tech-bridge",
+  "library-management-system",
+  "nextgen-mobile-shop",
+];
+
+function getProjectPriority(p: Project): number {
+  const key = (p.dedupeKey || p.slug || "").toLowerCase();
+  for (let i = 0; i < PRIORITY_ORDER.length; i++) {
+    if (key.includes(PRIORITY_ORDER[i])) return i;
+  }
+  return 999;
 }
 
 export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[] = []): Project[] {
   const repos = github.contributionData?.repositories;
   const cmsByRepo = new Map(cmsProjects.filter(p => p.githubUrl).map(p => [p.githubUrl!.replace(/\/$/, '').toLowerCase(), p]));
   const current = (github.currentRepo ?? github.contributionData?.currentRepo)?.fullName?.toLowerCase();
-  // If GitHub is unavailable, retain reviewed stories but don't invent live metrics/status.
-  const available: PortfolioRepository[] = repos ?? projectStories.map(story => ({
-    name: story.repository.split('/')[1], fullName: story.repository,
-    url: `https://github.com/${story.repository}`, description: story.summary,
+
+  // Ensure curated project stories (e.g. collaborative or org repos) are always present
+  const storyRepos: PortfolioRepository[] = projectStories.map(story => ({
+    name: story.repository.split('/')[1] || story.repository,
+    fullName: story.repository,
+    url: `https://github.com/${story.repository}`,
+    description: story.summary,
   }));
+  const existingNames = new Set((repos ?? []).map(r => r.fullName.toLowerCase()));
+  const missingFromGithub = storyRepos.filter(s => !existingNames.has(s.fullName.toLowerCase()));
+  const available: PortfolioRepository[] = [...(repos ?? []), ...missingFromGithub];
   
   const mappedProjects = available.map(repo => {
-    const story = projectStories.find(s => s.repository.toLowerCase() === repo.fullName.toLowerCase());
+    const story = projectStories.find(s => s.repository.toLowerCase() === repo.fullName.toLowerCase() ||
+      repo.fullName.toLowerCase().endsWith(s.repository.split('/')[1]?.toLowerCase() ?? ''));
     const cms = cmsByRepo.get(repo.url.toLowerCase());
-    const slug = cms?.slug ?? repositorySlug(repo.name);
+    const slug = cms?.slug ?? (story ? repositorySlug(story.title.split('—')[0].trim()) : repositorySlug(repo.name));
     const dedupeKey = getProjectDedupeKey(repo.fullName, slug);
     return {
       ...cms,
@@ -56,8 +83,6 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
       techStack: cms?.techStack?.length ? cms.techStack : (story?.technologies ?? (repo.language ? [repo.language] : [])),
       category: cms?.category ?? (story ? 'Project case study' : 'GitHub repository'),
       status: cms?.status ?? (repo.isArchived ? 'ARCHIVED' : 'ACTIVE'),
-      // A CMS record is an explicit editorial decision. Its featured flag must
-      // override the automatic story/current-repository default.
       featured: cms ? cms.featured : Boolean(story || repo.fullName.toLowerCase() === current),
       githubUrl: repo.url,
       liveUrl: cms?.liveUrl ?? publicWebsite(repo.liveUrl ?? repo.homepage),
@@ -76,7 +101,7 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
           ? "/brand/project-blueprint.jpg"
           : null),
       coverImageKind: cms?.coverImage ? undefined : (story?.coverImage ? 'concept' : undefined),
-      coverImageAlt: cms?.coverImage ? `Cover image for ${cms.title || story?.title || repo.name}` : (story?.coverImage ? `Concept illustration of ${story.title}: ${story.goal}` : undefined),
+      coverImageAlt: cms?.coverImage ? `Cover image for ${cms.title || story?.title || repo.name}` : (story?.coverImage ? `Illustration of ${story.title}: ${story.goal}` : undefined),
       caseStudy: cms?.caseStudy?.length ? cms.caseStudy : (story?.sections ?? (repo.goal ? [{ heading: 'Project goal', body: repo.goal }] : [])),
       outcome: cms?.outcome,
       updatedAt: repo.pushedAt ?? repo.updatedAt,
@@ -94,15 +119,13 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
     return !override || override.status === 'ACTIVE';
   });
 
-  // CMS-only projects do not have a GitHub repository to enrich, but they are
-  // still portfolio work and must appear on both the catalogue and homepage.
   const repoUrls = new Set(available.map((repo) => repo.url.replace(/\/$/, '').toLowerCase()));
   const standaloneCmsProjects = cmsProjects
     .filter((project) => project.status === 'ACTIVE')
     .filter((project) => !project.githubUrl || !repoUrls.has(project.githubUrl.replace(/\/$/, '').toLowerCase()))
     .map((project) => ({ ...project, id: `cms:${project.id}`, dedupeKey: project.slug }));
 
-  // Presentation grouping by dedupeKey to combine related repositories (e.g., Shoe Bank MERN + PHP versions)
+  // Presentation grouping by dedupeKey without contaminating techStacks
   const grouped = new Map<string, Project[]>();
   for (const p of [...mappedProjects, ...standaloneCmsProjects]) {
     const key = p.dedupeKey || p.slug;
@@ -116,35 +139,34 @@ export function projectsFromGithub(github: GithubSummary, cmsProjects: Project[]
     if (group.length === 1) {
       deduplicated.push(group[0]);
     } else {
-      // Prioritize the project that has a rich case study, cover image, or is current
       group.sort((a, b) => {
         const aScore = (a.caseStudy?.length ? 10 : 0) + (a.coverImage ? 5 : 0) + (a.isCurrent ? 20 : 0);
         const bScore = (b.caseStudy?.length ? 10 : 0) + (b.coverImage ? 5 : 0) + (b.isCurrent ? 20 : 0);
         return bScore - aScore;
       });
       const primary = { ...group[0] };
-      // Combine techStack without duplicates
-      const allTech = new Set(primary.techStack);
       const relatedRepos: string[] = [];
       for (const other of group.slice(1)) {
-        other.techStack.forEach(t => allTech.add(t));
         if (other.githubUrl) relatedRepos.push(other.githubUrl);
         if (!primary.liveUrl && other.liveUrl) primary.liveUrl = other.liveUrl;
         if (other.featured) primary.featured = true;
       }
-      primary.techStack = Array.from(allTech);
       primary.relatedRepositories = relatedRepos;
       deduplicated.push(primary);
     }
   }
 
-  return deduplicated.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent) || Number(b.featured) - Number(a.featured) || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  return deduplicated.sort((a, b) => {
+    const priorityDiff = getProjectPriority(a) - getProjectPriority(b);
+    if (priorityDiff !== 0) return priorityDiff;
+    return Number(b.isCurrent) - Number(a.isCurrent) || Number(b.featured) - Number(a.featured) || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+  });
 }
 
 export function reviewedBlogPosts(): BlogPost[] {
   return projectStories.map(story => ({
     id: `story:${story.repository}`, ...story.blog, coverImage: story.coverImage,
-    coverImageAlt: `Concept illustration for ${story.title}`,
+    coverImageAlt: `Illustration for ${story.title}`,
     author: 'Mohamed Hajith', status: 'PUBLISHED', publishedAt: `${story.reviewedAt}T00:00:00.000Z`,
     sourceUrl: story.sourceUrl,
     tags: story.technologies.slice(0, 3).map(name => ({name, slug: repositorySlug(name)})),

@@ -319,7 +319,7 @@ const NODES_DESKTOP = [
   { label: "TypeScript", pos: [-3.1, 0.5, 0.1] as const },
   { label: "Spring Boot", pos: [2.8, 0.2, 0.3] as const },
   { label: "MongoDB", pos: [3.7, -0.3, -0.3] as const },
-  { label: "AWS", pos: [3.0, -0.7, 0.2] as const },
+  { label: "Azure", pos: [3.0, -0.7, 0.2] as const },
   { label: "Java", pos: [3.6, -1.2, -0.2] as const },
   { label: "MySQL", pos: [2.7, -1.5, 0.2] as const },
   { label: "GitHub", pos: [-2.0, -1.6, 0.3] as const },

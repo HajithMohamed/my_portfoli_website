@@ -45,17 +45,18 @@ export function ProjectDossierView({
 }: ProjectDossierViewProps) {
   const [activeTab, setActiveTab] = useState<"architecture" | "case-study" | "tech-stack" | "impact">("architecture");
 
-  // Enterprise telemetry indicators tailored per category
+  // Architecture indicators tailored per project
+  const isAcademic = status.toUpperCase().includes("ACADEMIC") || (project.category && project.category.toUpperCase().includes("ACADEMIC"));
   const telemetryMetrics = [
     {
-      label: "System Latency (P99)",
-      value: "< 120ms",
-      detail: "Optimized DB indexing & edge caching",
-      icon: Activity,
+      label: "Architecture Pattern",
+      value: "Layered MVC / REST",
+      detail: "Decoupled frontend & backend services",
+      icon: Layers,
       color: "text-cyan",
     },
     {
-      label: "Architecture Classification",
+      label: "Architecture Scope",
       value: project.category || "Full-Stack System",
       detail: `${project.techStack.length} Integrated Technologies`,
       icon: Box,
@@ -63,15 +64,15 @@ export function ProjectDossierView({
     },
     {
       label: "Security & Guardrails",
-      value: "Enterprise RBAC",
-      detail: "Strict DTO validation & bot defense",
+      value: "JWT & Role-Based Auth",
+      detail: "Protected API routes & DTO validation",
       icon: ShieldCheck,
       color: "text-emerald-400",
     },
     {
-      label: "Engineering Lifecycle",
-      value: year,
-      detail: "Production verified release",
+      label: "Project Classification",
+      value: isAcademic ? "Academic Prototype" : year,
+      detail: isAcademic ? "Coursework system prototype" : "Verified Project Implementation",
       icon: Calendar,
       color: "text-amber-400",
     },
