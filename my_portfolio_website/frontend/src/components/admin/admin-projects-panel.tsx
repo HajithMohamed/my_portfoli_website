@@ -1,1362 +1,831 @@
-"use client";
+﻿"use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import {
-  AlertTriangle,
-  BookOpen,
-  Check,
-  CheckCircle2,
-  Copy,
-  Download,
-  Edit2,
-  ExternalLink,
-  FileCode,
-  FolderCheck,
-  GitCommit,
-  Github,
-  Image as ImageIcon,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ImagePlus,
+  Pencil,
   Plus,
   RefreshCw,
-  Search,
-  Sparkles,
-  Star,
   Trash2,
-  UploadCloud,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input, Textarea } from "@/components/ui/input";
-import { uploadImage } from "@/components/admin/admin-content-panels";
 import { adminFetch } from "@/lib/api";
+import { repositorySlug } from "@/lib/portfolio-mapping";
 import type { Project } from "@/lib/types";
+import { StudioProjectCard } from "@/components/projects/studio-project-card";
+import { ProjectMediaStudio } from "./project-media-studio";
+import { Button } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
 
-// Available preset artwork in /public/projects/
-const PRESET_COVERS = [
-  { label: "Saga Elite (MERN)", url: "/projects/saga-elite-cover.png" },
-  { label: "Shoe Bank (ERP)", url: "/projects/shoe-bank-cover.png" },
-  { label: "Tech Bridge", url: "/projects/tech-bridge-cover.png" },
-  { label: "University Library", url: "/projects/university-library-cover.png" },
-  { label: "NEXTGEN Mobile", url: "/projects/nextgen-mobile-cover.png" },
-  { label: "Nano Zillas (Java)", url: "/projects/nano-zillas-cover.jpg" },
-  { label: "Spring Boot Microservices", url: "/projects/spring-boot-cover.jpg" },
-  { label: "TODO App (Productivity)", url: "/projects/todo-app-cover.jpg" },
-  { label: "System Blueprint", url: "/brand/project-blueprint.jpg" },
-];
-
-export interface VerifiedRepo {
-  id?: string;
-  name: string;
-  fullName: string;
-  title: string;
-  slug: string;
-  description: string;
-  category: string;
-  techStack: string[];
-  coverImage: string;
-  githubUrl: string;
-  liveUrl?: string | null;
-  commitCount: number;
-  readmeBytes: number;
-  hasProperReadme: boolean;
-  statusNotes?: string;
-  status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  featured?: boolean;
-  caseStudy?: Array<{ heading: string; body: string }>;
-  isProductionReady?: boolean;
+const blankProject = (): Project => ({
+  id: "",
+  title: "",
+  slug: "",
+  description: "",
+  category: "",
+  techStack: [],
+  status: "DRAFT",
+  featured: false,
+  showOnHomepage: false,
+  showOnProjectsPage: true,
+  homepageOrder: 0,
+  media: [],
+});
+function errorMessage(error: unknown) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : "Request failed. Please try again.";
+  try {
+    const body = JSON.parse(message) as { message?: string | string[] };
+    return Array.isArray(body.message)
+      ? body.message.join(". ")
+      : body.message || message;
+  } catch {
+    return message;
+  }
 }
 
-// Complete verified projects from Hajith's GitHub account with proper READMEs (>1KB) and commit history
-export const COMPLETE_PROJECTS: VerifiedRepo[] = [
-  {
-    name: "Saga-Elite-Web-project",
-    fullName: "HajithMohamed/Saga-Elite-Web-project",
-    title: "Saga Elite Web Project",
-    slug: "saga-elite",
-    description: "Limited-edition fashion storefront with themed drops, inventory management, multi-tier checkout, and administrative operational workflows.",
-    category: "E-Commerce / Full Stack",
-    techStack: ["React", "Redux Toolkit", "Node.js", "Express", "MongoDB", "Socket.IO", "Docker"],
-    coverImage: "/projects/saga-elite-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/Saga-Elite-Web-project",
-    commitCount: 100,
-    readmeBytes: 24080,
-    hasProperReadme: true,
-  },
-  {
-    name: "Footwear_Business_Management_System",
-    fullName: "HajithMohamed/Footwear_Business_Management_System",
-    title: "Footwear Business Management (Shoe Bank)",
-    slug: "shoe-bank",
-    description: "Mobile-first wholesale footwear management system tracking inventory, landed cost, credit sales, customer ledgers, and profit vs cash collected.",
-    category: "Business Management / ERP",
-    techStack: ["PHP", "MySQL", "Tailwind CSS", "Alpine.js", "Docker"],
-    coverImage: "/projects/shoe-bank-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/Footwear_Business_Management_System",
-    commitCount: 100,
-    readmeBytes: 8229,
-    hasProperReadme: true,
-  },
-  {
-    name: "Tech_Bridge",
-    fullName: "HajithMohamed/Tech_Bridge",
-    title: "Tech Bridge Platform",
-    slug: "tech-bridge",
-    description: "Technology bridge and community learning ecosystem connecting aspiring developers, workshops, and resource repositories.",
-    category: "Community / Web App",
-    techStack: ["React", "TypeScript", "Node.js", "Express", "Tailwind CSS"],
-    coverImage: "/projects/tech-bridge-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/Tech_Bridge",
-    commitCount: 30,
-    readmeBytes: 22429,
-    hasProperReadme: true,
-  },
-  {
-    name: "Library-Management-System",
-    fullName: "HajithMohamed/Library-Management-System",
-    title: "University Library Management System",
-    slug: "library-management-system",
-    description: "Role-based circulation platform for students, faculty, and administrators with catalog search, borrowing, overdue fines, and email OTP verification.",
-    category: "Educational System / MVC",
-    techStack: ["PHP", "MySQL", "Bootstrap", "PHPMailer", "Nginx", "Docker"],
-    coverImage: "/projects/university-library-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/Library-Management-System",
-    commitCount: 100,
-    readmeBytes: 11720,
-    hasProperReadme: true,
-  },
-  {
-    name: "Nano-_Zillas_Java_Project",
-    fullName: "HajithMohamed/Nano-_Zillas_Java_Project",
-    title: "Nano Zillas Enterprise Java Project",
-    slug: "nano-zillas-java-project",
-    description: "Robust enterprise inventory and operations management software engineered with core Java OOP principles and relational database integration.",
-    category: "Desktop Application / OOP",
-    techStack: ["Java", "Swing", "JDBC", "MySQL", "OOP"],
-    coverImage: "/projects/nano-zillas-cover.jpg",
-    githubUrl: "https://github.com/HajithMohamed/Nano-_Zillas_Java_Project",
-    commitCount: 100,
-    readmeBytes: 4452,
-    hasProperReadme: true,
-  },
-  {
-    name: "spring_boot_work_shop",
-    fullName: "HajithMohamed/spring_boot_work_shop",
-    title: "Spring Boot Microservices & REST Architecture",
-    slug: "spring-boot-workshop",
-    description: "Comprehensive backend architecture workshop covering decoupled REST endpoints, dependency injection, JPA persistence, and production patterns.",
-    category: "Backend Architecture / APIs",
-    techStack: ["Java", "Spring Boot", "Spring Data JPA", "REST API", "Maven", "PostgreSQL"],
-    coverImage: "/projects/spring-boot-cover.jpg",
-    githubUrl: "https://github.com/HajithMohamed/spring_boot_work_shop",
-    commitCount: 21,
-    readmeBytes: 5878,
-    hasProperReadme: true,
-  },
-  {
-    name: "NEXTGEN---Sri-Lankan-Mobile-Shop-eCommerce-Website",
-    fullName: "HajithMohamed/NEXTGEN---Sri-Lankan-Mobile-Shop-eCommerce-Website",
-    title: "NEXTGEN Sri Lankan Mobile Shop eCommerce",
-    slug: "nextgen-mobile-shop",
-    description: "Complete digital storefront and operational back-office for a mobile device retailer with cart, order processing, and administrative controls.",
-    category: "E-Commerce / Storefront",
-    techStack: ["HTML5", "CSS3", "JavaScript", "jQuery", "PHP", "MySQL", "Bootstrap"],
-    coverImage: "/projects/nextgen-mobile-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/NEXTGEN---Sri-Lankan-Mobile-Shop-eCommerce-Website",
-    commitCount: 4,
-    readmeBytes: 1541,
-    hasProperReadme: true,
-  },
-  {
-    name: "TODO_App",
-    fullName: "HajithMohamed/TODO_App",
-    title: "TODO Task Management Application",
-    slug: "todo-app",
-    description: "Responsive task management and productivity dashboard featuring category tags, completion timelines, and offline persistence.",
-    category: "Productivity / Web Tool",
-    techStack: ["JavaScript", "HTML5", "CSS3", "Local Storage", "Responsive UI"],
-    coverImage: "/projects/todo-app-cover.jpg",
-    githubUrl: "https://github.com/HajithMohamed/TODO_App",
-    commitCount: 7,
-    readmeBytes: 4796,
-    hasProperReadme: true,
-  },
-  {
-    name: "my_portfoli_website",
-    fullName: "HajithMohamed/my_portfoli_website",
-    title: "HZ Labs Portfolio & Telemetry Platform",
-    slug: "hz-labs-portfolio",
-    description: "High-performance digital engineering portfolio console featuring interactive 3D command scenes, real-time GitHub telemetry, and administrative CMS.",
-    category: "Portfolio CMS / Telemetry",
-    techStack: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS", "Three.js", "NestJS", "Prisma"],
-    coverImage: "/brand/project-blueprint.jpg",
-    githubUrl: "https://github.com/HajithMohamed/my_portfoli_website",
-    commitCount: 55,
-    readmeBytes: 1160,
-    hasProperReadme: true,
-  },
-];
+function ProjectEditor({
+  project,
+  onClose,
+  onSaved,
+  mediaOnly = false,
+}: {
+  project: Project;
+  onClose: () => void;
+  onSaved: () => Promise<void>;
+  mediaOnly?: boolean;
+}) {
+  const [draft, setDraft] = useState<Project>(project);
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const focus = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const node = dialog.current;
+    focus.current = document.activeElement as HTMLElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    node?.showModal();
+    return () => {
+      node?.close();
+      document.body.style.overflow = overflow;
+      focus.current?.focus();
+    };
+  }, []);
+  function field<K extends keyof Project>(key: K, value: Project[K]) {
+    setDraft((current) => ({ ...current, [key]: value }));
+  }
 
-// Repositories missing a README or with a minimal stub that need operator attention
-export const INCOMPLETE_REPOS: VerifiedRepo[] = [
-  {
-    name: "E-commerce-shoe-shop-website-only-using-HTML-CSS-JS-jQuery",
-    fullName: "HajithMohamed/E-commerce-shoe-shop-website-only-using-HTML-CSS-JS-jQuery",
-    title: "E-Commerce Shoe Shop (HTML/CSS/JS/jQuery)",
-    slug: "ecommerce-shoe-shop-frontend",
-    description: "Complete frontend footwear eCommerce store with shopping cart and product filtering. Significant codebase with 44 commits, but completely missing a README.",
-    category: "Frontend eCommerce",
-    techStack: ["HTML5", "CSS3", "JavaScript", "jQuery"],
-    coverImage: "/projects/shoe-bank-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/E-commerce-shoe-shop-website-only-using-HTML-CSS-JS-jQuery",
-    commitCount: 44,
-    readmeBytes: 0,
-    hasProperReadme: false,
-    statusNotes: "44 commits recorded. Missing README.md on GitHub.",
-  },
-  {
-    name: "-Campus_One_Digital_Academy",
-    fullName: "HajithMohamed/-Campus_One_Digital_Academy",
-    title: "Campus One Digital Academy",
-    slug: "campus-one-digital-academy",
-    description: "Digital learning academy repository.",
-    category: "Educational Portal",
-    techStack: ["HTML", "CSS", "JavaScript"],
-    coverImage: "/projects/university-library-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/-Campus_One_Digital_Academy",
-    commitCount: 2,
-    readmeBytes: 0,
-    hasProperReadme: false,
-    statusNotes: "Missing README.md file.",
-  },
-  {
-    name: "CRUDApplication",
-    fullName: "HajithMohamed/CRUDApplication",
-    title: "CRUD Application",
-    slug: "crud-application",
-    description: "Fundamental Create-Read-Update-Delete application.",
-    category: "Web Application",
-    techStack: ["JavaScript", "Node.js"],
-    coverImage: "/projects/todo-app-cover.jpg",
-    githubUrl: "https://github.com/HajithMohamed/CRUDApplication",
-    commitCount: 4,
-    readmeBytes: 22,
-    hasProperReadme: false,
-    statusNotes: "README is a 22-byte single line stub.",
-  },
-  {
-    name: "Gym_Management_System",
-    fullName: "HajithMohamed/Gym_Management_System",
-    title: "Gym Management System",
-    slug: "gym-management-system",
-    description: "Fitness center membership and scheduling software.",
-    category: "Business Software",
-    techStack: ["PHP", "MySQL"],
-    coverImage: "/projects/shoe-bank-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/Gym_Management_System",
-    commitCount: 2,
-    readmeBytes: 23,
-    hasProperReadme: false,
-    statusNotes: "README is a 23-byte single line stub.",
-  },
-  {
-    name: "Real-state",
-    fullName: "HajithMohamed/Real-state",
-    title: "Real Estate Property Platform",
-    slug: "real-estate-platform",
-    description: "Property listing and brokerage web application.",
-    category: "Real Estate Portal",
-    techStack: ["JavaScript", "HTML", "CSS"],
-    coverImage: "/brand/project-blueprint.jpg",
-    githubUrl: "https://github.com/HajithMohamed/Real-state",
-    commitCount: 6,
-    readmeBytes: 12,
-    hasProperReadme: false,
-    statusNotes: "README is a 12-byte single line stub.",
-  },
-  {
-    name: "hackerthon_trial",
-    fullName: "HajithMohamed/hackerthon_trial",
-    title: "Hackathon Trial Project",
-    slug: "hackathon-trial",
-    description: "Rapid prototype developed during competitive hackathon.",
-    category: "Prototype",
-    techStack: ["JavaScript"],
-    coverImage: "/projects/tech-bridge-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/hackerthon_trial",
-    commitCount: 1,
-    readmeBytes: 23,
-    hasProperReadme: false,
-    statusNotes: "README is a 23-byte stub.",
-  },
-  {
-    name: "My-Resume",
-    fullName: "HajithMohamed/My-Resume",
-    title: "Interactive CV / Resume Source",
-    slug: "my-resume-source",
-    description: "Digital resume source repository.",
-    category: "Personal Asset",
-    techStack: ["HTML", "CSS"],
-    coverImage: "/brand/project-blueprint.jpg",
-    githubUrl: "https://github.com/HajithMohamed/My-Resume",
-    commitCount: 2,
-    readmeBytes: 11,
-    hasProperReadme: false,
-    statusNotes: "README is an 11-byte stub.",
-  },
-  {
-    name: "mysql-mtiw2gpb",
-    fullName: "HajithMohamed/mysql-mtiw2gpb",
-    title: "MySQL Database Backup Dump",
-    slug: "mysql-database-backup",
-    description: "Database export archive.",
-    category: "Database Backup",
-    techStack: ["SQL", "MySQL"],
-    coverImage: "/projects/shoe-bank-cover.png",
-    githubUrl: "https://github.com/HajithMohamed/mysql-mtiw2gpb",
-    commitCount: 1,
-    readmeBytes: 743,
-    hasProperReadme: false,
-    statusNotes: "Raw database dump file.",
-  },
-];
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    const payload = {
+      title: draft.title.trim(),
+      slug: draft.slug.trim() || repositorySlug(draft.title),
+      description: draft.description.trim(),
+      category: draft.category.trim(),
+      techStack: draft.techStack,
+      githubUrl: draft.githubUrl?.trim() || null,
+      liveUrl: draft.liveUrl?.trim() || null,
+      coverImage: draft.coverImage || null,
+      status: draft.status,
+      featured: Boolean(draft.showOnHomepage),
+      showOnHomepage: Boolean(draft.showOnHomepage),
+      showOnProjectsPage: Boolean(draft.showOnProjectsPage),
+      homepageOrder: draft.homepageOrder ?? 0,
+      media: (draft.media ?? []).map(
+        ({
+          url,
+          alt,
+          type,
+          caption,
+          posterUrl,
+          publicId,
+          provider,
+          mimeType,
+          bytes,
+        }) => ({
+          url,
+          alt,
+          type: type ?? "IMAGE",
+          caption: caption || undefined,
+          posterUrl: posterUrl || undefined,
+          publicId: publicId || undefined,
+          provider: provider || undefined,
+          mimeType: mimeType || undefined,
+          bytes: bytes ?? undefined,
+        }),
+      ),
+      caseStudy: draft.caseStudy?.map(({ heading, body }) => ({
+        heading,
+        body,
+      })),
+    };
+    try {
+      await adminFetch(
+        project.id ? `/admin/projects/${project.id}` : "/admin/projects",
+        {
+          method: project.id ? "PATCH" : "POST",
+          body: JSON.stringify(
+            mediaOnly
+              ? { media: payload.media, coverImage: payload.coverImage }
+              : payload,
+          ),
+        },
+      );
+      await onSaved();
+      onClose();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
 
-function generateReadmeTemplate(repo: VerifiedRepo): string {
-  return `# ${repo.title}
-
-${repo.description}
-
-## 🚀 Key Highlights & Capabilities
-- Clean architecture and modular folder structure
-- Built with modern engineering best practices
-- Responsive design and robust error handling
-
-## 🛠️ Technology Stack
-${repo.techStack.map((tech) => `- **${tech}**`).join("\n")}
-
-## 📦 Getting Started & Local Setup
-1. Clone the repository:
-   \`\`\`bash
-   git clone ${repo.githubUrl}.git
-   \`\`\`
-2. Navigate to project root:
-   \`\`\`bash
-   cd ${repo.name}
-   \`\`\`
-3. Install dependencies and start:
-   \`\`\`bash
-   # Add your specific setup instructions here
-   \`\`\`
-
-## 📸 Architecture & Screenshots
-<!-- Add visual screenshots or architecture diagrams here -->
-
-## 👤 Author
-- **Mohamed Hajith** - [GitHub Profile](https://github.com/HajithMohamed)
-`;
-}
-
-function splitList(value: FormDataEntryValue | null) {
-  return String(value ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return (
+    <dialog
+      data-lenis-prevent
+      ref={dialog}
+      aria-labelledby="project-editor-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        if (!busy && !uploading) onClose();
+      }}
+      className="fixed inset-0 m-auto max-h-[94dvh] w-[min(1100px,96vw)] max-w-[96vw] overflow-y-auto rounded-2xl border border-border bg-surface p-0 text-foreground backdrop:bg-black/85"
+    >
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface px-6 py-4">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            HZ Labs / Project studio
+          </p>
+          <h2 id="project-editor-title" className="mt-1 text-xl font-semibold">
+            {mediaOnly
+              ? `${project.title} · Photos & videos`
+              : project.id
+                ? "Edit project"
+                : "Create project"}
+          </h2>
+        </div>
+        <button
+          type="button"
+          aria-label="Close project editor"
+          disabled={busy || uploading}
+          onClick={onClose}
+          className="grid h-11 w-11 place-items-center rounded-lg border border-border disabled:opacity-40"
+        >
+          <X size={20} />
+        </button>
+      </div>
+      <form
+        onSubmit={save}
+        className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.2fr_1fr]"
+      >
+        <div className="min-w-0 space-y-4">
+          {!mediaOnly && (
+            <>
+              <label className="block text-sm">
+                Project title
+                <Input
+                  value={draft.title}
+                  onChange={(event) => field("title", event.target.value)}
+                  required
+                  name="title"
+                  className="mt-1"
+                />
+              </label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm">
+                  Slug
+                  <Input
+                    value={draft.slug}
+                    onChange={(event) => field("slug", event.target.value)}
+                    name="slug"
+                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                    placeholder="Generated from title"
+                    className="mt-1"
+                  />
+                </label>
+                <label className="block text-sm">
+                  Category
+                  <Input
+                    value={draft.category}
+                    onChange={(event) => field("category", event.target.value)}
+                    required
+                    name="category"
+                    className="mt-1"
+                  />
+                </label>
+              </div>
+              <label className="block text-sm">
+                Description
+                <Textarea
+                  value={draft.description}
+                  onChange={(event) => field("description", event.target.value)}
+                  required
+                  name="description"
+                  rows={4}
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                Technologies (comma separated)
+                <Input
+                  defaultValue={draft.techStack.join(", ")}
+                  onChange={(event) =>
+                    field(
+                      "techStack",
+                      event.target.value
+                        .split(",")
+                        .map((item) => item.trim())
+                        .filter(Boolean),
+                    )
+                  }
+                  name="techStack"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                GitHub URL
+                <Input
+                  value={draft.githubUrl ?? ""}
+                  onChange={(event) => field("githubUrl", event.target.value)}
+                  type="url"
+                  name="githubUrl"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                Live demo URL
+                <Input
+                  value={draft.liveUrl ?? ""}
+                  onChange={(event) => field("liveUrl", event.target.value)}
+                  type="url"
+                  name="liveUrl"
+                  className="mt-1"
+                />
+              </label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm">
+                  Publication status
+                  <select
+                    name="status"
+                    value={draft.status}
+                    onChange={(event) =>
+                      field("status", event.target.value as Project["status"])
+                    }
+                    className="mt-1 min-h-11 w-full rounded-lg border border-border bg-surface-2 px-3"
+                  >
+                    <option value="DRAFT">Draft / Held</option>
+                    <option value="ACTIVE">Published</option>
+                    <option value="ARCHIVED">Archived</option>
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  Homepage order
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.homepageOrder ?? 0}
+                    onChange={(event) =>
+                      field(
+                        "homepageOrder",
+                        Math.max(0, Number(event.target.value)),
+                      )
+                    }
+                    className="mt-1"
+                  />
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <label className="flex min-h-11 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="showOnHomepage"
+                    checked={draft.showOnHomepage ?? draft.featured}
+                    onChange={(event) => {
+                      field("showOnHomepage", event.target.checked);
+                      field("featured", event.target.checked);
+                    }}
+                  />{" "}
+                  Show on Home
+                </label>
+                <label className="flex min-h-11 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="showOnProjectsPage"
+                    checked={draft.showOnProjectsPage ?? true}
+                    onChange={(event) =>
+                      field("showOnProjectsPage", event.target.checked)
+                    }
+                  />{" "}
+                  Show on Projects
+                </label>
+              </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Draft and archived projects stay private. Publishing and page
+                placement are separate; holding a project preserves its media
+                and chosen placement.
+              </p>
+            </>
+          )}
+          <ProjectMediaStudio
+            media={draft.media ?? []}
+            cover={draft.coverImage ?? ""}
+            onChange={(value) => field("media", value)}
+            onCover={(value) => field("coverImage", value)}
+            onBusy={setUploading}
+            disabled={busy}
+          />
+          {!mediaOnly && (
+            <section className="space-y-3">
+              <h3 className="text-sm font-semibold">Case study</h3>
+              {(draft.caseStudy ?? []).map((section, index) => (
+                <div
+                  key={index}
+                  className="space-y-2 rounded-lg border border-border p-3"
+                >
+                  <Input
+                    aria-label={`Section ${index + 1} heading`}
+                    value={section.heading}
+                    onChange={(event) =>
+                      field(
+                        "caseStudy",
+                        draft.caseStudy?.map((item, i) =>
+                          i === index
+                            ? { ...item, heading: event.target.value }
+                            : item,
+                        ),
+                      )
+                    }
+                  />
+                  <Textarea
+                    aria-label={`Section ${index + 1} body`}
+                    rows={4}
+                    value={section.body}
+                    onChange={(event) =>
+                      field(
+                        "caseStudy",
+                        draft.caseStudy?.map((item, i) =>
+                          i === index
+                            ? { ...item, body: event.target.value }
+                            : item,
+                        ),
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="min-h-11 text-xs text-signal-red"
+                    onClick={() =>
+                      field(
+                        "caseStudy",
+                        draft.caseStudy?.filter((_, i) => i !== index),
+                      )
+                    }
+                  >
+                    Remove section
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() =>
+                  field("caseStudy", [
+                    ...(draft.caseStudy ?? []),
+                    { heading: "", body: "" },
+                  ])
+                }
+                className="min-h-11 text-sm text-cyan"
+              >
+                Add case study section
+              </button>
+            </section>
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-signal-red">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-3 border-t border-border pt-4">
+            <Button type="submit" disabled={busy || uploading}>
+              {busy
+                ? "Saving…"
+                : mediaOnly
+                  ? "Save media"
+                  : project.id
+                    ? "Save project"
+                    : "Create draft"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy || uploading}
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+        <aside className="min-w-0">
+          <div className="sticky top-24 space-y-3">
+            <h3 className="text-sm font-semibold">Card preview</h3>
+            <p className="text-xs text-muted-foreground">
+              Unsaved preview ·{" "}
+              {draft.status === "ACTIVE"
+                ? "Published when saved"
+                : "Private draft"}
+            </p>
+            <StudioProjectCard
+              project={{
+                ...draft,
+                slug: draft.slug || repositorySlug(draft.title),
+                title: draft.title || "Untitled project",
+              }}
+            />
+          </div>
+        </aside>
+      </form>
+    </dialog>
+  );
 }
 
 export function ProjectsPanel() {
-  const [activeTab, setActiveTab] = useState<"complete" | "needs-readme" | "all" | "create">("complete");
-  const [liveProjects, setLiveProjects] = useState<Project[]>([]);
-  const [dbProjects, setDbProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [copiedRepo, setCopiedRepo] = useState<string | null>(null);
-
-  // Editing state
-  const [editingProject, setEditingProject] = useState<Partial<Project> | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [savingEdit, setSavingEdit] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Load existing database projects and live public portfolio projects
-  async function loadProjects() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/portfolio-projects");
-      if (res.ok) {
-        const json = await res.json();
-        if (Array.isArray(json.projects) && json.projects.length > 0) {
-          setLiveProjects(json.projects);
-        }
-      }
-    } catch {
-      // Fallback if API route is loading
-    }
-
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Project | null>(null);
+  const [mediaOnly, setMediaOnly] = useState(false);
+  const [query, setQuery] = useState("");
+  const load = useCallback(async () => {
     try {
       const data = await adminFetch<Project[]>("/admin/projects");
-      if (Array.isArray(data)) {
-        setDbProjects(data);
-      }
-    } catch {
-      // Fallback: DB might be cold or offline
+      setProjects(
+        data
+          .slice()
+          .sort((a, b) => (a.homepageOrder ?? 0) - (b.homepageOrder ?? 0)),
+      );
+      setError(null);
+    } catch (err) {
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    loadProjects();
   }, []);
-
-  // 1-Click Sync All Complete Projects into Admin DB
-  async function syncAllCompleteProjects() {
-    setStatusMessage("Synchronizing all complete projects into Admin DB...");
-    let syncedCount = 0;
-
-    const sourceToSync = liveProjects.length > 0 ? liveProjects : COMPLETE_PROJECTS;
-
-    for (const cp of sourceToSync) {
-      try {
-        await adminFetch("/admin/projects", {
-          method: "POST",
-          body: JSON.stringify({
-            title: cp.title,
-            slug: cp.slug,
-            description: cp.description,
-            techStack: cp.techStack,
-            githubUrl: cp.githubUrl,
-            liveUrl: cp.liveUrl,
-            coverImage: cp.coverImage,
-            category: cp.category,
-            status: "ACTIVE",
-            featured: Boolean(cp.featured),
-            caseStudy: cp.caseStudy && cp.caseStudy.length > 0 ? cp.caseStudy : [
-              { heading: "Project Goal", body: cp.description },
-              { heading: "Architecture & Stack", body: `Built using ${cp.techStack.join(", ")}.` },
-            ],
-          }),
-        });
-        syncedCount++;
-      } catch {
-        // Continue even if one fails or already exists
-      }
-    }
-
-    await loadProjects();
-    setStatusMessage(`Successfully synchronized ${syncedCount || sourceToSync.length} projects into Admin CMS.`);
-    setTimeout(() => setStatusMessage(null), 5000);
-  }
-
-  // 1-Click Toggle Featured on Homepage Showcase
-  async function toggleFeatured(project: Project | VerifiedRepo) {
-    const newFeatured = !Boolean(project.featured);
-    setStatusMessage(`Updating ${project.title} featured status...`);
+  useEffect(() => {
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
+  async function update(project: Project, fields: Partial<Project>) {
+    setBusy(true);
+    setMessage(null);
     try {
-      const dbMatch = dbProjects.find(
-        (p) => p.slug === project.slug || (project.githubUrl && p.githubUrl === project.githubUrl)
-      );
-      if (dbMatch?.id) {
-        await adminFetch(`/admin/projects/${dbMatch.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ featured: newFeatured }),
-        });
-      } else {
-        await adminFetch("/admin/projects", {
-          method: "POST",
-          body: JSON.stringify({
-            title: project.title,
-            slug: project.slug,
-            description: project.description,
-            category: project.category,
-            techStack: project.techStack,
-            githubUrl: project.githubUrl,
-            liveUrl: project.liveUrl,
-            coverImage: project.coverImage,
-            status: project.status || "ACTIVE",
-            featured: newFeatured,
-          }),
-        });
-      }
-      await loadProjects();
-      setStatusMessage(
-        `Project "${project.title}" is now ${newFeatured ? "featured on homepage showcase" : "unfeatured"}.`
-      );
-      setTimeout(() => setStatusMessage(null), 3000);
-    } catch (err) {
-      setStatusMessage(`Failed to update featured status: ${err instanceof Error ? err.message : "Internal error"}`);
-    }
-  }
-
-  // Handle single repository import
-  async function importSingleRepo(repo: VerifiedRepo) {
-    setStatusMessage(`Importing ${repo.title}...`);
-    try {
-      await adminFetch("/admin/projects", {
-        method: "POST",
-        body: JSON.stringify({
-          title: repo.title,
-          slug: repo.slug,
-          description: repo.description,
-          techStack: repo.techStack,
-          githubUrl: repo.githubUrl,
-          liveUrl: repo.liveUrl,
-          coverImage: repo.coverImage,
-          category: repo.category,
-          status: "ACTIVE",
-          featured: false,
-          caseStudy: [
-            { heading: "Project Goal", body: repo.description },
-            { heading: "Architecture", body: `Engineered using ${repo.techStack.join(", ")}.` },
-          ],
-        }),
+      await adminFetch(`/admin/projects/${project.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(fields),
       });
-      await loadProjects();
-      setStatusMessage(`Imported ${repo.title} successfully.`);
-    } catch {
-      setStatusMessage(`Saved ${repo.title} locally.`);
-    }
-    setTimeout(() => setStatusMessage(null), 4000);
-  }
-
-  // Copy README template to clipboard
-  function handleCopyReadme(repo: VerifiedRepo) {
-    const template = generateReadmeTemplate(repo);
-    navigator.clipboard.writeText(template);
-    setCopiedRepo(repo.name);
-    setTimeout(() => setCopiedRepo(null), 3500);
-  }
-
-  // Handle image upload from file
-  function handleImageFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  // Save changes to project
-  async function handleSaveEdit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!editingProject) return;
-    setSavingEdit(true);
-    setEditError(null);
-
-    const form = new FormData(e.currentTarget);
-    let coverImage = previewImage || String(form.get("coverImage") ?? "").trim() || undefined;
-
-    const file = form.get("coverImageFile");
-    if (file instanceof File && file.size > 0) {
-      try {
-        const uploaded = await uploadImage(file, "hz-labs/projects");
-        coverImage = uploaded.url;
-      } catch {
-        // Fall back to preview data URL if Cloudinary is unavailable
-      }
-    }
-
-    const payload = {
-      title: String(form.get("title")),
-      slug: String(form.get("slug")),
-      description: String(form.get("description")),
-      category: String(form.get("category")),
-      techStack: splitList(form.get("techStack")),
-      githubUrl: form.get("githubUrl") ? String(form.get("githubUrl")) : undefined,
-      liveUrl: form.get("liveUrl") ? String(form.get("liveUrl")) : undefined,
-      coverImage,
-      status: String(form.get("status")),
-      featured: form.get("featured") === "on",
-    };
-
-    try {
-      if (editingProject.id) {
-        await adminFetch(`/admin/projects/${editingProject.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        });
-      } else {
-        await adminFetch("/admin/projects", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-      }
-      setEditingProject(null);
-      setPreviewImage(null);
-      await loadProjects();
-      setStatusMessage("Project updated successfully.");
-      setTimeout(() => setStatusMessage(null), 3000);
+      await load();
+      setMessage(`Saved ${project.title}.`);
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Failed to save project.");
+      setError(errorMessage(err));
     } finally {
-      setSavingEdit(false);
+      setBusy(false);
     }
   }
-
-  // Quick cover selection from presets
-  function selectPresetCover(url: string) {
-    setPreviewImage(url);
-    if (editingProject) {
-      setEditingProject((prev) => (prev ? { ...prev, coverImage: url } : null));
+  async function reorder(index: number, delta: number) {
+    const list = [...projects];
+    const target = index + delta;
+    if (target < 0 || target >= list.length) return;
+    [list[index], list[target]] = [list[target], list[index]];
+    setBusy(true);
+    try {
+      await adminFetch("/admin/projects/reorder", {
+        method: "POST",
+        body: JSON.stringify({ ids: list.map((item) => item.id) }),
+      });
+      await load();
+      setMessage("Project order saved.");
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
     }
   }
-
-  // Exact projects shown on the home page and projects page
-  const effectiveProjects =
-    liveProjects.length > 0
-      ? liveProjects
-      : dbProjects.length > 0
-      ? dbProjects
-      : COMPLETE_PROJECTS;
-
-  const filteredProjects = effectiveProjects.filter(
-    (p) =>
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      p.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
+  async function remove(project: Project) {
+    if (
+      !window.confirm(
+        `Delete ${project.title}? This removes its saved project record and gallery references.`,
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      await adminFetch(`/admin/projects/${project.id}`, { method: "DELETE" });
+      await load();
+      setMessage("Project deleted.");
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+  const visible = projects.filter((project) =>
+    `${project.title} ${project.description} ${project.category} ${project.techStack.join(" ")}`
+      .toLowerCase()
+      .includes(query.toLowerCase()),
   );
-
   return (
     <div className="space-y-6">
-      {/* Top Banner & Header */}
-      <div className="border-b border-border pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Projects Intelligence &amp; Control
-            </h1>
-            <span className="font-mono text-xs text-cyan border border-cyan/30 px-2 py-0.5 rounded-full bg-cyan/10">
-              Live Gateway
-            </span>
-          </div>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            Synchronized live portfolio projects as displayed on the Homepage and Projects page.
+          <h1 className="text-2xl font-semibold text-foreground">Projects</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            HZ Labs · Publishing, page placement, and project media
           </p>
         </div>
-
-        {/* Global Action Buttons */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex gap-2">
           <Button
-            size="sm"
-            onClick={syncAllCompleteProjects}
-            className="bg-cyan text-slate-950 hover:bg-cyan-soft font-mono text-xs font-semibold shadow-[0_0_15px_var(--cyan-glow)]"
-          >
-            <Sparkles size={13} className="mr-1.5" />
-            Sync All to Admin CMS
-          </Button>
-
-          <Button
-            size="sm"
+            type="button"
             variant="secondary"
-            onClick={() => setActiveTab("create")}
-            className="font-mono text-xs border-cyan/30 text-cyan hover:text-cyan"
+            disabled={busy || loading}
+            onClick={() => void load()}
+            aria-label="Refresh projects"
           >
-            <Plus size={13} className="mr-1.5" />
-            New Custom Project
+            <RefreshCw size={15} />
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              setMediaOnly(false);
+              setEditing(blankProject());
+            }}
+          >
+            <Plus size={16} /> New project
           </Button>
         </div>
-      </div>
-
-      {/* Status Alert Notification */}
-      {statusMessage && (
-        <div className="flex items-center gap-2.5 p-3.5 rounded-xl border border-cyan/40 bg-cyan/10 font-mono text-xs text-cyan shadow-[0_0_20px_rgba(92,208,255,0.15)] animate-in fade-in">
-          <CheckCircle2 size={16} className="text-cyan shrink-0" />
-          <span>{statusMessage}</span>
+      </header>
+      <dl className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-4">
+        {[
+          { label: "Projects", count: projects.length },
+          {
+            label: "Published",
+            count: projects.filter((item) => item.status === "ACTIVE").length,
+          },
+          {
+            label: "On homepage",
+            count: projects.filter(
+              (item) =>
+                item.status === "ACTIVE" &&
+                (item.showOnHomepage ?? item.featured),
+            ).length,
+          },
+          {
+            label: "Draft / held",
+            count: projects.filter((item) => item.status === "DRAFT").length,
+          },
+        ].map((item) => (
+          <div key={item.label}>
+            <dt className="text-xs text-muted-foreground">{item.label}</dt>
+            <dd className="mt-2 text-2xl tabular-nums text-foreground">
+              {item.count}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {error && (
+        <div
+          role="alert"
+          className="rounded-lg border border-signal-red/30 p-3 text-sm text-signal-red"
+        >
+          {error}{" "}
+          <button onClick={() => void load()} className="ml-2 underline">
+            Retry
+          </button>
         </div>
       )}
-
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-3 overflow-x-auto font-mono text-xs">
-        <button
-          onClick={() => setActiveTab("complete")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-            activeTab === "complete"
-              ? "bg-cyan/15 text-cyan border border-cyan/30 shadow-[0_0_12px_var(--cyan-glow)]"
-              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-          }`}
-        >
-          <FolderCheck size={14} className={activeTab === "complete" ? "text-cyan" : "text-muted-foreground"} />
-          <span>Public Showcase Projects ({effectiveProjects.length})</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded bg-signal-green/20 text-signal-green border border-signal-green/30">
-            Live on Site
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("needs-readme")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-            activeTab === "needs-readme"
-              ? "bg-signal-amber/15 text-signal-amber border border-signal-amber/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-          }`}
-        >
-          <AlertTriangle size={14} className={activeTab === "needs-readme" ? "text-signal-amber" : "text-muted-foreground"} />
-          <span>Needs README Advisory ({INCOMPLETE_REPOS.length})</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded bg-signal-amber/20 text-signal-amber border border-signal-amber/30">
-            Action Needed
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("create")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-            activeTab === "create"
-              ? "bg-cyan/15 text-cyan border border-cyan/30"
-              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-          }`}
-        >
-          <Plus size={14} />
-          <span>Manual Entry &amp; Custom Upload</span>
-        </button>
-      </div>
-
-      {/* Search Bar */}
-      {activeTab === "complete" && (
-        <div className="relative">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search live projects by title, stack, or category..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-9 pr-4 rounded-xl border border-border bg-surface-2/40 text-xs font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-cyan/50"
+      {message && (
+        <p role="status" className="text-sm text-signal-green">
+          {message}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label className="w-full max-w-md text-xs text-muted-foreground">
+          Search projects
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Title, category, or technology"
+            className="mt-1"
           />
-        </div>
-      )}
-
-      {/* TAB 1: SHOWCASE PROJECTS (EXACT HOME & PROJECTS PAGE PROJECTS) */}
-      {activeTab === "complete" && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl border border-cyan/20 bg-cyan/[0.03] flex items-center justify-between gap-4 font-mono text-xs">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan/10 text-cyan border border-cyan/30">
-                <Check size={16} />
-              </span>
-              <div>
-                <div className="text-foreground font-semibold">
-                  Live Portfolio Showcase ({effectiveProjects.length} Projects Active)
-                </div>
-                <div className="text-muted-foreground text-[11px]">
-                  These are the exact projects shown on your Homepage and /projects page, dynamically synchronized with GitHub &amp; CMS.
-                </div>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              onClick={loadProjects}
-              disabled={loading}
-              className="bg-cyan/20 text-cyan hover:bg-cyan hover:text-black border border-cyan/40 text-xs shrink-0"
-            >
-              <RefreshCw size={12} className={`mr-1.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {filteredProjects.map((proj) => (
-              <Card
-                key={proj.slug}
-                className="overflow-hidden border-border/80 bg-surface/80 hover:border-cyan/40 transition-all flex flex-col justify-between group shadow-lg"
-              >
-                <div>
-                  {/* Project Cover Image */}
-                  <div className="relative h-44 w-full bg-slate-950 overflow-hidden border-b border-border/60">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={proj.coverImage || "/brand/project-blueprint.jpg"}
-                      alt={proj.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-
-                    {/* Verified Badges */}
-                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                      {proj.featured ? (
-                        <span className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full shadow">
-                          <Star size={11} className="fill-slate-950" /> Featured on Home
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-[10px] font-mono font-semibold bg-signal-green/90 text-slate-950 px-2 py-0.5 rounded-full shadow">
-                          <Check size={11} /> Active
-                        </span>
-                      )}
-                      {proj.isProductionReady && (
-                        <span className="text-[10px] font-mono bg-black/75 backdrop-blur-sm text-cyan border border-cyan/30 px-2 py-0.5 rounded-full">
-                          Production Ready
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="absolute top-2.5 right-2.5">
-                      <span className="flex items-center gap-1 text-[10px] font-mono bg-black/75 backdrop-blur-sm text-slate-300 border border-white/20 px-2 py-0.5 rounded-full">
-                        {proj.status}
+        </label>
+        <Link
+          href="/admin/github"
+          className="text-sm text-cyan hover:underline"
+        >
+          GitHub imports & review queue →
+        </Link>
+      </div>
+      {loading ? (
+        <p role="status" className="py-6 text-sm text-muted-foreground">
+          Loading saved projects…
+        </p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+          <table className="w-full min-w-[740px] text-left text-sm">
+            <caption className="sr-only">
+              Project publishing and placement controls
+            </caption>
+            <thead className="text-xs text-muted-foreground">
+              <tr>
+                {[
+                  "Project",
+                  "Publication",
+                  "Home",
+                  "Projects",
+                  "Order",
+                  "Actions",
+                ].map((label) => (
+                  <th key={label} scope="col" className="p-4 font-normal">
+                    {label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((project) => {
+                const index = projects.findIndex(
+                  (item) => item.id === project.id,
+                );
+                return (
+                  <tr key={project.id} className="border-t border-border">
+                    <td className="max-w-[330px] p-4">
+                      <strong className="block font-medium text-foreground">
+                        {project.title}
+                      </strong>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {project.category} · {project.media?.length ?? 0} media
                       </span>
-                    </div>
-
-                    {/* Change Image Button overlay */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingProject({
-                          id: proj.id,
-                          title: proj.title,
-                          slug: proj.slug,
-                          description: proj.description,
-                          techStack: proj.techStack,
-                          githubUrl: proj.githubUrl,
-                          liveUrl: proj.liveUrl,
-                          coverImage: proj.coverImage,
-                          category: proj.category,
-                          status: proj.status || "ACTIVE",
-                          featured: proj.featured,
-                        });
-                        setPreviewImage(proj.coverImage || null);
-                      }}
-                      className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-[10px] font-mono bg-cyan/90 hover:bg-cyan text-slate-950 font-bold px-2.5 py-1 rounded-md shadow-lg transition-transform active:scale-95"
-                    >
-                      <ImageIcon size={12} />
-                      <span>Change Artwork</span>
-                    </button>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-4 space-y-3">
-                    <div>
-                      <span className="text-[10px] font-mono text-cyan uppercase tracking-wider">
-                        {proj.category}
-                      </span>
-                      <h3 className="font-display font-bold text-foreground text-base mt-0.5">
-                        {proj.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-                        {proj.description}
-                      </p>
-                    </div>
-
-                    {/* Tech Stack Pills */}
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {proj.techStack.map((tech) => (
-                        <span
-                          key={tech}
-                          className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border text-slate-300"
+                      <button
+                        type="button"
+                        aria-label={`Manage photos and videos for ${project.title}`}
+                        disabled={busy}
+                        onClick={() => {
+                          setMediaOnly(true);
+                          setEditing(project);
+                        }}
+                        className="mt-1 flex min-h-11 items-center gap-2 text-sm text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+                      >
+                        <ImagePlus size={16} aria-hidden="true" /> Photos &
+                        videos
+                      </button>
+                      {project.updatedAt && (
+                        <time
+                          className="mt-1 block text-xs text-muted-foreground"
+                          dateTime={project.updatedAt}
                         >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Actions */}
-                <div className="p-4 pt-2 border-t border-border/50 flex items-center justify-between gap-2 font-mono text-xs">
-                  <div className="flex items-center gap-2">
-                    {proj.githubUrl && (
-                      <a
-                        href={proj.githubUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-cyan transition-colors"
+                          Updated{" "}
+                          {new Date(project.updatedAt).toLocaleDateString()}
+                        </time>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void update(project, {
+                            status:
+                              project.status === "ACTIVE" ? "DRAFT" : "ACTIVE",
+                          })
+                        }
+                        className={`min-h-11 rounded-lg border border-border px-3 text-xs ${project.status === "ACTIVE" ? "text-signal-green" : "text-muted-foreground"}`}
                       >
-                        <Github size={13} />
-                        <span>Repo</span>
-                      </a>
-                    )}
-                    {proj.liveUrl && (
-                      <a
-                        href={proj.liveUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] text-cyan hover:underline"
-                      >
-                        <ExternalLink size={12} />
-                        <span>Live</span>
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => toggleFeatured(proj)}
-                      className={`text-xs px-2.5 py-1 h-auto ${
-                        proj.featured
-                          ? "border-amber-400/40 text-amber-400 bg-amber-400/10 hover:bg-amber-400/20"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Star size={11} className={`mr-1 ${proj.featured ? "fill-amber-400" : ""}`} />
-                      {proj.featured ? "Featured" : "Feature"}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingProject({
-                          id: proj.id,
-                          title: proj.title,
-                          slug: proj.slug,
-                          description: proj.description,
-                          techStack: proj.techStack,
-                          githubUrl: proj.githubUrl,
-                          liveUrl: proj.liveUrl,
-                          coverImage: proj.coverImage,
-                          category: proj.category,
-                          status: proj.status || "ACTIVE",
-                          featured: proj.featured,
-                        });
-                        setPreviewImage(proj.coverImage || null);
-                      }}
-                      className="text-cyan hover:text-cyan border-cyan/30 text-xs px-2.5 py-1 h-auto"
-                    >
-                      <Edit2 size={11} className="mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: NEEDS README ADVISORY */}
-      {activeTab === "needs-readme" && (
-        <div className="space-y-6">
-          {/* Advisory Notice */}
-          <div className="rounded-xl border border-signal-amber/40 bg-signal-amber/[0.06] p-5 space-y-3 font-mono text-xs">
-            <div className="flex items-center gap-2 text-signal-amber font-bold text-sm">
-              <AlertTriangle size={18} />
-              <span>Repository Documentation Advisory &amp; Action Guide</span>
-            </div>
-            <p className="text-slate-300 leading-relaxed">
-              The following {INCOMPLETE_REPOS.length} repositories were found on your GitHub account (<strong>HajithMohamed</strong>).
-              While they contain code and commits, they currently lack a descriptive README. A proper README is critical for technical evaluation, recruiter reviews, and public showcase inclusion.
-            </p>
-            <div className="flex items-center gap-2 pt-1 text-[11px] text-signal-amber">
-              <Sparkles size={13} />
-              <span>Tip: Click &quot;Copy Tailored README Template&quot; on any card below, then paste directly into GitHub!</span>
-            </div>
-          </div>
-
-          {/* Incomplete Repositories Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {INCOMPLETE_REPOS.map((repo) => (
-              <Card
-                key={repo.name}
-                className="p-5 border-signal-amber/30 bg-surface/90 hover:border-signal-amber/60 transition-all space-y-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-signal-amber/20 text-signal-amber border border-signal-amber/40">
-                        {repo.readmeBytes === 0 ? "⚠️ Missing README" : `⚠️ Stub README (${repo.readmeBytes}b)`}
-                      </span>
-                      <span className="text-[10px] font-mono text-cyan bg-cyan/10 border border-cyan/20 px-2 py-0.5 rounded-full">
-                        <GitCommit size={10} className="inline mr-0.5" /> {repo.commitCount} commits
-                      </span>
-                    </div>
-
-                    <h3 className="font-display font-bold text-foreground text-base mt-2">
-                      {repo.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {repo.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Status Notice */}
-                <div className="p-3 rounded-lg border border-white/10 bg-surface-2/40 font-mono text-[11px] space-y-1.5">
-                  <div className="text-slate-300 flex items-center justify-between">
-                    <span>Status:</span>
-                    <span className="text-signal-amber font-semibold">{repo.statusNotes}</span>
-                  </div>
-                  <div className="text-slate-400 flex items-center justify-between">
-                    <span>Detected Tech:</span>
-                    <span className="text-cyan">{repo.techStack.join(", ")}</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border font-mono text-xs">
-                  <a
-                    href={`${repo.githubUrl}/new/main?filename=README.md`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-cyan border border-cyan/20 transition-all text-xs"
-                  >
-                    <BookOpen size={13} />
-                    <span>Add README on GitHub</span>
-                    <ExternalLink size={10} />
-                  </a>
-
-                  <Button
-                    size="sm"
-                    onClick={() => handleCopyReadme(repo)}
-                    className="bg-cyan text-slate-950 hover:bg-cyan-soft font-semibold text-xs shadow-[0_0_10px_var(--cyan-glow)]"
-                  >
-                    {copiedRepo === repo.name ? (
-                      <>
-                        <Check size={13} className="mr-1 text-slate-950 font-bold" />
-                        <span>Copied Template!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={13} className="mr-1" />
-                        <span>Copy README Template</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: CREATE CUSTOM PROJECT */}
-      {activeTab === "create" && (
-        <Card className="p-6 max-w-2xl mx-auto space-y-6">
-          <div className="border-b border-border pb-4">
-            <h2 className="text-lg font-bold font-display text-foreground">
-              Create New Project &amp; Upload Artwork
-            </h2>
-            <p className="text-xs font-mono text-muted-foreground mt-1">
-              Add custom project details and upload high-resolution cover images
-            </p>
-          </div>
-
-          <form onSubmit={handleSaveEdit} className="space-y-4 font-mono text-xs">
-            <div>
-              <label className="block text-muted-foreground mb-1">Project Title</label>
-              <Input name="title" placeholder="e.g. Distributed Cloud Sync Engine" required />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-muted-foreground mb-1">Slug (URL)</label>
-                <Input name="slug" placeholder="e.g. cloud-sync-engine" required />
-              </div>
-              <div>
-                <label className="block text-muted-foreground mb-1">Category</label>
-                <Input name="category" placeholder="e.g. Full Stack System" required />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-muted-foreground mb-1">Description</label>
-              <Textarea name="description" placeholder="Brief technical summary..." rows={3} required />
-            </div>
-
-            <div>
-              <label className="block text-muted-foreground mb-1">Tech Stack (comma separated)</label>
-              <Input name="techStack" placeholder="React, Node.js, PostgreSQL, Docker" required />
-            </div>
-
-            {/* Cover Image Upload & Presets */}
-            <div className="p-4 rounded-xl border border-cyan/30 bg-surface-2/40 space-y-3">
-              <label className="block text-cyan text-xs font-bold uppercase tracking-wider">
-                Cover Image (File Upload or Curated Presets)
-              </label>
-
-              {/* Upload Input */}
-              <Input
-                accept="image/*"
-                name="coverImageFile"
-                type="file"
-                onChange={handleImageFileChange}
-                className="cursor-pointer file:cursor-pointer file:bg-cyan file:text-slate-950 file:border-0 file:rounded-md file:px-2.5 file:py-1 file:font-bold file:mr-3"
-              />
-
-              {/* Image URL fallback */}
-              <Input
-                name="coverImage"
-                value={previewImage || ""}
-                onChange={(e) => setPreviewImage(e.target.value)}
-                placeholder="Or paste image URL (Cloudinary, GitHub raw, Unsplash)"
-              />
-
-              {/* Instant Image Preview */}
-              {previewImage && (
-                <div className="relative h-40 w-full rounded-lg overflow-hidden border border-cyan/40 bg-slate-950">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewImage} alt="Cover preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setPreviewImage(null)}
-                    className="absolute top-2 right-2 p-1 bg-black/80 rounded text-muted-foreground hover:text-white"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              )}
-
-              {/* Quick Pick Presets */}
-              <div>
-                <span className="text-[10px] text-muted-foreground block mb-1.5">
-                  Or pick a preset appropriate cover image:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_COVERS.map((preset) => (
-                    <button
-                      key={preset.url}
-                      type="button"
-                      onClick={() => selectPresetCover(preset.url)}
-                      className={`text-[10px] px-2.5 py-1 rounded-md border transition-all ${
-                        previewImage === preset.url
-                          ? "bg-cyan text-slate-950 border-cyan font-bold"
-                          : "bg-surface text-slate-300 border-border hover:border-cyan/50"
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-muted-foreground mb-1">GitHub URL</label>
-                <Input name="githubUrl" placeholder="https://github.com/..." />
-              </div>
-              <div>
-                <label className="block text-muted-foreground mb-1">Live URL (Optional)</label>
-                <Input name="liveUrl" placeholder="https://..." />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 items-center pt-2">
-              <div>
-                <label className="block text-muted-foreground mb-1">Status</label>
-                <select
-                  name="status"
-                  defaultValue="ACTIVE"
-                  className="w-full h-10 rounded-md border border-border bg-surface-2 px-3 text-xs text-foreground"
-                >
-                  <option value="ACTIVE">Active (Public)</option>
-                  <option value="DRAFT">Draft</option>
-                  <option value="ARCHIVED">Archived</option>
-                </select>
-              </div>
-
-              <label className="flex items-center gap-2 cursor-pointer mt-4">
-                <input type="checkbox" name="featured" className="h-4 w-4 rounded border-border text-cyan" />
-                <span className="text-foreground">Featured on Home Showcase</span>
-              </label>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={savingEdit}
-              className="w-full bg-cyan text-slate-950 hover:bg-cyan-soft font-bold mt-4"
-            >
-              {savingEdit ? "Saving Project..." : "Save Project"}
-            </Button>
-          </form>
-        </Card>
-      )}
-
-      {/* SLIDE-OVER DRAWER FOR EDITING PROJECT & UPLOADING IMAGE */}
-      {editingProject && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-end">
-          <div className="w-full max-w-xl bg-surface border-l border-border h-full overflow-y-auto p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300">
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-3 mb-5">
-                <div>
-                  <span className="font-mono text-[10px] uppercase text-cyan tracking-wider">
-                    Project Studio &amp; Artwork
-                  </span>
-                  <h2 className="text-xl font-bold font-display text-foreground">
-                    {editingProject.title || "Edit Project"}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingProject(null);
-                    setPreviewImage(null);
-                  }}
-                  className="p-1.5 rounded-md hover:bg-surface-2 text-muted-foreground hover:text-foreground"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {editError && (
-                <div className="mb-4 text-xs font-mono text-signal-red bg-signal-red/10 border border-signal-red/30 p-2.5 rounded">
-                  {editError}
-                </div>
-              )}
-
-              <form id="edit-project-drawer-form" onSubmit={handleSaveEdit} className="space-y-4 font-mono text-xs">
-                <div>
-                  <label className="block text-muted-foreground mb-1">Project Title</label>
-                  <Input name="title" defaultValue={editingProject.title || ""} required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-muted-foreground mb-1">Slug</label>
-                    <Input name="slug" defaultValue={editingProject.slug || ""} required />
-                  </div>
-                  <div>
-                    <label className="block text-muted-foreground mb-1">Category</label>
-                    <Input name="category" defaultValue={editingProject.category || ""} required />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-muted-foreground mb-1">Description</label>
-                  <Textarea
-                    name="description"
-                    defaultValue={editingProject.description || ""}
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-muted-foreground mb-1">Tech Stack (comma separated)</label>
-                  <Input
-                    name="techStack"
-                    defaultValue={editingProject.techStack?.join(", ") || ""}
-                    required
-                  />
-                </div>
-
-                {/* Image Upload Box */}
-                <div className="p-4 rounded-xl border border-cyan/40 bg-surface-2/40 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-cyan text-xs font-bold uppercase tracking-wider">
-                      Cover Image Artwork
-                    </label>
-                    <span className="text-[10px] text-muted-foreground">Upload file or pick preset</span>
-                  </div>
-
-                  {/* File Upload Input */}
-                  <Input
-                    accept="image/*"
-                    name="coverImageFile"
-                    type="file"
-                    onChange={handleImageFileChange}
-                    className="cursor-pointer file:cursor-pointer file:bg-cyan file:text-slate-950 file:border-0 file:rounded-md file:px-2.5 file:py-1 file:font-bold file:mr-3"
-                  />
-
-                  {/* URL Input */}
-                  <Input
-                    name="coverImage"
-                    value={previewImage || editingProject.coverImage || ""}
-                    onChange={(e) => setPreviewImage(e.target.value)}
-                    placeholder="https://..."
-                  />
-
-                  {/* Preview Image */}
-                  {Boolean(previewImage || editingProject.coverImage) && (
-                    <div className="relative h-44 w-full rounded-lg overflow-hidden border border-cyan/40 bg-slate-950">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={(previewImage || editingProject.coverImage) || ""}
-                        alt="Project preview"
-                        className="h-full w-full object-cover"
+                        {project.status === "ACTIVE"
+                          ? "Published · Hold"
+                          : project.status === "ARCHIVED"
+                            ? "Archived · Publish"
+                            : "Draft · Publish"}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        aria-label={`Show ${project.title} on Home`}
+                        disabled={busy}
+                        checked={project.showOnHomepage ?? project.featured}
+                        onChange={(event) =>
+                          void update(project, {
+                            showOnHomepage: event.target.checked,
+                            featured: event.target.checked,
+                          })
+                        }
+                        className="h-5 w-5 accent-cyan"
                       />
-                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 rounded text-[10px] text-cyan font-mono">
-                        Active Artwork
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Preset Buttons */}
-                  <div>
-                    <span className="text-[10px] text-muted-foreground block mb-1.5">
-                      Select appropriate preset:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {PRESET_COVERS.map((preset) => (
+                    </td>
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        aria-label={`Show ${project.title} on Projects`}
+                        disabled={busy}
+                        checked={project.showOnProjectsPage ?? true}
+                        onChange={(event) =>
+                          void update(project, {
+                            showOnProjectsPage: event.target.checked,
+                          })
+                        }
+                        className="h-5 w-5 accent-cyan"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex">
                         <button
-                          key={preset.url}
                           type="button"
-                          onClick={() => selectPresetCover(preset.url)}
-                          className={`text-[9px] px-2 py-0.5 rounded border transition-all ${
-                            (previewImage || editingProject.coverImage) === preset.url
-                              ? "bg-cyan text-slate-950 border-cyan font-bold"
-                              : "bg-surface text-slate-300 border-border hover:border-cyan/50"
-                          }`}
+                          disabled={busy || index === 0}
+                          aria-label={`Move ${project.title} up`}
+                          onClick={() => void reorder(index, -1)}
+                          className="grid h-11 w-11 place-items-center disabled:opacity-30"
                         >
-                          {preset.label}
+                          <ArrowUp size={16} />
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-muted-foreground mb-1">GitHub URL</label>
-                    <Input name="githubUrl" defaultValue={editingProject.githubUrl || ""} />
-                  </div>
-                  <div>
-                    <label className="block text-muted-foreground mb-1">Live URL</label>
-                    <Input name="liveUrl" defaultValue={editingProject.liveUrl || ""} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 items-center pt-2">
-                  <div>
-                    <label className="block text-muted-foreground mb-1">Status</label>
-                    <select
-                      name="status"
-                      defaultValue={editingProject.status || "ACTIVE"}
-                      className="w-full h-10 rounded-md border border-border bg-surface-2 px-3 text-xs text-foreground"
-                    >
-                      <option value="ACTIVE">Active (Public)</option>
-                      <option value="DRAFT">Draft</option>
-                      <option value="ARCHIVED">Archived</option>
-                    </select>
-                  </div>
-
-                  <label className="flex items-center gap-2 cursor-pointer mt-4">
-                    <input
-                      type="checkbox"
-                      name="featured"
-                      defaultChecked={editingProject.featured}
-                      className="h-4 w-4 rounded border-border text-cyan"
-                    />
-                    <span className="text-foreground">Featured on Showcase</span>
-                  </label>
-                </div>
-              </form>
-            </div>
-
-            <div className="border-t border-border pt-4 mt-6 flex items-center justify-end gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEditingProject(null);
-                  setPreviewImage(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                form="edit-project-drawer-form"
-                type="submit"
-                disabled={savingEdit}
-                size="sm"
-                className="bg-cyan text-slate-950 hover:bg-cyan-soft font-semibold"
-              >
-                {savingEdit ? "Saving..." : "Save Project & Image"}
-              </Button>
-            </div>
-          </div>
+                        <button
+                          type="button"
+                          disabled={busy || index === projects.length - 1}
+                          aria-label={`Move ${project.title} down`}
+                          onClick={() => void reorder(index, 1)}
+                          className="grid h-11 w-11 place-items-center disabled:opacity-30"
+                        >
+                          <ArrowDown size={16} />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex">
+                        <button
+                          type="button"
+                          aria-label={`Edit ${project.title}`}
+                          onClick={() => {
+                            setMediaOnly(false);
+                            setEditing({
+                              ...project,
+                              showOnHomepage:
+                                project.showOnHomepage ?? project.featured,
+                              showOnProjectsPage:
+                                project.showOnProjectsPage ?? true,
+                            });
+                          }}
+                          className="grid h-11 w-11 place-items-center"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          aria-label={`Delete ${project.title}`}
+                          onClick={() => void remove(project)}
+                          className="grid h-11 w-11 place-items-center text-signal-red"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {visible.length === 0 && (
+            <p className="p-8 text-center text-sm text-muted-foreground">
+              {projects.length
+                ? "No projects match this search."
+                : "No saved projects. Create a draft or review GitHub imports."}
+            </p>
+          )}
         </div>
+      )}
+      {editing && (
+        <ProjectEditor
+          project={editing}
+          mediaOnly={mediaOnly}
+          onClose={() => setEditing(null)}
+          onSaved={async () => {
+            await load();
+            setMessage("Project saved successfully.");
+          }}
+        />
       )}
     </div>
   );

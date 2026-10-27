@@ -56,6 +56,11 @@ function getBackendOrigin(): string | null {
 const backendOrigin = getBackendOrigin();
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Each project file travels separately through /bff. Leave room for a
+    // 60 MB video plus multipart headers before the API validates the file.
+    proxyClientMaxBodySize: "64mb",
+  },
   images: {
     remotePatterns: [
       // Optional remote images supplied by repository metadata or the CMS.

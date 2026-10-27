@@ -49,6 +49,10 @@ export type Project = {
   category: string;
   status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   featured: boolean;
+  showOnHomepage?: boolean;
+  showOnProjectsPage?: boolean;
+  homepageOrder?: number;
+  media?: ProjectMedia[];
   outcome?: string | null;
   caseStudy?: CaseStudySection[];
   updatedAt?: string;
@@ -64,6 +68,20 @@ export type Project = {
   coverImageKind?: "concept";
   dedupeKey?: string;
   relatedRepositories?: string[];
+};
+
+export type ProjectMedia = {
+  id?: string;
+  url: string;
+  alt: string;
+  type?: "IMAGE" | "VIDEO";
+  order?: number;
+  caption?: string | null;
+  posterUrl?: string | null;
+  publicId?: string | null;
+  provider?: string | null;
+  mimeType?: string | null;
+  bytes?: number | null;
 };
 
 export type BlogPost = {
@@ -89,7 +107,11 @@ export type CvAsset = {
   isActive: boolean;
 };
 
-export type ContributionDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
+export type ContributionDay = {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+};
 
 export type CurrentRepositoryStatus = {
   name: string;
@@ -118,13 +140,17 @@ export type CurrentRepositoryStatus = {
   isPrivate?: boolean;
   isCollaborator?: boolean;
   ownerLogin?: string;
-  activityStatus?: "active" | "recent" | "quiet" | "stale" | "unknown" | "archived" | string;
+  activityStatus?:
+    "active" | "recent" | "quiet" | "stale" | "unknown" | "archived" | string;
   statusLabel?: string;
   statusTone?: "green" | "amber" | "cyan" | "red" | string;
 };
 
 export type ContributionData = {
-  calendar?: { totalContributions: number; weeks: { days: ContributionDay[] }[] } | null;
+  calendar?: {
+    totalContributions: number;
+    weeks: { days: ContributionDay[] }[];
+  } | null;
   totalStars?: number;
   totalForks?: number;
   totalContributions?: number;
@@ -320,7 +346,8 @@ export type ProjectRequest = {
   clientProjects?: Array<{ id: string; title: string }>;
 };
 
-export type ClientProjectStatus = "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
+export type ClientProjectStatus =
+  "ACTIVE" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
 export type MilestoneStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
 export type Milestone = {

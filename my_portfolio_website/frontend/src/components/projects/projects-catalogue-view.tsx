@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X, Terminal, Filter, Sparkles, Hammer, GitFork } from "lucide-react";
+import {
+  Search,
+  X,
+  Terminal,
+  Filter,
+  Sparkles,
+  Hammer,
+  GitFork,
+} from "lucide-react";
 import type { Project } from "@/lib/types";
 import { StudioProjectCard } from "@/components/projects/studio-project-card";
 
@@ -21,7 +29,19 @@ const POPULAR_TECHS = [
   "MySQL",
 ];
 
-export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
+export function ProjectsCatalogueView({
+  projects: sourceProjects,
+}: {
+  projects: Project[];
+}) {
+  const projects = useMemo(
+    () =>
+      sourceProjects.filter(
+        (project) =>
+          project.status === "ACTIVE" && project.showOnProjectsPage !== false,
+      ),
+    [sourceProjects],
+  );
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState<string>("All");
@@ -34,28 +54,19 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
         return false;
       }
       if (activeCategory === "BUILDING") {
-        const isBuilding =
-          project.isCurrent ||
-          project.slug.includes("shoe") ||
-          project.slug.includes("tech-bridge") ||
-          project.slug.includes("tech_bridge") ||
-          project.status === "ACTIVE";
-        if (!isBuilding) return false;
+        if (!project.isCurrent) return false;
       }
       if (activeCategory === "CONTRIBUTED") {
-        const isContributed =
-          project.category?.toLowerCase().includes("group") ||
-          project.category?.toLowerCase().includes("academic") ||
-          project.slug.includes("saga") ||
-          project.slug.includes("library") ||
-          project.slug.includes("nextgen");
+        const isContributed = /group|academic|team|collaborat/i.test(
+          project.category,
+        );
         if (!isContributed) return false;
       }
 
       // 2. Technology Filter
       if (selectedTech !== "All") {
         const hasTech = project.techStack.some(
-          (t) => t.toLowerCase() === selectedTech.toLowerCase()
+          (t) => t.toLowerCase() === selectedTech.toLowerCase(),
         );
         if (!hasTech) return false;
       }
@@ -65,8 +76,12 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
         const q = searchQuery.toLowerCase().trim();
         const matchesTitle = project.title.toLowerCase().includes(q);
         const matchesDesc = project.description.toLowerCase().includes(q);
-        const matchesTech = project.techStack.some((t) => t.toLowerCase().includes(q));
-        const matchesCategory = (project.category ?? "").toLowerCase().includes(q);
+        const matchesTech = project.techStack.some((t) =>
+          t.toLowerCase().includes(q),
+        );
+        const matchesCategory = (project.category ?? "")
+          .toLowerCase()
+          .includes(q);
         if (!matchesTitle && !matchesDesc && !matchesTech && !matchesCategory) {
           return false;
         }
@@ -82,25 +97,14 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
     setSelectedTech("All");
   };
 
-  const isFiltered = activeCategory !== "ALL" || selectedTech !== "All" || searchQuery !== "";
+  const isFiltered =
+    activeCategory !== "ALL" || selectedTech !== "All" || searchQuery !== "";
 
   // Category counts
   const featuredCount = projects.filter((p) => p.featured).length;
-  const buildingCount = projects.filter(
-    (p) =>
-      p.isCurrent ||
-      p.slug.includes("shoe") ||
-      p.slug.includes("tech-bridge") ||
-      p.slug.includes("tech_bridge") ||
-      p.status === "ACTIVE"
-  ).length;
-  const contributedCount = projects.filter(
-    (p) =>
-      p.category?.toLowerCase().includes("group") ||
-      p.category?.toLowerCase().includes("academic") ||
-      p.slug.includes("saga") ||
-      p.slug.includes("library") ||
-      p.slug.includes("nextgen")
+  const buildingCount = projects.filter((p) => p.isCurrent).length;
+  const contributedCount = projects.filter((p) =>
+    /group|academic|team|collaborat/i.test(p.category),
   ).length;
 
   return (
@@ -174,17 +178,22 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
           {/* Live Search Input */}
           <div className="relative flex-1 max-w-md">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by title, stack, or keywords..."
+              aria-label="Search projects"
               className="w-full rounded-xl border border-white/10 bg-black/40 pl-10 pr-9 py-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
+                aria-label="Clear project search"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X size={13} />
@@ -193,7 +202,7 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
           </div>
 
           {/* Technology Chips Slider */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex min-w-0 max-w-full items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1 shrink-0 mr-1">
               <Filter size={11} /> Tech:
             </span>
@@ -217,8 +226,11 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
       {/* 2. RESULTS META BAR */}
       <div className="flex items-center justify-between font-mono text-xs text-muted-foreground px-1">
         <div>
-          Showing <span className="font-semibold text-foreground">{filteredProjects.length}</span> of{" "}
-          <span>{projects.length}</span> projects
+          Showing{" "}
+          <span className="font-semibold text-foreground">
+            {filteredProjects.length}
+          </span>{" "}
+          of <span>{projects.length}</span> projects
         </div>
 
         {isFiltered && (
@@ -246,7 +258,8 @@ export function ProjectsCatalogueView({ projects }: { projects: Project[] }) {
             No projects match your filter
           </h3>
           <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
-            Try broadening your search query or switching technology and category filters.
+            Try broadening your search query or switching technology and
+            category filters.
           </p>
           <button
             onClick={resetFilters}
