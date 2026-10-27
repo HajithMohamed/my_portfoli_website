@@ -2,6 +2,12 @@
   display: grid;
   gap: 22px;
 }
+.projectList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 16px;
+}
 .heading {
   display: flex;
   justify-content: space-between;
@@ -443,6 +449,9 @@
   }
 }
 @media (max-width: 767px) {
+  .projectList .lead {
+    grid-template-rows: 280px minmax(0, 1fr);
+  }
   .lead {
     grid-template-columns: minmax(0, 1fr);
     padding: 8px;
@@ -466,6 +475,9 @@
   }
 }
 @media (max-width: 540px) {
+  .projectList .lead {
+    grid-template-rows: 240px minmax(0, 1fr);
+  }
   .grid {
     grid-template-columns: minmax(0, 1fr);
   }
