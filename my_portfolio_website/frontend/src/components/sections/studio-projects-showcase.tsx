@@ -16,7 +16,6 @@ export function StudioProjectsShowcase({
       project.status === "ACTIVE" &&
       (project.showOnHomepage ?? project.featured),
   );
-  const [lead, ...secondary] = visible;
   return (
     <section
       id="work"
@@ -36,17 +35,12 @@ export function StudioProjectsShowcase({
           All projects <ArrowRight size={15} aria-hidden="true" />
         </Link>
       </div>
-      {lead ? (
-        <>
-          <StudioProjectCard project={lead} lead />
-          {secondary.length > 0 && (
-            <div className={styles.grid}>
-              {secondary.map((project) => (
-                <StudioProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          )}
-        </>
+      {visible.length > 0 ? (
+        <div className={styles.projectList}>
+          {visible.map((project) => (
+            <StudioProjectCard key={project.id} project={project} lead />
+          ))}
+        </div>
       ) : (
         <p className={styles.empty}>
           No featured projects at the moment. Explore the project directory for
