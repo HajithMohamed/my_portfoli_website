@@ -6,18 +6,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'node:stream';
+import { validatedResourceType } from './upload-validation';
 
 @Injectable()
 export class UploadsService {
-  private readonly maxBytes = 10 * 1024 * 1024;
-  private readonly allowedMimeTypes = new Set([
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-    'application/pdf',
-  ]);
-
   constructor(private readonly configService: ConfigService) {
     cloudinary.config({
       cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
@@ -28,41 +20,66 @@ export class UploadsService {
   }
 
   async upload(file: Express.Multer.File, folder = 'hz-labs') {
-    if (!file) {
-      throw new BadRequestException('No file provided');
-    }
-    if (file.size > this.maxBytes) {
-      throw new BadRequestException('File exceeds 10 MB upload limit');
-    }
-    if (!this.allowedMimeTypes.has(file.mimetype)) {
-      throw new BadRequestException('Unsupported file type');
-    }
-    if (!this.configService.get<string>('CLOUDINARY_CLOUD_NAME')) {
-      throw new ServiceUnavailableException('Cloudinary is not configured');
+    const resourceType = validatedResourceType(
+      file,
+      10 * 1024 * 1024,
+      this.videoLimit(),
+    );
+    if (!/^hz-labs(?:\/[a-zA-Z0-9_-]+)*$/.test(folder))
+      throw new BadRequestException('Invalid upload folder');
+    if (
+      [
+        'CLOUDINARY_CLOUD_NAME',
+        'CLOUDINARY_API_KEY',
+        'CLOUDINARY_API_SECRET',
+      ].some((key) => !this.configService.get<string>(key)?.trim())
+    ) {
+      throw new ServiceUnavailableException(
+        'Cloudinary uploads are not configured. Add the cloud name, API key and API secret to the backend configuration.',
+      );
     }
 
-    const resourceType = file.mimetype === 'application/pdf' ? 'raw' : 'image';
-    const response = await this.streamUpload(file.buffer, folder, resourceType);
+    let response: UploadApiResponse;
+    try {
+      response = await this.streamUpload(file.buffer, folder, resourceType);
+    } catch {
+      throw new ServiceUnavailableException(
+        'Media upload failed. Please try again.',
+      );
+    }
     return {
       url: response.secure_url,
       publicId: response.public_id,
       resourceType,
       bytes: response.bytes,
       format: response.format,
+      mimeType: file.mimetype,
+      provider: 'cloudinary',
+      posterUrl:
+        resourceType === 'video'
+          ? cloudinary.url(response.public_id, {
+              resource_type: 'video',
+              format: 'jpg',
+              secure: true,
+              transformation: [
+                { start_offset: '0', width: 1280, crop: 'limit' },
+              ],
+            })
+          : undefined,
     };
   }
 
   private streamUpload(
     buffer: Buffer,
     folder: string,
-    resourceType: 'image' | 'raw',
+    resourceType: 'image' | 'raw' | 'video',
   ) {
     return new Promise<UploadApiResponse>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder,
           resource_type: resourceType,
-          overwrite: true,
+          overwrite: false,
         },
         (error, result) => {
           if (error || !result) {
@@ -77,7 +94,22 @@ export class UploadsService {
         },
       );
 
-      Readable.from(buffer).pipe(stream);
+      stream.on('error', reject);
+      Readable.from(buffer).on('error', reject).pipe(stream);
     });
+  }
+
+  private videoLimit() {
+    const configured = Number(
+      this.configService.get<string>('VIDEO_UPLOAD_MAX_MB') ?? 60,
+    );
+    return (
+      Math.min(
+        120,
+        Math.max(1, Number.isFinite(configured) ? configured : 60),
+      ) *
+      1024 *
+      1024
+    );
   }
 }

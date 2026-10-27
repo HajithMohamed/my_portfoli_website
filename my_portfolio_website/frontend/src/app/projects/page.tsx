@@ -6,11 +6,15 @@ import { getHomeData } from "@/lib/public-data";
 
 export const metadata = {
   title: "Projects & Engineering Work",
-  description: "Explore production web applications, open-source repositories, and technical case studies by Mohamed Hajith.",
+  description:
+    "Explore production web applications, open-source repositories, and technical case studies by Mohamed Hajith.",
 };
 
 export default async function ProjectsPage() {
-  const { projects, profile } = await getHomeData();
+  const { projects: publishedProjects, profile } = await getHomeData();
+  const projects = publishedProjects.filter(
+    (project) => project.showOnProjectsPage !== false,
+  );
 
   return (
     <div className="relative min-h-screen">
@@ -27,12 +31,14 @@ export default async function ProjectsPage() {
                 All projects &amp; systems
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                A verified collection of production systems, client applications, open-source libraries, and academic architectures. Filter by category, stack, or search by keyword to explore technical evidence and case studies.
+                Explore published applications, open-source work, and academic
+                projects. Filter by stack or keyword to find screenshots, demos,
+                and technical case studies.
               </p>
             </div>
             <div className="flex w-fit items-center gap-2 rounded-full border border-cyan/30 bg-cyan/[0.06] px-4 py-2 font-mono text-xs text-cyan shrink-0">
               <Terminal size={13} />
-              <span>{projects.length} Total Repositories</span>
+              <span>{projects.length} Published Projects</span>
             </div>
           </header>
 

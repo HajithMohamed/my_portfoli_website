@@ -24,6 +24,7 @@ enum BlogStatus {
 
 enum AssetType {
   IMAGE
+  VIDEO
   CV
   DOCUMENT
 }
@@ -114,6 +115,9 @@ model Project {
   category    String
   status      ProjectStatus      @default(DRAFT)
   featured    Boolean            @default(false)
+  showOnHomepage Boolean         @default(false)
+  showOnProjectsPage Boolean     @default(true)
+  homepageOrder Int              @default(0)
   outcome     String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
@@ -127,6 +131,12 @@ model ProjectMedia {
   alt       String
   type      AssetType @default(IMAGE)
   order     Int       @default(0)
+  caption   String?
+  posterUrl String?
+  publicId  String?
+  provider  String?
+  mimeType  String?
+  bytes     Int?
   projectId String
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

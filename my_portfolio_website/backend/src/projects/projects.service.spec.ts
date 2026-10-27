@@ -1,5 +1,5 @@
-import { NotFoundException } from '@nestjs/common';
-import { ProjectStatus } from '@prisma/client';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { AssetType, ProjectStatus } from '@prisma/client';
 import { ProjectsService } from './projects.service';
 import { ProjectDto } from './dto/project.dto';
 
@@ -12,6 +12,7 @@ describe('ProjectsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   const service = new ProjectsService(prisma as never);
@@ -21,9 +22,14 @@ describe('ProjectsService', () => {
   });
 
   describe('publicProjects', () => {
-    it('returns only active projects ordered by featured and updatedAt', async () => {
+    it('returns only published projects in CMS order', async () => {
       const mockProjects = [
-        { id: '1', title: 'Shoe Bank', status: ProjectStatus.ACTIVE, featured: true },
+        {
+          id: '1',
+          title: 'Shoe Bank',
+          status: ProjectStatus.ACTIVE,
+          featured: true,
+        },
       ];
       prisma.project.findMany.mockResolvedValue(mockProjects);
 
@@ -35,7 +41,7 @@ describe('ProjectsService', () => {
           media: { orderBy: { order: 'asc' } },
           caseStudy: { orderBy: { order: 'asc' } },
         },
-        orderBy: [{ featured: 'desc' }, { updatedAt: 'desc' }],
+        orderBy: [{ homepageOrder: 'asc' }, { createdAt: 'asc' }],
       });
     });
   });
@@ -62,13 +68,19 @@ describe('ProjectsService', () => {
 
   describe('publicVisibility', () => {
     it('returns visibility status for projects with githubUrl', async () => {
-      const mockVisibility = [{ id: '1', githubUrl: 'https://github.com/org/repo', status: ProjectStatus.ACTIVE }];
+      const mockVisibility = [
+        {
+          id: '1',
+          githubUrl: 'https://github.com/org/repo',
+          status: ProjectStatus.ACTIVE,
+        },
+      ];
       prisma.project.findMany.mockResolvedValue(mockVisibility);
 
       const result = await service.publicVisibility();
       expect(result).toEqual(mockVisibility);
       expect(prisma.project.findMany).toHaveBeenCalledWith({
-        where: { githubUrl: { not: null } },
+        where: { githubUrl: { not: null }, status: ProjectStatus.ACTIVE },
         select: { id: true, githubUrl: true, status: true },
       });
     });
@@ -76,7 +88,11 @@ describe('ProjectsService', () => {
 
   describe('findBySlug', () => {
     it('returns an active project when found', async () => {
-      const mockProject = { id: '1', slug: 'shoe-bank', status: ProjectStatus.ACTIVE };
+      const mockProject = {
+        id: '1',
+        slug: 'shoe-bank',
+        status: ProjectStatus.ACTIVE,
+      };
       prisma.project.findUnique.mockResolvedValue(mockProject);
 
       const result = await service.findBySlug('shoe-bank');
@@ -92,18 +108,30 @@ describe('ProjectsService', () => {
 
     it('throws NotFoundException when project does not exist', async () => {
       prisma.project.findUnique.mockResolvedValue(null);
-      await expect(service.findBySlug('unknown')).rejects.toThrow(NotFoundException);
+      await expect(service.findBySlug('unknown')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('throws NotFoundException for non-active project when includeDrafts is false', async () => {
-      const mockDraft = { id: '2', slug: 'draft-project', status: ProjectStatus.ARCHIVED };
+      const mockDraft = {
+        id: '2',
+        slug: 'draft-project',
+        status: ProjectStatus.ARCHIVED,
+      };
       prisma.project.findUnique.mockResolvedValue(mockDraft);
 
-      await expect(service.findBySlug('draft-project', false)).rejects.toThrow(NotFoundException);
+      await expect(service.findBySlug('draft-project', false)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('returns non-active project when includeDrafts is true', async () => {
-      const mockDraft = { id: '2', slug: 'draft-project', status: ProjectStatus.ARCHIVED };
+      const mockDraft = {
+        id: '2',
+        slug: 'draft-project',
+        status: ProjectStatus.ARCHIVED,
+      };
       prisma.project.findUnique.mockResolvedValue(mockDraft);
 
       const result = await service.findBySlug('draft-project', true);
@@ -118,7 +146,8 @@ describe('ProjectsService', () => {
         slug: 'shoe-bank',
         description: 'Wholesale footwear system',
         techStack: ['PHP', 'MySQL'],
-        githubUrl: 'https://github.com/HajithMohamed/Footwear_Business_Management_System',
+        githubUrl:
+          'https://github.com/HajithMohamed/Footwear_Business_Management_System',
         liveUrl: 'https://shoebank.lk',
         coverImage: '/projects/shoe-bank-cover.png',
         category: 'Enterprise System',
@@ -139,10 +168,18 @@ describe('ProjectsService', () => {
           title: 'Shoe Bank',
           slug: 'shoe-bank',
           media: {
-            create: [{ url: 'https://example.com/img1.png', alt: 'Overview', order: 0 }],
+            create: [
+              {
+                url: 'https://example.com/img1.png',
+                alt: 'Overview',
+                order: 0,
+              },
+            ],
           },
           caseStudy: {
-            create: [{ heading: 'Goal', body: 'Manage wholesale inventory', order: 0 }],
+            create: [
+              { heading: 'Goal', body: 'Manage wholesale inventory', order: 0 },
+            ],
           },
         }),
         include: {
@@ -154,8 +191,106 @@ describe('ProjectsService', () => {
   });
 
   describe('update', () => {
+    it('saves multiple Cloudinary photos and a video in their chosen gallery order', async () => {
+      prisma.project.findUnique.mockResolvedValue({ id: 'gallery' });
+      const media = [
+        {
+          url: 'https://res.cloudinary.com/test/image/upload/overview.png',
+          alt: 'Overview',
+          type: AssetType.IMAGE,
+          publicId: 'hz-labs/projects/overview',
+          provider: 'cloudinary',
+        },
+        {
+          url: 'https://res.cloudinary.com/test/image/upload/details.png',
+          alt: 'Details',
+          type: AssetType.IMAGE,
+          publicId: 'hz-labs/projects/details',
+          provider: 'cloudinary',
+        },
+        {
+          url: 'https://res.cloudinary.com/test/video/upload/demo.mp4',
+          alt: 'Demo',
+          type: AssetType.VIDEO,
+          publicId: 'hz-labs/projects/demo',
+          provider: 'cloudinary',
+          posterUrl: 'https://res.cloudinary.com/test/video/upload/demo.jpg',
+        },
+      ];
+
+      await service.update('gallery', { media });
+
+      expect(prisma.project.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'gallery' },
+          data: expect.objectContaining({
+            media: {
+              deleteMany: {},
+              create: media.map((item, order) => ({ ...item, order })),
+            },
+          }),
+        }),
+      );
+    });
+
+    it('holds a project without changing its media or listing choices', async () => {
+      prisma.project.findUnique.mockResolvedValue({ id: 'held' });
+      await service.update('held', { status: ProjectStatus.DRAFT });
+      const input = prisma.project.update.mock.calls[0][0] as {
+        data: Record<string, unknown>;
+      };
+      expect(input.data.status).toBe(ProjectStatus.DRAFT);
+      expect(input.data.media).toBeUndefined();
+      expect(input.data.showOnHomepage).toBeUndefined();
+      expect(input.data.showOnProjectsPage).toBeUndefined();
+    });
+
+    it('persists independent placement and ordered video metadata', async () => {
+      prisma.project.findUnique.mockResolvedValue({ id: 'video' });
+      const media = {
+        url: 'https://res.cloudinary.com/test/video/upload/demo.mp4',
+        alt: 'Demo',
+        type: AssetType.VIDEO,
+        posterUrl: 'https://res.cloudinary.com/test/video/upload/demo.jpg',
+        publicId: 'demo',
+        provider: 'cloudinary',
+        mimeType: 'video/mp4',
+        bytes: 1024,
+      };
+      await service.update('video', {
+        showOnHomepage: false,
+        showOnProjectsPage: true,
+        media: [media],
+      });
+      const input = prisma.project.update.mock.calls[0][0] as {
+        data: Record<string, unknown>;
+      };
+      expect(input.data).toMatchObject({
+        showOnHomepage: false,
+        showOnProjectsPage: true,
+        media: { deleteMany: {}, create: [{ ...media, order: 0 }] },
+      });
+    });
+
+    it('rejects direct external video URLs before saving', async () => {
+      await expect(
+        service.update('video', {
+          media: [
+            {
+              url: 'https://untrusted.example/demo.mp4',
+              alt: 'Demo',
+              type: AssetType.VIDEO,
+            },
+          ],
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(prisma.project.update).not.toHaveBeenCalled();
+    });
     it('updates project fields and re-creates related records', async () => {
-      prisma.project.findUnique.mockResolvedValue({ id: 'proj-1', slug: 'shoe-bank' });
+      prisma.project.findUnique.mockResolvedValue({
+        id: 'proj-1',
+        slug: 'shoe-bank',
+      });
       const updatedMock = { id: 'proj-1', title: 'Updated Shoe Bank' };
       prisma.project.update.mockResolvedValue(updatedMock);
 
@@ -183,8 +318,23 @@ describe('ProjectsService', () => {
 
     it('throws NotFoundException if updating non-existent project', async () => {
       prisma.project.findUnique.mockResolvedValue(null);
-      await expect(service.update('missing', { title: 'Test' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('missing', { title: 'Test' }),
+      ).rejects.toThrow(NotFoundException);
     });
+  });
+
+  it('saves a complete editorial reorder in one transaction', async () => {
+    await service.reorder(['second', 'first']);
+    expect(prisma.project.update).toHaveBeenNthCalledWith(1, {
+      where: { id: 'second' },
+      data: { homepageOrder: 0 },
+    });
+    expect(prisma.project.update).toHaveBeenNthCalledWith(2, {
+      where: { id: 'first' },
+      data: { homepageOrder: 1 },
+    });
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
   });
 
   describe('remove', () => {
@@ -194,12 +344,16 @@ describe('ProjectsService', () => {
 
       const result = await service.remove('proj-1');
       expect(result).toEqual({ ok: true });
-      expect(prisma.project.delete).toHaveBeenCalledWith({ where: { id: 'proj-1' } });
+      expect(prisma.project.delete).toHaveBeenCalledWith({
+        where: { id: 'proj-1' },
+      });
     });
 
     it('throws NotFoundException if deleting non-existent project', async () => {
       prisma.project.findUnique.mockResolvedValue(null);
-      await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('missing')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

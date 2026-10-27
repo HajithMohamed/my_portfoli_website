@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProjectStatus } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { AssetType, ProjectStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectDto } from './dto/project.dto';
 
@@ -11,7 +15,7 @@ export class ProjectsService {
     return this.prisma.project.findMany({
       where: { status: ProjectStatus.ACTIVE },
       include: this.includes(),
-      orderBy: [{ featured: 'desc' }, { updatedAt: 'desc' }],
+      orderBy: [{ homepageOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
@@ -24,7 +28,7 @@ export class ProjectsService {
 
   publicVisibility() {
     return this.prisma.project.findMany({
-      where: { githubUrl: { not: null } },
+      where: { githubUrl: { not: null }, status: ProjectStatus.ACTIVE },
       select: { id: true, githubUrl: true, status: true },
     });
   }
@@ -46,6 +50,7 @@ export class ProjectsService {
   }
 
   create(dto: ProjectDto) {
+    this.validateMedia(dto);
     return this.prisma.project.create({
       data: {
         title: dto.title,
@@ -57,7 +62,10 @@ export class ProjectsService {
         coverImage: dto.coverImage,
         category: dto.category,
         status: dto.status,
-        featured: dto.featured,
+        featured: dto.showOnHomepage ?? dto.featured,
+        showOnHomepage: dto.showOnHomepage ?? dto.featured ?? false,
+        showOnProjectsPage: dto.showOnProjectsPage ?? true,
+        homepageOrder: dto.homepageOrder,
         outcome: dto.outcome,
         media: dto.media?.length
           ? { create: dto.media.map((item, order) => ({ ...item, order })) }
@@ -71,6 +79,7 @@ export class ProjectsService {
   }
 
   async update(id: string, dto: Partial<ProjectDto>) {
+    this.validateMedia(dto);
     await this.ensure(id);
     return this.prisma.project.update({
       where: { id },
@@ -106,6 +115,15 @@ export class ProjectsService {
     return { ok: true };
   }
 
+  async reorder(ids: string[]) {
+    await this.prisma.$transaction(
+      ids.map((id, homepageOrder) =>
+        this.prisma.project.update({ where: { id }, data: { homepageOrder } }),
+      ),
+    );
+    return { ok: true };
+  }
+
   private projectFields(dto: Partial<ProjectDto>) {
     return {
       title: dto.title,
@@ -117,9 +135,27 @@ export class ProjectsService {
       coverImage: dto.coverImage,
       category: dto.category,
       status: dto.status,
-      featured: dto.featured,
+      featured: dto.showOnHomepage ?? dto.featured,
+      showOnHomepage: dto.showOnHomepage ?? dto.featured,
+      showOnProjectsPage: dto.showOnProjectsPage,
+      homepageOrder: dto.homepageOrder,
       outcome: dto.outcome,
     };
+  }
+
+  private validateMedia(dto: Partial<ProjectDto>) {
+    for (const item of dto.media ?? []) {
+      if (
+        item.type === AssetType.VIDEO &&
+        !/^https:\/\/res\.cloudinary\.com\/[^/]+\/video\/upload\//.test(
+          item.url,
+        )
+      ) {
+        throw new BadRequestException(
+          'Upload demo videos through the secured media studio',
+        );
+      }
+    }
   }
 
   private includes() {

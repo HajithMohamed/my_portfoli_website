@@ -10,7 +10,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { ProjectDto } from './dto/project.dto';
+import {
+  ProjectDto,
+  ReorderProjectsDto,
+  UpdateProjectDto,
+} from './dto/project.dto';
 import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
@@ -57,8 +61,15 @@ export class ProjectsController {
   @Patch('admin/projects/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() dto: Partial<ProjectDto>) {
+  update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(id, dto);
+  }
+
+  @Post('admin/projects/reorder')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  reorder(@Body() dto: ReorderProjectsDto) {
+    return this.projectsService.reorder(dto.ids);
   }
 
   @Delete('admin/projects/:id')

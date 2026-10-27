@@ -2,22 +2,22 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { 
-  Layers, 
-  BookOpen, 
-  Code2, 
-  Sparkles, 
-  ArrowLeft, 
-  ArrowRight, 
-  ExternalLink, 
-  Github, 
-  Globe2, 
-  ShieldCheck, 
-  Activity, 
+import { ProjectMediaGallery } from "./project-media-gallery";
+import {
+  Layers,
+  BookOpen,
+  Code2,
+  Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  ExternalLink,
+  Github,
+  Globe2,
+  ShieldCheck,
+  Activity,
   CheckCircle2,
   Calendar,
-  Box
+  Box,
 } from "lucide-react";
 import type { Project, CaseStudySection } from "@/lib/types";
 import { ProjectArchitectureVisualizer } from "./project-architecture-visualizer";
@@ -43,10 +43,14 @@ export function ProjectDossierView({
   prevProject,
   nextProject,
 }: ProjectDossierViewProps) {
-  const [activeTab, setActiveTab] = useState<"architecture" | "case-study" | "tech-stack" | "impact">("architecture");
+  const [activeTab, setActiveTab] = useState<
+    "architecture" | "case-study" | "tech-stack" | "impact"
+  >("architecture");
 
   // Architecture indicators tailored per project
-  const isAcademic = status.toUpperCase().includes("ACADEMIC") || (project.category && project.category.toUpperCase().includes("ACADEMIC"));
+  const isAcademic =
+    status.toUpperCase().includes("ACADEMIC") ||
+    (project.category && project.category.toUpperCase().includes("ACADEMIC"));
   const telemetryMetrics = [
     {
       label: "Architecture Pattern",
@@ -72,7 +76,9 @@ export function ProjectDossierView({
     {
       label: "Project Classification",
       value: isAcademic ? "Academic Prototype" : year,
-      detail: isAcademic ? "Coursework system prototype" : "Verified Project Implementation",
+      detail: isAcademic
+        ? "Coursework system prototype"
+        : "Verified Project Implementation",
       icon: Calendar,
       color: "text-amber-400",
     },
@@ -139,25 +145,12 @@ export function ProjectDossierView({
           {project.description}
         </p>
 
-        {project.coverImage ? (
-          <figure className="mt-8 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-            <div className="relative aspect-[16/8] w-full">
-              <Image
-                src={project.coverImage}
-                alt={project.coverImageAlt ?? project.title}
-                fill
-                sizes="(max-width: 1100px) 100vw, 1100px"
-                className="object-cover"
-                priority
-              />
-            </div>
-            {project.coverImageKind === "concept" ? (
-              <figcaption className="p-3 border-t border-white/[0.06] font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground text-center">
-                Concept illustration generated from repository architecture and README specification.
-              </figcaption>
-            ) : null}
-          </figure>
-        ) : null}
+        <div className="mt-8">
+          <ProjectMediaGallery
+            key={`${project.id}:${project.coverImage ?? ""}`}
+            project={project}
+          />
+        </div>
 
         {/* Telemetry Metrics Grid */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -299,12 +292,17 @@ export function ProjectDossierView({
       )}
 
       {activeTab === "case-study" && sections.length > 0 && (
-        <section aria-label="Case Study Sections" className="grid gap-6 md:grid-cols-2">
+        <section
+          aria-label="Case Study Sections"
+          className="grid gap-6 md:grid-cols-2"
+        >
           {sections.map((section, index) => (
             <div
               key={`${section.heading}-${index}`}
               className={`rounded-2xl border border-white/[0.08] bg-surface/80 p-6 backdrop-blur-xl ${
-                index === sections.length - 1 && sections.length % 2 === 1 ? "md:col-span-2" : ""
+                index === sections.length - 1 && sections.length % 2 === 1
+                  ? "md:col-span-2"
+                  : ""
               }`}
             >
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
@@ -322,7 +320,10 @@ export function ProjectDossierView({
       )}
 
       {activeTab === "tech-stack" && (
-        <section aria-label="Technology Specification" className="rounded-2xl border border-white/[0.08] bg-surface/80 p-6 sm:p-8 backdrop-blur-xl space-y-6">
+        <section
+          aria-label="Technology Specification"
+          className="rounded-2xl border border-white/[0.08] bg-surface/80 p-6 sm:p-8 backdrop-blur-xl space-y-6"
+        >
           <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
             <Code2 size={13} />
             <span>FULL PRODUCTION DEPENDENCY MATRIX</span>
@@ -344,7 +345,10 @@ export function ProjectDossierView({
       )}
 
       {activeTab === "impact" && project.outcome && (
-        <section aria-label="Engineering Impact" className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.03] p-6 sm:p-8 backdrop-blur-md space-y-3">
+        <section
+          aria-label="Engineering Impact"
+          className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.03] p-6 sm:p-8 backdrop-blur-md space-y-3"
+        >
           <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber-400">
             <Sparkles size={13} />
             <span>ENGINEERING IMPACT &amp; VERIFIED OUTCOMES</span>
@@ -366,7 +370,8 @@ export function ProjectDossierView({
             Architecting a high-throughput system?
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Let&apos;s formulate architectural scope, database schemas, and microservice topologies for your enterprise product.
+            Let&apos;s formulate architectural scope, database schemas, and
+            microservice topologies for your enterprise product.
           </p>
         </div>
         <Link
@@ -404,7 +409,10 @@ export function ProjectDossierView({
                 </div>
                 <div className="mt-4 flex items-center gap-1 font-mono text-xs text-cyan">
                   <span>Read Dossier</span>
-                  <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight
+                    size={12}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
                 </div>
               </Link>
             ))}

@@ -274,8 +274,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
     }
 
     const name = stringValue(selected.name) ?? 'repository';
-    const fullName =
-      stringValue(selected.fullName) ?? `${username}/${name}`;
+    const fullName = stringValue(selected.fullName) ?? `${username}/${name}`;
     const activity = this.repoActivity(
       stringValue(selected.pushedAt) ?? stringValue(selected.updatedAt),
     );
@@ -359,8 +358,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         `https://api.github.com/users/${username}/events/public?per_page=50`,
       ).catch(() => [] as GithubEvent[]);
 
-      const sourceRepos = publicOwnerRepos(repos, username)
-        .sort((a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at));
+      const sourceRepos = publicOwnerRepos(repos, username).sort(
+        (a, b) => timestamp(b.pushed_at) - timestamp(a.pushed_at),
+      );
       const currentRepo = await this.resolveCurrentRepoStatus(sourceRepos);
 
       const languagePairs = await Promise.all(
@@ -408,9 +408,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
       // Public API has a small hourly allowance. Preserve complete repository
       // counts even when optional README/release enrichment is rate limited.
-      this.enrichmentBudget = this.getGithubToken()
-        ? 1000
-        : 36;
+      this.enrichmentBudget = this.getGithubToken() ? 1000 : 36;
       const repositories: RepositoryInsight[] = [];
       for (let offset = 0; offset < sourceRepos.length; offset += 4) {
         repositories.push(
@@ -523,50 +521,54 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       if (!response.ok) {
         throw new Error(`GitHub GraphQL failed: ${response.status}`);
       }
-    const json = (await response.json()) as {
-      data?: {
-        user?: {
-          contributionsCollection?: {
-            contributionCalendar?: {
-              totalContributions: number;
-              weeks: {
-                contributionDays: { date: string; contributionCount: number }[];
-              }[];
+      const json = (await response.json()) as {
+        data?: {
+          user?: {
+            contributionsCollection?: {
+              contributionCalendar?: {
+                totalContributions: number;
+                weeks: {
+                  contributionDays: {
+                    date: string;
+                    contributionCount: number;
+                  }[];
+                }[];
+              };
             };
           };
         };
       };
-    };
-    const raw = json.data?.user?.contributionsCollection?.contributionCalendar;
-    if (!raw) {
-      return null;
-    }
+      const raw =
+        json.data?.user?.contributionsCollection?.contributionCalendar;
+      if (!raw) {
+        return null;
+      }
 
-    const max = Math.max(
-      1,
-      ...raw.weeks.flatMap((week) =>
-        week.contributionDays.map((day) => day.contributionCount),
-      ),
-    );
-    const level = (count: number): 0 | 1 | 2 | 3 | 4 => {
-      if (count === 0) return 0;
-      const ratio = count / max;
-      if (ratio > 0.66) return 4;
-      if (ratio > 0.33) return 3;
-      if (ratio > 0.12) return 2;
-      return 1;
-    };
+      const max = Math.max(
+        1,
+        ...raw.weeks.flatMap((week) =>
+          week.contributionDays.map((day) => day.contributionCount),
+        ),
+      );
+      const level = (count: number): 0 | 1 | 2 | 3 | 4 => {
+        if (count === 0) return 0;
+        const ratio = count / max;
+        if (ratio > 0.66) return 4;
+        if (ratio > 0.33) return 3;
+        if (ratio > 0.12) return 2;
+        return 1;
+      };
 
-    return {
-      totalContributions: raw.totalContributions,
-      weeks: raw.weeks.map((week) => ({
-        days: week.contributionDays.map((day) => ({
-          date: day.date,
-          count: day.contributionCount,
-          level: level(day.contributionCount),
+      return {
+        totalContributions: raw.totalContributions,
+        weeks: raw.weeks.map((week) => ({
+          days: week.contributionDays.map((day) => ({
+            date: day.date,
+            count: day.contributionCount,
+            level: level(day.contributionCount),
+          })),
         })),
-      })),
-    };
+      };
     } catch (error) {
       this.logger.warn(
         `Failed to fetch contribution calendar: ${error instanceof Error ? error.message : 'unknown'}`,
@@ -753,13 +755,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       const caseStudy = await this.buildCaseStudy(payload);
       await this.prisma.project.upsert({
         where: { slug: payload.slug },
-        update: {
-          githubUrl: payload.githubUrl,
-          liveUrl: payload.liveUrl,
-          description:
-            payload.description ??
-            'GitHub-synced project awaiting admin refinement.',
-        },
+        // Re-approving an import must never overwrite an editor's changes or
+        // republish a held project. Source suggestions are reviewed separately.
+        update: {},
         create: {
           title: payload.title,
           slug: payload.slug,
@@ -771,6 +769,8 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
           liveUrl: payload.liveUrl,
           category: payload.category ?? 'GitHub',
           status: ProjectStatus.DRAFT,
+          showOnHomepage: false,
+          showOnProjectsPage: false,
           caseStudy: caseStudy.length ? { create: caseStudy } : undefined,
         },
       });
@@ -959,7 +959,10 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
         figma: 'Tools',
       };
 
-      const totalBytes = Object.values(languages).reduce((sum, b) => sum + b, 0);
+      const totalBytes = Object.values(languages).reduce(
+        (sum, b) => sum + b,
+        0,
+      );
 
       for (const [langName, bytes] of Object.entries(languages)) {
         const lower = langName.toLowerCase();
