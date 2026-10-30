@@ -69,4 +69,20 @@ describe("CMS authority over public projects", () => {
     expect(result[0].coverImage).toBeNull();
     expect(result[0].caseStudy).toEqual([]);
   });
+
+  it("handles partial or malformed github repository metadata without throwing", () => {
+    const partialGithub = {
+      currentRepo: { name: "partial-only" },
+      contributionData: {
+        repositories: [{ name: "missing-url-and-fullname" }],
+      },
+    } as unknown as GithubSummary;
+
+    const result = projectsFromGithub(partialGithub, [
+      project("safe-project", { githubUrl: "https://github.com/owner/safe-project" }),
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].isCurrent).toBe(false);
+  });
 });

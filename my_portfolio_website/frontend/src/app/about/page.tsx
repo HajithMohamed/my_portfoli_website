@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { CommandFooter } from "@/components/shell/command-footer";
-import { getHomeData } from "@/lib/public-data";
+import { getAboutData } from "@/lib/public-data";
 import { PERSONAL_IDENTITY } from "@/lib/identity";
 
 export const metadata = {
@@ -99,7 +99,7 @@ const CORE_PILLARS = [
 ];
 
 export default async function AboutPage() {
-  const { profile, resume, skills } = await getHomeData();
+  const { profile, resume } = await getAboutData();
 
   return (
     <div className="relative min-h-screen selection:bg-cyan selection:text-slate-950">

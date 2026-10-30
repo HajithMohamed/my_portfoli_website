@@ -27,8 +27,8 @@ function useProfilePortrait() {
         const response = await fetch("/bff/profile", { signal: controller.signal });
         if (!response.ok) return;
 
-        const profile = (await response.json()) as { profileImageUrl?: unknown };
-        if (typeof profile.profileImageUrl === "string" && profile.profileImageUrl.trim()) {
+        const profile = (await response.json()) as { profileImageUrl?: unknown } | null;
+        if (typeof profile?.profileImageUrl === "string" && profile.profileImageUrl.trim()) {
           setPortraitUrl(profile.profileImageUrl);
         }
       } catch (error) {
@@ -53,7 +53,7 @@ function useProfilePortrait() {
 export function GlobalSystemBackground() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin")) {
     return null;
   }
 

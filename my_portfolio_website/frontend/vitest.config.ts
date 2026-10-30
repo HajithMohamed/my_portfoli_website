@@ -19,6 +19,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       react: path.resolve(__dirname, "../node_modules/react"),
       "react-dom": path.resolve(__dirname, "../node_modules/react-dom"),
+      "server-only": path.resolve(
+        __dirname,
+        "../node_modules/next/dist/compiled/server-only/empty.js",
+      ),
     },
   },
 });

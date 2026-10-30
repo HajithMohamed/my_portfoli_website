@@ -20,7 +20,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const rafRef = useRef<number>(0);
   const prefersReduced = useReducedMotion();
 
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = Boolean(pathname?.startsWith("/admin"));
   const shouldDisable = isAdmin || prefersReduced;
 
   useEffect(() => {
