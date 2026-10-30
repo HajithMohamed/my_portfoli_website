@@ -1,4 +1,4 @@
-﻿import type { BlogPost, GithubSummary, Project } from "./types";
+import type { BlogPost, GithubSummary, Project } from "./types";
 import { projectStories } from "./project-stories";
 
 export function repositorySlug(name: string): string {
@@ -44,29 +44,41 @@ export function projectsFromGithub(
   github: GithubSummary,
   cmsProjects: Project[] = [],
 ): Project[] {
-  const repos = github.contributionData?.repositories ?? [];
+  const repos = Array.isArray(github?.contributionData?.repositories)
+    ? github.contributionData.repositories
+    : [];
   const current = (
-    github.currentRepo ?? github.contributionData?.currentRepo
-  )?.fullName.toLowerCase();
-  return cmsProjects
-    .filter((project) => project.status === "ACTIVE")
+    github?.currentRepo ?? github?.contributionData?.currentRepo
+  )?.fullName?.toLowerCase();
+  const safeProjects = Array.isArray(cmsProjects) ? cmsProjects : [];
+  return safeProjects
+    .filter((project) => project?.status === "ACTIVE")
     .map((project) => {
-      const repo = repos.find(
-        (item) =>
-          item.url.replace(/\/$/, "").toLowerCase() ===
-          project.githubUrl?.replace(/\/$/, "").toLowerCase(),
-      );
-      const story = projectStories.find(
-        (item) =>
-          `https://github.com/${item.repository}`.toLowerCase() ===
-          project.githubUrl?.replace(/\/$/, "").toLowerCase(),
-      );
+      const normalizedGithubUrl = project.githubUrl
+        ?.replace(/\/$/, "")
+        .toLowerCase();
+      const repo = normalizedGithubUrl
+        ? repos.find(
+            (item) =>
+              item?.url?.replace(/\/$/, "").toLowerCase() ===
+              normalizedGithubUrl,
+          )
+        : undefined;
+      const story = normalizedGithubUrl
+        ? projectStories.find(
+            (item) =>
+              `https://github.com/${item.repository}`.toLowerCase() ===
+              normalizedGithubUrl,
+          )
+        : undefined;
       const coverImage = project.coverImage;
       return {
         ...project,
         dedupeKey: project.id,
         repositoryFullName: repo?.fullName,
-        isCurrent: Boolean(repo && repo.fullName.toLowerCase() === current),
+        isCurrent: Boolean(
+          current && repo?.fullName && repo.fullName.toLowerCase() === current,
+        ),
         isHosted: Boolean(publicWebsite(project.liveUrl)),
         liveUrl: publicWebsite(project.liveUrl),
         isProductionReady: repo?.isProductionReady ?? false,

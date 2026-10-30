@@ -3,22 +3,34 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-vi.mock("@/lib/public-data", () => ({
-  getHomeData: async () => ({
+const { getAboutDataMock, getHomeDataMock } = vi.hoisted(() => ({
+  getAboutDataMock: vi.fn(async () => ({
     profile: {
       name: "Mohamed Hajith",
+      title: "Full-Stack Software Developer",
+      tagline: "Building practical web applications",
       email: "ahammedlebbehajith@gmail.com",
       location: "Batticaloa, Sri Lanka",
       bio: "Software Engineer",
+      philosophy: "Architecture first",
       availabilityStatus: "Available",
+      currentlyExploring: [],
+      socialLinks: [],
     },
-    resume: { fileUrl: "https://example.com/cv.pdf" },
-    skills: [],
-    certificates: [],
-    projects: [],
-    blogs: [],
-    github: { totalContributions: 450, currentStreak: 12, publicRepos: 49 },
-  }),
+    resume: {
+      id: "cv-1",
+      title: "Mohamed Hajith CV",
+      fileUrl: "https://example.com/cv.pdf",
+      version: 1,
+      isActive: true,
+    },
+  })),
+  getHomeDataMock: vi.fn(),
+}));
+
+vi.mock("@/lib/public-data", () => ({
+  getAboutData: getAboutDataMock,
+  getHomeData: getHomeDataMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -36,6 +48,8 @@ import AboutPage from "./page";
 describe("AboutPage Component", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    getAboutDataMock.mockClear();
+    getHomeDataMock.mockClear();
   });
 
   afterEach(() => {
@@ -82,5 +96,14 @@ describe("AboutPage Component", () => {
 
     expect(hrefs).toContain("/start-project");
     expect(hrefs).toContain("/certificates");
+    expect(hrefs).toContain("/api/cv");
+  });
+
+  it("loads isolated About data without invoking full home/GitHub aggregation", async () => {
+    const Component = await AboutPage();
+    render(Component);
+
+    expect(getAboutDataMock).toHaveBeenCalledTimes(1);
+    expect(getHomeDataMock).not.toHaveBeenCalled();
   });
 });

@@ -291,6 +291,11 @@ export type MediaAsset = {
   order?: number;
 };
 
+export type AboutData = {
+  profile: Profile;
+  resume: CvAsset | null;
+};
+
 export type HomeData = {
   profile: Profile;
   skills: Skill[];

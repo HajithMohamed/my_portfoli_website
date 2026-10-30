@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { getPublicGithub } from "./github-public";
 import { PERSONAL_IDENTITY } from "./identity";
 import {
@@ -14,6 +15,7 @@ import {
 import { projectsFromGithub } from "./portfolio-mapping";
 import { absoluteApiUrl } from "./utils";
 import type {
+  AboutData,
   Certificate,
   BlogPost,
   CvAsset,
@@ -26,21 +28,107 @@ import type {
   Testimonial,
 } from "./types";
 
+const BACKEND_FETCH_TIMEOUT_MS = 8000;
+
+function isDynamicServerError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    (error as { digest?: unknown }).digest === "DYNAMIC_SERVER_USAGE"
+  );
+}
+
+function isMissingIncrementalCacheError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("incrementalCache missing in unstable_cache")
+  );
+}
+
+function normalizeBackendData<T>(data: unknown, fallback: T): T {
+  if (data === null || data === undefined) {
+    return fallback;
+  }
+  if (Array.isArray(fallback)) {
+    return (Array.isArray(data) ? data : fallback) as T;
+  }
+  if (typeof fallback === "object" && fallback !== null) {
+    return (
+      typeof data === "object" && !Array.isArray(data) ? data : fallback
+    ) as T;
+  }
+  if (fallback === null) {
+    return (
+      typeof data === "object" && !Array.isArray(data) ? data : fallback
+    ) as T;
+  }
+  return data as T;
+}
+
+const getCachedBackendJson = unstable_cache(
+  async (url: string): Promise<{ data: unknown }> => {
+    const response = await fetch(url, {
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(BACKEND_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}`);
+    }
+    const data: unknown = await response.json();
+    if (data === null || data === undefined) {
+      throw new Error("Backend returned empty/null JSON");
+    }
+    return { data };
+  },
+  ["hz-labs-backend-json"],
+  { revalidate: 60 },
+);
+
 async function fetchBackend<T>(path: string, fallback: T): Promise<T> {
+  const url = absoluteApiUrl(path);
+  const isNoStore = path.startsWith("/projects") || path.startsWith("/blogs");
+
   try {
-    const response = await fetch(absoluteApiUrl(path), {
-      ...(path.startsWith("/projects") || path.startsWith("/blogs")
+    if (!isNoStore) {
+      try {
+        const cached = await getCachedBackendJson(url);
+        return normalizeBackendData(cached.data, fallback);
+      } catch (error) {
+        if (isDynamicServerError(error)) {
+          throw error;
+        }
+        if (!isMissingIncrementalCacheError(error)) {
+          return fallback;
+        }
+      }
+    }
+
+    const response = await fetch(url, {
+      ...(isNoStore
         ? { cache: "no-store" as const }
         : { next: { revalidate: 60 } }),
       headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(BACKEND_FETCH_TIMEOUT_MS),
     });
-    return response.ok ? ((await response.json()) as T) : fallback;
-  } catch {
+    if (!response.ok) {
+      return fallback;
+    }
+    const data: unknown = await response.json();
+    return normalizeBackendData(data, fallback);
+  } catch (error) {
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
     return fallback;
   }
 }
 
-function profileForPortfolio(candidate: Profile): Profile {
+function profileForPortfolio(candidate?: Partial<Profile> | null): Profile {
+  const safeCandidate =
+    candidate && typeof candidate === "object" && !Array.isArray(candidate)
+      ? candidate
+      : {};
   const githubLink = {
     label: "GitHub",
     url: PERSONAL_IDENTITY.githubUrl,
@@ -51,8 +139,13 @@ function profileForPortfolio(candidate: Profile): Profile {
     url: PERSONAL_IDENTITY.linkedInUrl,
     icon: "linkedin",
   };
-  const otherLinks = (candidate.socialLinks ?? []).filter(
+  const rawLinks = Array.isArray(safeCandidate.socialLinks)
+    ? safeCandidate.socialLinks
+    : [];
+  const otherLinks = rawLinks.filter(
     (link) =>
+      typeof link?.url === "string" &&
+      link.url.trim().length > 0 &&
       link.url.replace(/\/$/, "").toLowerCase() !==
         PERSONAL_IDENTITY.githubUrl.toLowerCase() &&
       !link.url.toLowerCase().includes("linkedin.com"),
@@ -60,7 +153,10 @@ function profileForPortfolio(candidate: Profile): Profile {
 
   return {
     ...fallbackProfile,
-    ...candidate,
+    ...safeCandidate,
+    currentlyExploring: Array.isArray(safeCandidate.currentlyExploring)
+      ? safeCandidate.currentlyExploring
+      : fallbackProfile.currentlyExploring,
     name: PERSONAL_IDENTITY.name,
     title: PERSONAL_IDENTITY.title,
     bio: PERSONAL_IDENTITY.bio,
@@ -72,11 +168,15 @@ function profileForPortfolio(candidate: Profile): Profile {
   };
 }
 
-function usableGithub(summary: GithubSummary): boolean {
+function usableGithub(summary?: GithubSummary | null): boolean {
+  if (!summary || typeof summary !== "object") {
+    return false;
+  }
   return Boolean(
-    summary.contributionData?.repositories?.length ||
+    (Array.isArray(summary.contributionData?.repositories) &&
+      summary.contributionData.repositories.length > 0) ||
     summary.currentRepo ||
-    summary.recentRepos.length,
+    (Array.isArray(summary.recentRepos) && summary.recentRepos.length > 0),
   );
 }
 
@@ -207,15 +307,19 @@ function inferCategory(techName: string): string {
 
 export function syncSkillsWithGithub(
   baseSkills: Skill[],
-  github: GithubSummary,
+  github?: GithubSummary | null,
 ): Skill[] {
   const skillMap = new Map<string, Skill>();
-  baseSkills.forEach((s) => skillMap.set(s.name.toLowerCase(), { ...s }));
+  (Array.isArray(baseSkills) ? baseSkills : []).forEach((s) => {
+    if (typeof s?.name === "string" && s.name.trim()) {
+      skillMap.set(s.name.toLowerCase(), { ...s });
+    }
+  });
 
   // Extract all languages from github.languages or repositories
   const githubLanguages: Array<{ name: string; weight: number }> = [];
   if (
-    github.languages &&
+    github?.languages &&
     typeof github.languages === "object" &&
     !Array.isArray(github.languages)
   ) {
@@ -225,9 +329,11 @@ export function syncSkillsWithGithub(
   }
 
   // Also collect languages from repositories
-  const repos = github.contributionData?.repositories ?? [];
+  const repos = Array.isArray(github?.contributionData?.repositories)
+    ? github.contributionData.repositories
+    : [];
   repos.forEach((repo) => {
-    if (repo.language) {
+    if (repo?.language) {
       const existing = githubLanguages.find(
         (l) => l.name.toLowerCase() === repo.language?.toLowerCase(),
       );
@@ -269,8 +375,11 @@ export function syncSkillsWithGithub(
   });
 
   // Add detected technologies/topics from GitHub
-  const detectedTech = github.contributionData?.technologies ?? [];
+  const detectedTech = Array.isArray(github?.contributionData?.technologies)
+    ? github.contributionData.technologies
+    : [];
   detectedTech.forEach((tech) => {
+    if (typeof tech !== "string" || !tech.trim()) return;
     const key = tech.toLowerCase();
     if (!skillMap.has(key)) {
       skillMap.set(key, {
@@ -288,6 +397,23 @@ export function syncSkillsWithGithub(
     if (a.featured !== b.featured) return a.featured ? -1 : 1;
     return b.proficiency - a.proficiency;
   });
+}
+
+export async function getAboutData(): Promise<AboutData> {
+  const [profile, resume] = await Promise.all([
+    fetchBackend<Profile>("/profile", fallbackProfile),
+    fetchBackend<CvAsset | null>("/resume/latest", fallbackResume),
+  ]);
+
+  const normalizedResume =
+    resume && typeof resume === "object" && typeof resume.fileUrl === "string"
+      ? resume
+      : fallbackResume;
+
+  return {
+    profile: profileForPortfolio(profile),
+    resume: normalizedResume,
+  };
 }
 
 /**
@@ -324,21 +450,24 @@ export async function getHomeData(): Promise<HomeData> {
     (usableGithub(backendGithub) ? backendGithub : fallbackGithub);
   const projects = projectsFromGithub(github, cmsProjects);
 
-  const dynamicSkills = syncSkillsWithGithub(
-    skills.length ? skills : fallbackSkills,
-    github,
-  );
+  const safeSkills = Array.isArray(skills) && skills.length ? skills : fallbackSkills;
+  const dynamicSkills = syncSkillsWithGithub(safeSkills, github);
+  const safeBlogs = Array.isArray(blogs) ? blogs : [];
+  const normalizedResume =
+    resume && typeof resume === "object" && typeof resume.fileUrl === "string"
+      ? resume
+      : fallbackResume;
 
   return {
     profile: profileForPortfolio(profile),
     skills: dynamicSkills,
     projects,
-    blogs: blogs.filter((post) => post.status === "PUBLISHED"),
-    resume,
+    blogs: safeBlogs.filter((post) => post?.status === "PUBLISHED"),
+    resume: normalizedResume,
     github,
-    testimonials,
-    certificates,
-    gallery,
+    testimonials: Array.isArray(testimonials) ? testimonials : fallbackTestimonials,
+    certificates: Array.isArray(certificates) ? certificates : fallbackCertificates,
+    gallery: Array.isArray(gallery) ? gallery : fallbackGallery,
   };
 }
 

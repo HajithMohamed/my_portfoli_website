@@ -34,6 +34,15 @@ type Release = {
   tag_name: string;
 };
 
+function isDynamicServerError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'digest' in error &&
+    (error as { digest?: unknown }).digest === 'DYNAMIC_SERVER_USAGE'
+  );
+}
+
 function getGithubAuthToken(): string | undefined {
   const envToken = process.env.GITHUB_TOKEN?.trim();
   if (envToken) return envToken;
@@ -92,7 +101,10 @@ async function loadPublicGithub(): Promise<GithubSummary> {
           break;
         }
       }
-    } catch {
+    } catch (error) {
+      if (isDynamicServerError(error)) {
+        throw error;
+      }
       // Fall back to public user repos if token lacks permissions
     }
   }
@@ -324,7 +336,10 @@ async function loadPublicGithub(): Promise<GithubSummary> {
 export async function getPublicGithub(): Promise<GithubSummary | null> {
   try {
     return await loadPublicGithub();
-  } catch {
+  } catch (error) {
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
     return null;
   }
 }
