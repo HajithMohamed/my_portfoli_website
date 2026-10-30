@@ -9,15 +9,15 @@ import type { NextConfig } from "next";
 // 404 (often accompanied by DNS_HOSTNAME_RESOLVED_PRIVATE). Fail the production
 // build early instead of publishing that broken configuration.
 function getBackendOrigin(): string | null {
-  const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  const rawUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
   const isVercel = process.env.VERCEL === "1";
 
-  if (!configuredUrl) {
+  if (!rawUrl) {
     if (isVercel) {
       console.warn(
         "\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL is not set in Vercel environment variables.\n" +
         "   The /bff proxy to the backend is disabled. To connect your live backend,\n" +
-        "   go to Vercel Project Settings > Environment Variables, add NEXT_PUBLIC_API_URL=https://your-api.onrender.com,\n" +
+        "   go to Vercel Project Settings > Environment Variables, add NEXT_PUBLIC_API_URL=https://your-backend.vercel.app,\n" +
         "   and redeploy.\n"
       );
       return null;
@@ -25,11 +25,17 @@ function getBackendOrigin(): string | null {
     return "http://localhost:4000";
   }
 
+  const candidateUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(rawUrl)
+    ? rawUrl
+    : rawUrl.startsWith("localhost") || rawUrl.startsWith("127.0.0.1")
+      ? `http://${rawUrl}`
+      : `https://${rawUrl}`;
+
   let url: URL;
   try {
-    url = new URL(configuredUrl);
+    url = new URL(candidateUrl);
   } catch {
-    console.warn(`\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL "${configuredUrl}" is invalid. Expected a full URL with https://.\n`);
+    console.warn(`\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL "${rawUrl}" is invalid. Expected a full URL with https://.\n`);
     return isVercel ? null : "http://localhost:4000";
   }
 
@@ -42,12 +48,39 @@ function getBackendOrigin(): string | null {
     /^192\.168(?:\.\d{1,3}){2}$/.test(url.hostname) ||
     /^172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}$/.test(url.hostname);
 
-  if (isVercel && (url.protocol !== "https:" || privateHost || (url.pathname !== "/" && url.pathname !== ""))) {
+  if (isVercel && (url.protocol !== "https:" || privateHost)) {
     console.warn(
-      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${configuredUrl}") points to a private or localhost origin.\n` +
-      "   Vercel cannot proxy to private origins. Disabling /bff proxy until a public HTTPS URL is set.\n"
+      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${rawUrl}") must use https:// and a public hostname on Vercel.\n` +
+      "   Vercel cannot proxy to HTTP or private/localhost origins. Disabling /bff proxy until a public HTTPS URL is set.\n"
     );
     return null;
+  }
+
+  const frontendHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim().toLowerCase();
+  if (
+    isVercel &&
+    (url.hostname.toLowerCase() === "www.hzlabs.studio" ||
+      url.hostname.toLowerCase() === "hzlabs.studio" ||
+      (frontendHost && url.hostname.toLowerCase() === frontendHost))
+  ) {
+    console.warn(
+      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${rawUrl}") points to the frontend domain itself rather than your NestJS backend deployment.\n` +
+      "   Disabling /bff self-proxy loop. Set NEXT_PUBLIC_API_URL to your backend Production domain (e.g. https://your-backend.vercel.app).\n"
+    );
+    return null;
+  }
+
+  if (isVercel && url.hostname.endsWith(".vercel.app") && url.hostname.includes("-git-")) {
+    console.warn(
+      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${rawUrl}") uses a Vercel Git branch preview alias, which is usually blocked by Vercel Authentication.\n` +
+      "   Prefer your backend project's public Production domain (e.g. https://<backend-project>.vercel.app).\n"
+    );
+  }
+
+  if (url.pathname !== "/" && url.pathname !== "") {
+    console.warn(
+      `\n⚠️ [DEPLOYMENT NOTICE] NEXT_PUBLIC_API_URL ("${rawUrl}") includes path "${url.pathname}". Normalizing /bff proxy destination to origin "${url.origin}".\n`
+    );
   }
 
   return url.origin;

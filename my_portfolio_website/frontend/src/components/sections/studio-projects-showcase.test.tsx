@@ -1,5 +1,6 @@
-﻿import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import styles from "@/components/projects/project-views.module.css";
 import { StudioProjectsShowcase } from "./studio-projects-showcase";
 import type { Project } from "@/lib/types";
 
@@ -34,6 +35,10 @@ describe("Homepage project selection", () => {
         .getByRole("link", { name: /Case study for Project first/i })
         .getAttribute("href"),
     ).toBe("/projects/first");
+    const cards = screen.getAllByRole("article");
+    expect(cards).toHaveLength(2);
+    expect(cards[0].className).toContain(styles.card);
+    expect(cards[0].className).not.toContain(styles.lead);
   });
 
   it("does not substitute unfeatured, held, or explicitly hidden projects", () => {

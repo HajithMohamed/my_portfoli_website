@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -36,9 +36,9 @@ export function StudioProjectsShowcase({
         </Link>
       </div>
       {visible.length > 0 ? (
-        <div className={styles.projectList}>
+        <div className={styles.grid}>
           {visible.map((project) => (
-            <StudioProjectCard key={project.id} project={project} lead />
+            <StudioProjectCard key={project.id} project={project} />
           ))}
         </div>
       ) : (

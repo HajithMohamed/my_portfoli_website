@@ -127,6 +127,7 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
       this.configService.get<string>('GITHUB_TOKEN')?.trim() ||
       process.env.GITHUB_TOKEN?.trim();
     if (token) return token;
+    if (process.env.VERCEL === '1') return undefined;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { execSync } = require('node:child_process');
@@ -148,7 +149,10 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
 
   // ---- scheduling ----------------------------------------------------------
 
-  async onApplicationBootstrap() {
+  onApplicationBootstrap() {
+    if (process.env.VERCEL === '1') {
+      return;
+    }
     void this.initializeSync();
   }
 

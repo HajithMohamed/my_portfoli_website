@@ -21,11 +21,17 @@ async function bootstrap() {
   // never reach this list. It still names the production frontend explicitly rather than
   // trusting FRONTEND_URL alone, so that a direct cross-origin call keeps
   // working when those vars are unset on the host — which is the case today.
-  const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'http://localhost:3000',
-    'http://localhost:3001',
-  ].filter(Boolean) as string[];
+  const allowedOrigins = Array.from(
+    new Set(
+      [
+        process.env.FRONTEND_URL?.trim(),
+        'https://www.hzlabs.studio',
+        'https://hzlabs.studio',
+        'http://localhost:3000',
+        'http://localhost:3001',
+      ].filter(Boolean) as string[],
+    ),
+  );
 
   app.enableCors({
     origin: allowedOrigins,

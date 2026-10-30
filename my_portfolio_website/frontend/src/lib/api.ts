@@ -74,6 +74,58 @@ export function bffUrl(path: string): string {
   return `${BFF_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export function formatBffError(
+  status: number,
+  bodyText: string,
+  responseUrl?: string,
+): string {
+  const trimmed = bodyText.trim();
+  const isHtml = /^<!doctype html|^<html/i.test(trimmed);
+
+  if (
+    trimmed.includes("Protected by Vercel Authentication") ||
+    responseUrl?.includes("vercel.com/sso-api")
+  ) {
+    return (
+      "Backend deployment is blocked by Vercel Authentication. " +
+      "Set NEXT_PUBLIC_API_URL to your backend's public Production domain (e.g. https://<backend-project>.vercel.app) rather than a -git- branch preview URL, then redeploy."
+    );
+  }
+
+  if (status === 404 && isHtml) {
+    return (
+      "Backend proxy (/bff) returned 404. " +
+      "Verify NEXT_PUBLIC_API_URL is set to your public HTTPS backend origin in Vercel Environment Variables and redeploy the frontend."
+    );
+  }
+
+  if (trimmed) {
+    try {
+      const parsed = JSON.parse(trimmed) as {
+        message?: string | string[];
+        hint?: string;
+      };
+      const baseMessage = Array.isArray(parsed.message)
+        ? parsed.message.join(". ")
+        : parsed.message;
+      if (baseMessage && parsed.hint) {
+        return `${baseMessage} — ${parsed.hint}`;
+      }
+      if (baseMessage) {
+        return baseMessage;
+      }
+    } catch {
+      // Not JSON; handle HTML or plain text below.
+    }
+  }
+
+  if (isHtml) {
+    return `Backend service returned an unexpected HTML response (HTTP ${status}). Verify your backend deployment and DATABASE_URL configuration.`;
+  }
+
+  return trimmed || `Backend request failed (HTTP ${status}).`;
+}
+
 /**
  * Authenticated admin request. Auth rides on the HTTP-only session cookie
  * (credentials: "include") — there is no access token to pass around anymore.
@@ -87,9 +139,16 @@ export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T
       ...init?.headers,
     },
   });
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
   const text = await response.text();
+  if (!response.ok) {
+    throw new Error(formatBffError(response.status, text, response.url));
+  }
+  const contentType = response.headers.get("content-type") ?? "";
+  if (
+    contentType.includes("text/html") ||
+    /^<!doctype html|^<html/i.test(text.trim())
+  ) {
+    throw new Error(formatBffError(response.status, text, response.url));
+  }
   return text ? (JSON.parse(text) as T) : (undefined as T);
 }

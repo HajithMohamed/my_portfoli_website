@@ -112,6 +112,11 @@ async function fetchBackend<T>(path: string, fallback: T): Promise<T> {
       signal: AbortSignal.timeout(BACKEND_FETCH_TIMEOUT_MS),
     });
     if (!response.ok) {
+      if (isNoStore && process.env.NODE_ENV !== "test") {
+        console.warn(
+          `[public-data] Backend ${path} responded with HTTP ${response.status}; failing closed to fallback.`,
+        );
+      }
       return fallback;
     }
     const data: unknown = await response.json();
@@ -120,7 +125,114 @@ async function fetchBackend<T>(path: string, fallback: T): Promise<T> {
     if (isDynamicServerError(error)) {
       throw error;
     }
+    if (isNoStore && process.env.NODE_ENV !== "test") {
+      console.warn(
+        `[public-data] Backend ${path} unreachable (${error instanceof Error ? error.message : "request failed"}); failing closed to fallback.`,
+      );
+    }
     return fallback;
+  }
+}
+
+export type BackendConnectionStatus = {
+  configured: boolean;
+  reachable: boolean;
+  database?: string;
+  statusCode?: number;
+  reason?: string;
+  hint?: string;
+};
+
+export async function checkBackendStatus(): Promise<BackendConnectionStatus> {
+  const configured = Boolean(process.env.NEXT_PUBLIC_API_URL?.trim());
+  if (!configured && process.env.VERCEL === "1") {
+    return {
+      configured: false,
+      reachable: false,
+      reason: "missing_api_url",
+      hint: "Set NEXT_PUBLIC_API_URL in Vercel Environment Variables to your public HTTPS backend origin and redeploy.",
+    };
+  }
+
+  try {
+    const response = await fetch(absoluteApiUrl("/health"), {
+      cache: "no-store",
+      redirect: "manual",
+      signal: AbortSignal.timeout(5000),
+    });
+
+    const location = response.headers.get("location") ?? "";
+    if (
+      (response.status >= 300 && response.status < 400 && location.includes("vercel.com/sso-api")) ||
+      location.includes("vercel.com/sso")
+    ) {
+      return {
+        configured,
+        reachable: false,
+        statusCode: response.status,
+        reason: "vercel_deployment_protection",
+        hint: "NEXT_PUBLIC_API_URL points to a deployment protected by Vercel Authentication. Use your backend's public Production domain (e.g. https://<backend-project>.vercel.app).",
+      };
+    }
+
+    const bodyText = await response.text();
+    let parsed: {
+      database?: string;
+      reason?: string;
+      hint?: string;
+      message?: string;
+    } | null = null;
+    try {
+      parsed = JSON.parse(bodyText) as {
+        database?: string;
+        reason?: string;
+        hint?: string;
+        message?: string;
+      };
+    } catch {
+      parsed = null;
+    }
+
+    if (response.ok) {
+      return {
+        configured,
+        reachable: true,
+        database: parsed?.database ?? "connected",
+        statusCode: response.status,
+      };
+    }
+
+    if (bodyText.includes("Protected by Vercel Authentication")) {
+      return {
+        configured,
+        reachable: false,
+        statusCode: response.status,
+        reason: "vercel_deployment_protection",
+        hint: "NEXT_PUBLIC_API_URL points to a deployment protected by Vercel Authentication. Use your backend's public Production domain.",
+      };
+    }
+
+    return {
+      configured,
+      reachable: false,
+      database: parsed?.database,
+      statusCode: response.status,
+      reason: parsed?.reason ?? "backend_http_error",
+      hint:
+        parsed?.hint ??
+        parsed?.message ??
+        `Backend /health returned HTTP ${response.status}.`,
+    };
+  } catch (error) {
+    return {
+      configured,
+      reachable: false,
+      reason: "network_error",
+      hint:
+        error instanceof Error
+          ? error.message
+          : "Failed to connect to backend /health endpoint.",
+    };
   }
 }
 
