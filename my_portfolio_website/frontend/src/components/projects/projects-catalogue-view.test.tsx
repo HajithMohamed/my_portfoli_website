@@ -1,5 +1,6 @@
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import styles from "./project-views.module.css";
 import { ProjectsCatalogueView } from "./projects-catalogue-view";
 import type { Project } from "@/lib/types";
 
@@ -73,6 +74,9 @@ describe("ProjectsCatalogueView Component", () => {
     expect(
       screen.getAllByText((_, element) => element?.textContent === "Showing 4 of 4 projects").length
     ).toBeGreaterThan(0);
+    const articles = screen.getAllByRole("article");
+    expect(articles).toHaveLength(4);
+    expect(articles[0].className).toContain(styles.lead);
   });
 
   it("filters projects when clicking Featured category tab", () => {

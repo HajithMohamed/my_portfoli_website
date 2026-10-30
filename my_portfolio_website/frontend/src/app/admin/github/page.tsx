@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import {
+  AlertTriangle,
+  ArrowRight,
   Check,
   ExternalLink,
   GitBranch,
-  GitCommit,
   GitFork,
   Github,
   RefreshCw,
@@ -32,8 +34,10 @@ export default function AdminGithubPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [approvedRepoTitle, setApprovedRepoTitle] = useState<string | null>(null);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [ghData, suggData] = await Promise.all([
@@ -42,38 +46,64 @@ export default function AdminGithubPage() {
       ]);
       setGithub(ghData);
       setSuggestions(suggData);
+      setErrorMsg(null);
     } catch (err) {
-      console.error("Failed to load GitHub data:", err);
+      setErrorMsg(
+        err instanceof Error
+          ? err.message
+          : "Unable to connect to the CMS backend. Check NEXT_PUBLIC_API_URL and backend health.",
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const timer = window.setTimeout(() => void loadData(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadData]);
 
   async function triggerSync() {
     setSyncing(true);
+    setErrorMsg(null);
     setStatusMsg("Syncing with GitHub API...");
     try {
       await adminFetch("/admin/github/sync", { method: "POST", body: "{}" });
       await loadData();
-      setStatusMsg("GitHub sync completed successfully.");
-      setTimeout(() => setStatusMsg(null), 4000);
+      setStatusMsg("GitHub sync completed successfully. Review pending suggestions to import drafts.");
+      setTimeout(() => setStatusMsg(null), 5000);
     } catch (err) {
-      setStatusMsg(`Sync failed: ${err instanceof Error ? err.message : "Internal error"}`);
+      setStatusMsg(null);
+      setErrorMsg(
+        `Sync failed: ${err instanceof Error ? err.message : "Unable to reach CMS backend."}`,
+      );
     } finally {
       setSyncing(false);
     }
   }
 
-  async function handleSuggestion(id: string, action: "approve" | "reject") {
+  async function handleSuggestion(
+    id: string,
+    action: "approve" | "reject",
+    title?: string,
+  ) {
+    setErrorMsg(null);
     try {
-      await adminFetch(`/admin/suggestions/${id}/${action}`, { method: "POST", body: "{}" });
+      await adminFetch(`/admin/suggestions/${id}/${action}`, {
+        method: "POST",
+        body: "{}",
+      });
       await loadData();
+      if (action === "approve") {
+        setApprovedRepoTitle(title ?? "Imported repository");
+      } else {
+        setStatusMsg(`Dismissed suggestion${title ? ` "${title}"` : ""}.`);
+        setTimeout(() => setStatusMsg(null), 4000);
+      }
     } catch (err) {
-      alert(`Failed to ${action} suggestion`);
+      setErrorMsg(
+        `Failed to ${action} suggestion: ${err instanceof Error ? err.message : "Request failed."}`,
+      );
     }
   }
 
@@ -118,6 +148,63 @@ export default function AdminGithubPage() {
           </Button>
         </div>
       </div>
+
+      {errorMsg && (
+        <div
+          role="alert"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-signal-red/40 bg-signal-red/10 p-3.5 font-mono text-xs text-signal-red"
+        >
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+            <div>
+              <div className="font-bold">CMS Backend Connection Issue</div>
+              <p className="mt-0.5 text-signal-red/90">{errorMsg}</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void loadData()}
+            disabled={loading}
+            className="shrink-0 font-mono text-xs"
+          >
+            Retry Connection
+          </Button>
+        </div>
+      )}
+
+      {approvedRepoTitle && (
+        <div
+          role="status"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3.5 font-mono text-xs text-emerald-300"
+        >
+          <div className="space-y-1">
+            <div className="font-bold text-emerald-200">
+              &ldquo;{approvedRepoTitle}&rdquo; imported as a Draft project
+            </div>
+            <p className="text-emerald-200/80">
+              Approved GitHub imports remain hidden (status: DRAFT, Homepage &amp; Projects visibility off) until you publish them and enable placement.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/admin/projects"
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1.5 font-mono text-xs font-bold text-slate-950 hover:bg-emerald-400 transition-colors"
+            >
+              <span>Open Projects Management</span>
+              <ArrowRight size={13} />
+            </Link>
+            <button
+              type="button"
+              aria-label="Dismiss draft import notice"
+              onClick={() => setApprovedRepoTitle(null)}
+              className="rounded p-1 text-emerald-300/80 hover:text-emerald-100"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {statusMsg && (
         <div className="font-mono text-xs p-3 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan">
@@ -254,16 +341,21 @@ export default function AdminGithubPage() {
         {/* Right: Automated Suggestions */}
         <div className="lg:col-span-5 space-y-4">
           <Card className="p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2">
-                <GitBranch size={18} className="text-amber-400" />
-                <h2 className="font-display font-semibold text-foreground text-sm">
-                  Repository Ingestion Suggestions
-                </h2>
+            <div className="space-y-1.5 border-b border-border pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GitBranch size={18} className="text-amber-400" />
+                  <h2 className="font-display font-semibold text-foreground text-sm">
+                    Repository Ingestion Suggestions
+                  </h2>
+                </div>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {suggestions.filter((s) => s.status === "PENDING").length} pending
+                </span>
               </div>
-              <span className="font-mono text-xs text-muted-foreground">
-                {suggestions.filter((s) => s.status === "PENDING").length} pending
-              </span>
+              <p className="font-mono text-[11px] text-muted-foreground">
+                Workflow: Sync &rarr; Approve (creates hidden Draft) &rarr; Publish &amp; enable placement in Projects Management.
+              </p>
             </div>
 
             <div className="space-y-3 font-mono text-xs">
@@ -282,16 +374,28 @@ export default function AdminGithubPage() {
                       <div className="flex items-center gap-2 pt-1">
                         <Button
                           size="sm"
-                          onClick={() => handleSuggestion(suggestion.id, "approve")}
+                          onClick={() =>
+                            void handleSuggestion(
+                              suggestion.id,
+                              "approve",
+                              suggestion.title,
+                            )
+                          }
                           className="h-7 text-xs bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold"
                         >
                           <Check size={12} className="mr-1" />
-                          Approve
+                          Approve as Draft
                         </Button>
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => handleSuggestion(suggestion.id, "reject")}
+                          onClick={() =>
+                            void handleSuggestion(
+                              suggestion.id,
+                              "reject",
+                              suggestion.title,
+                            )
+                          }
                           className="h-7 text-xs text-signal-red border-signal-red/30"
                         >
                           <X size={12} className="mr-1" />

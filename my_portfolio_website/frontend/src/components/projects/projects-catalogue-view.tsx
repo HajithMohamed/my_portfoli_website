@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { StudioProjectCard } from "@/components/projects/studio-project-card";
+import styles from "@/components/projects/project-views.module.css";
 
 type CategoryFilter = "ALL" | "FEATURED" | "BUILDING" | "CONTRIBUTED";
 
@@ -244,11 +245,11 @@ export function ProjectsCatalogueView({
         )}
       </div>
 
-      {/* 3. PROJECT GRID OR EMPTY STATE */}
+      {/* 3. PROJECT HORIZONTAL LIST OR EMPTY STATE */}
       {filteredProjects.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className={styles.projectList}>
           {filteredProjects.map((project) => (
-            <StudioProjectCard key={project.slug} project={project} />
+            <StudioProjectCard key={project.slug} project={project} lead />
           ))}
         </div>
       ) : (

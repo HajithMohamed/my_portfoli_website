@@ -10,7 +10,11 @@ vi.mock("./github-public", () => ({
   getPublicGithub: getPublicGithubMock,
 }));
 
-import { getAboutData, getHomeData } from "./public-data";
+import {
+  checkBackendStatus,
+  getAboutData,
+  getHomeData,
+} from "./public-data";
 import { getSiteUrl } from "./site-url";
 import { absoluteApiUrl } from "./utils";
 
@@ -146,6 +150,50 @@ describe("public-data resilience and About data isolation", () => {
     process.env.VERCEL_PROJECT_PRODUCTION_URL = "www.hzlabs.studio";
     expect(getSiteUrl()).toBe("https://www.hzlabs.studio");
     expect(() => new URL(getSiteUrl())).not.toThrow();
+  });
+
+  it("checkBackendStatus detects Vercel Authentication redirects and structured 503 diagnostics", async () => {
+    process.env.NEXT_PUBLIC_API_URL =
+      "https://my-portfoli-website-dbaf-git-main-hz-labs1.vercel.app";
+    globalThis.fetch = vi.fn(async () =>
+      new Response("Protected by Vercel Authentication", {
+        status: 302,
+        headers: { Location: "https://vercel.com/sso-api?nonce=1" },
+      }),
+    ) as unknown as typeof fetch;
+
+    const ssoResult = await checkBackendStatus();
+    expect(ssoResult).toMatchObject({
+      configured: true,
+      reachable: false,
+      statusCode: 302,
+      reason: "vercel_deployment_protection",
+    });
+
+    process.env.NEXT_PUBLIC_API_URL =
+      "https://my-portfoli-website-dbaf.vercel.app";
+    globalThis.fetch = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          service: "hz-labs-api",
+          status: "degraded",
+          database: "unavailable",
+          reason: "missing_database_url",
+          hint: "Set DATABASE_URL in Vercel",
+        }),
+        { status: 503, headers: { "Content-Type": "application/json" } },
+      ),
+    ) as unknown as typeof fetch;
+
+    const degradedResult = await checkBackendStatus();
+    expect(degradedResult).toMatchObject({
+      configured: true,
+      reachable: false,
+      database: "unavailable",
+      statusCode: 503,
+      reason: "missing_database_url",
+      hint: "Set DATABASE_URL in Vercel",
+    });
   });
 });
 

@@ -175,6 +175,8 @@ async function main() {
       category: 'Business Systems',
       status: 'ACTIVE',
       featured: true,
+      showOnHomepage: true,
+      showOnProjectsPage: true,
       coverImage: '/projects/shoe-bank-cover.png',
       outcome:
         'Working footwear wholesale management ERP repository with Docker Compose development workflow.',
