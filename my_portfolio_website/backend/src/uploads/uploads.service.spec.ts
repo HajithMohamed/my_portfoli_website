@@ -6,7 +6,7 @@ import {
   UploadResponseCallback,
 } from 'cloudinary';
 import { PassThrough } from 'node:stream';
-import { UploadsService } from './uploads.service';
+import { describeCloudinaryError, UploadsService } from './uploads.service';
 
 jest.mock('cloudinary', () => ({
   v2: {
@@ -121,5 +121,62 @@ describe('UploadsService', () => {
         file('image/png', Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
       ),
     ).rejects.toThrow(ServiceUnavailableException);
+  });
+
+  it('surfaces a credential hint when Cloudinary rejects the signature', async () => {
+    uploadStream.mockImplementation((...args: unknown[]) => {
+      const callback = args[1] as UploadResponseCallback;
+      const stream = new PassThrough();
+      stream.on('finish', () =>
+        callback(
+          { message: 'Invalid Signature abc123', http_code: 401 } as never,
+          undefined,
+        ),
+      );
+      return stream;
+    });
+
+    await expect(
+      service.upload(
+        file('image/png', Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+      ),
+    ).rejects.toThrow(
+      /Invalid Signature.*CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET/,
+    );
+  });
+
+  it('trims credentials before configuring Cloudinary', () => {
+    new UploadsService(
+      new ConfigService({
+        CLOUDINARY_CLOUD_NAME: ' test \n',
+        CLOUDINARY_API_KEY: 'test-key ',
+        CLOUDINARY_API_SECRET: '\ttest-secret\n',
+      }),
+    );
+
+    expect(cloudinary.config).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        cloud_name: 'test',
+        api_key: 'test-key',
+        api_secret: 'test-secret',
+      }),
+    );
+  });
+});
+
+describe('describeCloudinaryError', () => {
+  it('points to the cloud name for an invalid cloud_name', () => {
+    expect(
+      describeCloudinaryError({
+        message: 'Invalid cloud_name foo',
+        http_code: 401,
+      }),
+    ).toContain('CLOUDINARY_CLOUD_NAME');
+  });
+
+  it('keeps the original message for other failures', () => {
+    expect(describeCloudinaryError(new Error('socket hang up'))).toBe(
+      'Media upload failed: socket hang up',
+    );
   });
 });
