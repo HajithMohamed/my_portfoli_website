@@ -13,6 +13,10 @@
 [![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
+[![Live site](https://img.shields.io/website?url=https%3A%2F%2Fwww.hzlabs.studio&up_message=online&down_message=offline&label=hzlabs.studio&style=flat-square)](https://www.hzlabs.studio/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
+[![README sync](https://img.shields.io/badge/Project_summaries-synced_from_GitHub_READMEs-2DD4BF?style=flat-square&logo=github&logoColor=white)](#-8-github-readme-sync)
+
 <p align="center">
   <a href="https://www.hzlabs.studio/"><strong>Explore Live Platform »</strong></a> ·
   <a href="#-system-architecture"><strong>Architecture</strong></a> ·
@@ -63,6 +67,7 @@ Engineered as a clean monorepo architecture, this platform pairs a **Next.js 16 
   - **BloodBridge:** Advanced DBMS academic prototype with procedural PL/pgSQL transaction functions ([PR #7 Merged](https://github.com/akalanka001/-BloodBridge--ADBMS/pull/7)).
   - **HZ Labs Platform:** Digital studio CMS, GitHub sync, and HUD portfolio.
 - **Dynamic Filtering:** Filter projects by domain (Full-Stack, Backend, Database, Systems).
+- **Featured Row:** The homepage shows the projects selected in the CMS in one row (four cards on wide screens, three on laptops), with back and forward arrows that move one card at a time. Nothing scrolls on its own.
 
 ### 🕹️ 5. Command Palette (`Ctrl + K` / `Cmd + K`)
 - **HUD Command Center:** Instant keyboard-driven navigation modal.
@@ -78,6 +83,12 @@ Engineered as a clean monorepo architecture, this platform pairs a **Next.js 16 
 - **Modular CMS Endpoints:** Complete CRUD control over projects, skills, certifications, client case studies, blog articles, and contact inquiries.
 - **Secure Media Pipeline:** Backend-wrapped **Cloudinary** uploads ensuring API secrets remain server-side.
 - **GitHub Sync Engine:** Automated and on-demand synchronization of GitHub repositories, commit telemetry, and language statistics.
+
+### 📖 8. GitHub README Sync
+- **Checked at every admin sign-in:** The admin dashboard fetches the README of every published project from GitHub (conditional requests, so unchanged READMEs cost nothing).
+- **README-first project summaries:** Each card and case study shows a summary and sections (overview, features, tech stack, architecture, testing) taken from the project's own README, falling back to the CMS description when a README has no real description.
+- **Change notices:** When a README changes, the dashboard lists it with the commit that changed it, and the public card and project page show a "README updated" badge for 14 days.
+- **No schema change:** Snapshots are stored as sync records, so the feature deploys without a database migration.
 
 ---
 
