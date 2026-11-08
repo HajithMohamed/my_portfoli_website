@@ -14,6 +14,7 @@ import { MessagesModule } from './messages/messages.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { ProjectsModule } from './projects/projects.module';
+import { ReadmeModule } from './readme/readme.module';
 import { RequestsModule } from './requests/requests.module';
 import { ResumeModule } from './resume/resume.module';
 import { SettingsModule } from './settings/settings.module';
@@ -30,6 +31,7 @@ import { UploadsModule } from './uploads/uploads.module';
     ProfileModule,
     SkillsModule,
     ProjectsModule,
+    ReadmeModule,
     BlogsModule,
     MessagesModule,
     ResumeModule,

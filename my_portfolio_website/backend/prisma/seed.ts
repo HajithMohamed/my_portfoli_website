@@ -4,7 +4,11 @@ import * as argon2 from 'argon2';
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminPassword = process.env.ADMIN_PASSWORD ?? 'HAzi@1915';
+  // Never fall back to a password stored in this public repository.
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    throw new Error('Set ADMIN_PASSWORD before running the seed.');
+  }
   const passwordHash = await argon2.hash(adminPassword);
   
   // Seed both personal and portal emails so admin access always works

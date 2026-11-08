@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminFetch } from "@/lib/api";
 import { excludeSelfFromAnalytics } from "@/lib/analytics";
+import { README_CHECK_FLAG } from "@/lib/project-readme";
 
 function loginErrorMessage(error: unknown): string {
   const raw = error instanceof Error ? error.message.trim() : "";
@@ -40,6 +41,12 @@ export function AdminLoginForm() {
         body: JSON.stringify({ email, password }),
       });
       excludeSelfFromAnalytics();
+      try {
+        // The dashboard checks project READMEs on GitHub once per sign-in.
+        sessionStorage.setItem(README_CHECK_FLAG, "pending");
+      } catch {
+        // Storage unavailable: the dashboard still offers a manual check.
+      }
       // Full reload so server components in AdminLayout pick up the newly set HTTP-only cookie
       window.location.href = "/admin/dashboard";
     } catch (err) {
@@ -76,8 +83,7 @@ export function AdminLoginForm() {
             <Input
               name="email"
               type="email"
-              placeholder="e.g. hanoufaatif@gmail.com"
-              defaultValue="hanoufaatif@gmail.com"
+              placeholder="you@example.com"
               autoComplete="email"
               required
               autoFocus
@@ -94,7 +100,6 @@ export function AdminLoginForm() {
               name="password"
               type="password"
               placeholder="••••••••••••"
-              defaultValue="HAzi@1915"
               autoComplete="current-password"
               required
               className="bg-slate-900/80 border-slate-800 text-white placeholder:text-slate-600 focus:border-violet-500"

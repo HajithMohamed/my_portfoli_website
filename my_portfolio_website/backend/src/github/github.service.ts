@@ -10,6 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Prisma, ProjectStatus, SuggestionStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { README_SOURCE } from '../readme/readme-sync.service';
 import {
   GithubRepo,
   GithubRelease,
@@ -211,7 +212,9 @@ export class GithubService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   suggestions() {
+    // README snapshots and change notices have their own admin view.
     return this.prisma.syncSuggestion.findMany({
+      where: { source: { not: README_SOURCE } },
       orderBy: { createdAt: 'desc' },
     });
   }

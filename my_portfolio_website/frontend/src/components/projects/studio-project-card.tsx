@@ -1,10 +1,15 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { ArrowRight, ExternalLink, Github } from "lucide-react";
+import { ArrowRight, ExternalLink, Github, RefreshCw } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { projectGalleryMedia, safeMediaUrl } from "@/lib/project-media";
 import { publicWebsite } from "@/lib/portfolio-mapping";
+import {
+  formatReadmeDate,
+  projectSummary,
+  recentReadmeUpdate,
+} from "@/lib/project-readme";
 import { ProjectMediaGallery } from "./project-media-gallery";
 import styles from "./project-views.module.css";
 
@@ -18,6 +23,7 @@ export function StudioProjectCard({
   const media = projectGalleryMedia(project);
   const liveUrl = publicWebsite(project.liveUrl);
   const githubUrl = safeMediaUrl(project.githubUrl);
+  const readmeUpdated = recentReadmeUpdate(project);
   return (
     <article className={`${styles.card} ${lead ? styles.lead : ""}`}>
       <ProjectMediaGallery
@@ -26,9 +32,17 @@ export function StudioProjectCard({
         compact={!lead}
       />
       <div className={styles.copy}>
-        <span className={styles.eyebrow}>{project.category}</span>
+        <div className={styles.cardMeta}>
+          <span className={styles.eyebrow}>{project.category}</span>
+          {readmeUpdated && (
+            <span className={styles.readmeBadge}>
+              <RefreshCw size={10} aria-hidden="true" />
+              README updated {formatReadmeDate(readmeUpdated)}
+            </span>
+          )}
+        </div>
         <h3>{project.title}</h3>
-        <p className={styles.description}>{project.description}</p>
+        <p className={styles.description}>{projectSummary(project)}</p>
         <div className={styles.tags} aria-label="Technologies">
           {project.techStack.slice(0, lead ? 8 : 4).map((tech) => (
             <span key={tech} className={styles.tag}>
