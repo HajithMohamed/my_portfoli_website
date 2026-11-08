@@ -111,4 +111,29 @@ describe("Homepage project row", () => {
     render(<StudioProjectsShowcase projects={[project("solo")]} />);
     expect(screen.queryByRole("button", { name: /project$/ })).toBeNull();
   });
+
+  it("shows the README summary and a recent README change", () => {
+    const changedAt = new Date(Date.now() - 2 * 86_400_000).toISOString();
+    render(
+      <StudioProjectsShowcase
+        projects={[
+          project("readme", {
+            readme: {
+              repo: "HajithMohamed/Tech_Bridge",
+              htmlUrl: "https://github.com/HajithMohamed/Tech_Bridge/blob/main/README.md",
+              sha: "abc",
+              summary: "Summary taken from the GitHub README.",
+              sections: [],
+              syncedAt: changedAt,
+              changedAt,
+            },
+          }),
+          project("plain"),
+        ]}
+      />,
+    );
+    expect(screen.getByText("Summary taken from the GitHub README.")).toBeDefined();
+    expect(screen.queryAllByText(/README updated/)).toHaveLength(1);
+    expect(screen.getByText("An administrator's project description.")).toBeDefined();
+  });
 });

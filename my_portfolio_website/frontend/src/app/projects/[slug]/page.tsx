@@ -8,6 +8,7 @@ import {
   projectYear,
 } from "@/lib/project-presentation";
 import { ProjectDossierView } from "@/components/projects/project-dossier-view";
+import { projectSummary } from "@/lib/project-readme";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -27,10 +28,10 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     title: `${project.title} — Technical Dossier | HZ Labs`,
-    description: project.description ?? "Technical architecture dossier by Mohamed Hajith.",
+    description: projectSummary(project) || "Technical architecture dossier by Mohamed Hajith.",
     openGraph: {
       title: `${project.title} — Technical Dossier | HZ Labs`,
-      description: project.description,
+      description: projectSummary(project),
       type: "article",
       images: [
         {
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: PageProps) {
     twitter: {
       card: "summary_large_image",
       title: `${project.title} — Technical Dossier | HZ Labs`,
-      description: project.description,
+      description: projectSummary(project),
       images: [ogUrl],
     },
   };

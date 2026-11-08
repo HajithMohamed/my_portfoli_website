@@ -37,11 +37,24 @@ export type CaseStudySection = {
   order?: number;
 };
 
+/** Synced from the project's GitHub README by the admin README check. */
+export type ProjectReadme = {
+  repo: string;
+  htmlUrl: string;
+  sha: string;
+  summary: string | null;
+  sections: CaseStudySection[];
+  syncedAt: string;
+  /** When the latest README change was detected; null if it never changed. */
+  changedAt: string | null;
+};
+
 export type Project = {
   id: string;
   title: string;
   slug: string;
   description: string;
+  readme?: ProjectReadme | null;
   techStack: string[];
   githubUrl?: string | null;
   liveUrl?: string | null;

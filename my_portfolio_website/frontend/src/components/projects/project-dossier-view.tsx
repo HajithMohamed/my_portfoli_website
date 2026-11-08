@@ -18,8 +18,14 @@ import {
   CheckCircle2,
   Calendar,
   Box,
+  RefreshCw,
 } from "lucide-react";
 import type { Project, CaseStudySection } from "@/lib/types";
+import {
+  formatReadmeDate,
+  projectSummary,
+  recentReadmeUpdate,
+} from "@/lib/project-readme";
 import { ProjectArchitectureVisualizer } from "./project-architecture-visualizer";
 
 interface ProjectDossierViewProps {
@@ -46,6 +52,10 @@ export function ProjectDossierView({
   const [activeTab, setActiveTab] = useState<
     "architecture" | "case-study" | "tech-stack" | "impact"
   >("architecture");
+  const readme = project.readme ?? null;
+  const readmeSections = readme?.sections ?? [];
+  const readmeUpdated = recentReadmeUpdate(project);
+  const caseStudyCount = sections.length + readmeSections.length;
 
   // Architecture indicators tailored per project
   const isAcademic =
@@ -141,8 +151,15 @@ export function ProjectDossierView({
           {project.category} · {year}
         </div>
 
+        {readmeUpdated && (
+          <div className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 px-3 py-1 font-mono text-[11px] text-cyan">
+            <RefreshCw size={11} aria-hidden="true" />
+            README updated {formatReadmeDate(readmeUpdated)}
+          </div>
+        )}
+
         <p className="mt-5 max-w-3xl text-base sm:text-lg leading-relaxed text-foreground/90">
-          {project.description}
+          {projectSummary(project)}
         </p>
 
         <div className="mt-8">
@@ -236,7 +253,7 @@ export function ProjectDossierView({
           <span>Architecture Topology</span>
         </button>
 
-        {sections.length > 0 && (
+        {caseStudyCount > 0 && (
           <button
             type="button"
             onClick={() => setActiveTab("case-study")}
@@ -247,7 +264,7 @@ export function ProjectDossierView({
             }`}
           >
             <BookOpen size={13} />
-            <span>Case Study Dossier ({sections.length})</span>
+            <span>Case Study Dossier ({caseStudyCount})</span>
           </button>
         )}
 
@@ -291,32 +308,78 @@ export function ProjectDossierView({
         </section>
       )}
 
-      {activeTab === "case-study" && sections.length > 0 && (
-        <section
-          aria-label="Case Study Sections"
-          className="grid gap-6 md:grid-cols-2"
-        >
-          {sections.map((section, index) => (
-            <div
-              key={`${section.heading}-${index}`}
-              className={`rounded-2xl border border-white/[0.08] bg-surface/80 p-6 backdrop-blur-xl ${
-                index === sections.length - 1 && sections.length % 2 === 1
-                  ? "md:col-span-2"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
-                <span>{`0${index + 1} // ${section.heading}`}</span>
+      {activeTab === "case-study" && caseStudyCount > 0 && (
+        <div className="space-y-8">
+          {readme && readmeSections.length > 0 && (
+            <section aria-label="From the GitHub README" className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+                  <Github size={13} aria-hidden="true" />
+                  <span>From the GitHub README · {readme.repo}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-muted-foreground">
+                  <span>Synced {formatReadmeDate(readme.syncedAt)}</span>
+                  <a
+                    href={readme.htmlUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-cyan hover:underline"
+                  >
+                    Read the full README{" "}
+                    <ExternalLink size={11} aria-hidden="true" />
+                  </a>
+                </div>
               </div>
-              <h3 className="mt-2 font-display text-xl font-bold text-foreground">
-                {section.heading}
-              </h3>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                {section.body}
-              </p>
-            </div>
-          ))}
-        </section>
+              <div className="grid gap-6 md:grid-cols-2">
+                {readmeSections.map((section, index) => (
+                  <div
+                    key={`readme-${section.heading}-${index}`}
+                    className={`rounded-2xl border border-cyan/20 bg-surface/80 p-6 backdrop-blur-xl ${
+                      index === readmeSections.length - 1 &&
+                      readmeSections.length % 2 === 1
+                        ? "md:col-span-2"
+                        : ""
+                    }`}
+                  >
+                    <h3 className="font-display text-xl font-bold text-foreground">
+                      {section.heading}
+                    </h3>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {section.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {sections.length > 0 && (
+            <section
+              aria-label="Case Study Sections"
+              className="grid gap-6 md:grid-cols-2"
+            >
+              {sections.map((section, index) => (
+                <div
+                  key={`${section.heading}-${index}`}
+                  className={`rounded-2xl border border-white/[0.08] bg-surface/80 p-6 backdrop-blur-xl ${
+                    index === sections.length - 1 && sections.length % 2 === 1
+                      ? "md:col-span-2"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
+                    <span>{`0${index + 1} // ${section.heading}`}</span>
+                  </div>
+                  <h3 className="mt-2 font-display text-xl font-bold text-foreground">
+                    {section.heading}
+                  </h3>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                    {section.body}
+                  </p>
+                </div>
+              ))}
+            </section>
+          )}
+        </div>
       )}
 
       {activeTab === "tech-stack" && (

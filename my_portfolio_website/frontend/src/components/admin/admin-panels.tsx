@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import { AnalyticsOverview } from "@/components/admin/admin-analytics";
+import { ReadmeUpdatesPanel } from "@/components/admin/admin-readme-updates";
 import { uploadImage } from "@/components/admin/admin-content-panels";
 import { adminFetch, bffUrl } from "@/lib/api";
 import type { BlogPost, CvAsset, GithubSummary, Profile, Project, Skill } from "@/lib/types";
@@ -378,6 +379,9 @@ export function DashboardPanel() {
           </div>
         </div>
       </Card>
+
+      {/* README changes in published repositories, checked after each sign-in */}
+      <ReadmeUpdatesPanel />
 
       {/* Two Column Quick Overview: Pending Suggestions & Recent Messages */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

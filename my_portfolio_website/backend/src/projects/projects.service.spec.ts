@@ -46,6 +46,40 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('README data', () => {
+    it('adds the synced README summary to public projects and project pages', async () => {
+      const readme = {
+        attach: jest.fn((projects: { id: string }[]) =>
+          Promise.resolve(
+            projects.map((project) => ({
+              ...project,
+              readme: { summary: 'From the README.', changedAt: null },
+            })),
+          ),
+        ),
+      };
+      const withReadme = new ProjectsService(prisma as never, readme as never);
+      const project = {
+        id: '1',
+        slug: 'shoe-bank',
+        status: ProjectStatus.ACTIVE,
+      };
+      prisma.project.findMany.mockResolvedValue([project]);
+      prisma.project.findUnique.mockResolvedValue(project);
+
+      await expect(withReadme.publicProjects()).resolves.toEqual([
+        {
+          ...project,
+          readme: { summary: 'From the README.', changedAt: null },
+        },
+      ]);
+      await expect(withReadme.findBySlug('shoe-bank')).resolves.toMatchObject({
+        readme: { summary: 'From the README.' },
+      });
+      expect(readme.attach).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('adminProjects', () => {
     it('returns all projects for admin view', async () => {
       const mockProjects = [

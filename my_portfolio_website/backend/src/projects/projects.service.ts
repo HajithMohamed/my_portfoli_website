@@ -2,28 +2,36 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { AssetType, ProjectStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReadmeSyncService } from '../readme/readme-sync.service';
 import { ProjectDto } from './dto/project.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    // Adds the synced GitHub README summary to each project when available.
+    @Optional() private readonly readme?: ReadmeSyncService,
+  ) {}
 
-  publicProjects() {
-    return this.prisma.project.findMany({
+  async publicProjects() {
+    const projects = await this.prisma.project.findMany({
       where: { status: ProjectStatus.ACTIVE },
       include: this.includes(),
       orderBy: [{ homepageOrder: 'asc' }, { createdAt: 'asc' }],
     });
+    return this.withReadme(projects);
   }
 
-  adminProjects() {
-    return this.prisma.project.findMany({
+  async adminProjects() {
+    const projects = await this.prisma.project.findMany({
       include: this.includes(),
       orderBy: { updatedAt: 'desc' },
     });
+    return this.withReadme(projects);
   }
 
   publicVisibility() {
@@ -46,7 +54,8 @@ export class ProjectsService {
       throw new NotFoundException('Project not found');
     }
 
-    return project;
+    const [withReadme] = await this.withReadme([project]);
+    return withReadme;
   }
 
   create(dto: ProjectDto) {
@@ -156,6 +165,12 @@ export class ProjectsService {
         );
       }
     }
+  }
+
+  private withReadme<T extends { id: string }>(projects: T[]) {
+    return this.readme
+      ? this.readme.attach(projects)
+      : Promise.resolve(projects);
   }
 
   private includes() {
