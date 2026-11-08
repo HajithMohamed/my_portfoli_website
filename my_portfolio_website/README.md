@@ -67,7 +67,7 @@ Engineered as a clean monorepo architecture, this platform pairs a **Next.js 16 
   - **BloodBridge:** Advanced DBMS academic prototype with procedural PL/pgSQL transaction functions ([PR #7 Merged](https://github.com/akalanka001/-BloodBridge--ADBMS/pull/7)).
   - **HZ Labs Platform:** Digital studio CMS, GitHub sync, and HUD portfolio.
 - **Dynamic Filtering:** Filter projects by domain (Full-Stack, Backend, Database, Systems).
-- **Featured Row:** The homepage shows the projects selected in the CMS in one row (four cards on wide screens, three on laptops), with back and forward arrows that move one card at a time. Nothing scrolls on its own.
+- **Featured Row:** The homepage shows the projects selected in the CMS in one row (three cards on desktop, two on tablets, one on phones), with back and forward arrows that move one card at a time. Nothing scrolls on its own.
 
 ### 🕹️ 5. Command Palette (`Ctrl + K` / `Cmd + K`)
 - **HUD Command Center:** Instant keyboard-driven navigation modal.

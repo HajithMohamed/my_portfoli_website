@@ -210,7 +210,7 @@
 }
 .carouselTrack {
   --carousel-gap: 20px;
-  --carousel-columns: 4;
+  --carousel-columns: 3;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: calc(
@@ -533,11 +533,6 @@
 .gallery button:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: -3px;
-}
-@media (max-width: 1279px) {
-  .carouselTrack {
-    --carousel-columns: 3;
-  }
 }
 @media (max-width: 1023px) {
   .grid {

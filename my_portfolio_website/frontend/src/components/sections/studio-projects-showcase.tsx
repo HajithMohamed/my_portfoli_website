@@ -9,9 +9,9 @@ import styles from "@/components/projects/project-views.module.css";
 
 /**
  * Homepage "Featured projects": one horizontal row of the projects chosen in
- * the CMS, in CMS order. Up to four cards are visible (three on smaller
- * laptops); the arrow buttons move one card at a time. Nothing scrolls on its
- * own.
+ * the CMS, in CMS order. Three cards are visible on desktop (two on tablets,
+ * one on phones); the arrow buttons move one card at a time. Nothing scrolls
+ * on its own.
  */
 export function StudioProjectsShowcase({
   projects = [],
