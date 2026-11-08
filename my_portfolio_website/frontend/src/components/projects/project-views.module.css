@@ -168,6 +168,103 @@
 .grid > :nth-child(4) {
   animation-delay: 180ms;
 }
+/* Homepage featured projects: one row, scrolled with the arrow buttons. */
+.showcaseControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.carouselNav {
+  display: flex;
+  gap: 8px;
+}
+.carouselButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition:
+    color 180ms,
+    border-color 180ms,
+    opacity 180ms;
+}
+.carouselButton:hover:not(:disabled) {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+.carouselButton:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+.carouselButton:focus-visible,
+.carouselTrack:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+.carouselTrack {
+  --carousel-gap: 20px;
+  --carousel-columns: 4;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc(
+    (100% - (var(--carousel-columns) - 1) * var(--carousel-gap)) /
+      var(--carousel-columns)
+  );
+  gap: var(--carousel-gap);
+  margin: 0;
+  /* Room for the card hover lift and focus ring inside the scroll box. */
+  padding: 6px 2px 14px;
+  /* Snap cards to the padding edge, so the first card rests at scrollLeft 0. */
+  scroll-padding-inline: 2px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.carouselItem {
+  display: flex;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.carouselItem > article {
+  flex: 1;
+}
+.carouselItem .description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.readmeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 999px;
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 10%, transparent);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
 @keyframes project-enter {
   from {
     opacity: 0;
@@ -437,9 +534,17 @@
   outline: 2px solid var(--cyan);
   outline-offset: -3px;
 }
+@media (max-width: 1279px) {
+  .carouselTrack {
+    --carousel-columns: 3;
+  }
+}
 @media (max-width: 1023px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .carouselTrack {
+    --carousel-columns: 2;
   }
   .lead {
     gap: 10px;
@@ -470,6 +575,10 @@
     flex-direction: column;
     gap: 12px;
   }
+  .showcaseControls {
+    width: 100%;
+    justify-content: space-between;
+  }
   .heading h2 {
     font-size: 30px;
   }
@@ -480,6 +589,11 @@
   }
   .grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .carouselTrack {
+    --carousel-gap: 14px;
+    /* One card plus a peek of the next, so it is clear the row scrolls. */
+    grid-auto-columns: 86%;
   }
   .gallery {
     min-height: 240px;
@@ -492,10 +606,14 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .carouselTrack {
+    scroll-behavior: auto;
+  }
   .card,
   .image,
   .action,
-  .arrow {
+  .arrow,
+  .carouselButton {
     transition: none;
     animation: none;
   }
