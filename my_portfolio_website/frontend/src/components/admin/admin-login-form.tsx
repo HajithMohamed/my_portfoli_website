@@ -76,8 +76,7 @@ export function AdminLoginForm() {
             <Input
               name="email"
               type="email"
-              placeholder="e.g. hanoufaatif@gmail.com"
-              defaultValue="hanoufaatif@gmail.com"
+              placeholder="you@example.com"
               autoComplete="email"
               required
               autoFocus
@@ -94,7 +93,6 @@ export function AdminLoginForm() {
               name="password"
               type="password"
               placeholder="••••••••••••"
-              defaultValue="HAzi@1915"
               autoComplete="current-password"
               required
               className="bg-slate-900/80 border-slate-800 text-white placeholder:text-slate-600 focus:border-violet-500"
